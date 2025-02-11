@@ -21,4 +21,10 @@ public interface PaystackDataMapper {
     PaystackPaymentInitializationResource dataToResource(Payment payment);
 
     PaystackChargeSuccessWebhookEntity resourceToEntity(ChargeSuccessPayload payload);
+
+
+    // Custom mapping for Object to String
+    default String map(final Object value) {
+        return value != null ? value.toString() : null;
+    }
 }

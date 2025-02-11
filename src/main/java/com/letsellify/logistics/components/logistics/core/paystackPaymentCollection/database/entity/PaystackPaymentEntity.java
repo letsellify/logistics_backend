@@ -6,13 +6,17 @@ import java.util.UUID;
 
 import org.hibernate.annotations.NaturalId;
 
-import com.letsellify.logistics.components.logistics.core.auditing.database.entity.Auditable;
+import com.letsellify.logistics.common.audit.entity.Auditable;
+import com.letsellify.logistics.common.data.LogisticsAppRole;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author AHMAD BUBA
@@ -22,6 +26,7 @@ import lombok.Data;
 
 @Entity
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class PaystackPaymentEntity extends Auditable {
     @Id
     private UUID id;
@@ -39,7 +44,10 @@ public class PaystackPaymentEntity extends Auditable {
 
     private String reference;
 
-    private UUID userId;
+    private String userEmail;
+
+    @Enumerated(EnumType.STRING)
+    private LogisticsAppRole userRole;
 
     private boolean success;
 
@@ -51,14 +59,16 @@ public class PaystackPaymentEntity extends Auditable {
         super();
     }
 
-    public static PaystackPaymentEntity getInstance(final BigDecimal amount, final UUID userId) {
+    public static PaystackPaymentEntity getInstance(final String userEmail, final LogisticsAppRole userRole, final BigDecimal amount) {
         Objects.requireNonNull(amount, "Amount must not be null");
-        Objects.requireNonNull(userId, "UserId must not be null");
+        Objects.requireNonNull(userEmail, "UserEmail must not be null");
+        Objects.requireNonNull(userRole, "UserRole must not be null");
         final PaystackPaymentEntity paymentEntity = new PaystackPaymentEntity();
         paymentEntity.id = UUID.randomUUID();
         paymentEntity.amount = amount;
         paymentEntity.initializationStatus = false;
-        paymentEntity.userId = userId;
+        paymentEntity.userEmail = userEmail;
+        paymentEntity.userRole = userRole;
         paymentEntity.success = false;
         return paymentEntity;
     }

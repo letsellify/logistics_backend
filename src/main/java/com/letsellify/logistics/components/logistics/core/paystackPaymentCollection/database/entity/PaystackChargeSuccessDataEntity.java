@@ -51,7 +51,7 @@ public class PaystackChargeSuccessDataEntity {
     @Embedded
     private Authorization authorization;
 
-    private Object plan; // Changed from Object to String
+    private String plan; // Changed from Object to String
 
     // No-arg constructor for JPA
     public PaystackChargeSuccessDataEntity() {

@@ -24,9 +24,9 @@ public class PaystackRestClientConfig {
     @Qualifier("PaystackRestClient")
     public RestClient payStackRestClient() {
         return RestClient.builder()
-                         .defaultHeader("Authorization", "Bearer " + " ")
+                         .defaultHeader("Authorization", "Bearer " + this.config.secretKey())
                          .defaultHeader("Content-Type", "application/json")
-                         .baseUrl("https://api.paystack.com/")
+                         .baseUrl(this.config.baseUrl())
                          .build();
     }
 }

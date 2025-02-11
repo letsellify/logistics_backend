@@ -7,5 +7,6 @@ package com.letsellify.logistics.components.fileStorage.core.data;
  */
 
 public enum StorageType {
-    KYC
+    KYC,
+    LOGISTICS,
 }

@@ -1,6 +1,6 @@
 package com.letsellify.logistics.components.logistics.core.paystackPaymentCollection.database.entity;
 
-import com.letsellify.logistics.components.logistics.core.auditing.database.entity.Auditable;
+import com.letsellify.logistics.common.audit.entity.Auditable;
 import com.letsellify.logistics.components.logistics.core.paystackPaymentCollection.rest.dto.ChargeSuccessPayload;
 
 import jakarta.persistence.CascadeType;

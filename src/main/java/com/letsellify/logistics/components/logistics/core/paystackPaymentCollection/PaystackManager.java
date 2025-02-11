@@ -1,6 +1,7 @@
 package com.letsellify.logistics.components.logistics.core.paystackPaymentCollection;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -9,9 +10,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 
-import com.letsellify.logistics.components.logistics.core.financeAccount.AccountManager;
-import com.letsellify.logistics.components.logistics.core.financeAccount.data.LogisticsAccount;
-import com.letsellify.logistics.components.logistics.core.money.MoneyManager;
+import com.letsellify.logistics.common.data.LogisticsAppRole;
+import com.letsellify.logistics.components.logistics.core.financeAccountManagement.AccountManager;
+import com.letsellify.logistics.components.logistics.core.financeAccountManagement.data.LogisticsAccountTransaction;
 import com.letsellify.logistics.components.logistics.core.paystackPaymentCollection.data.Payment;
 import com.letsellify.logistics.components.logistics.core.paystackPaymentCollection.dataMapper.PaystackDataMapper;
 import com.letsellify.logistics.components.logistics.core.paystackPaymentCollection.database.entity.PaystackChargeSuccessWebhookEntity;
@@ -20,9 +21,8 @@ import com.letsellify.logistics.components.logistics.core.paystackPaymentCollect
 import com.letsellify.logistics.components.logistics.core.paystackPaymentCollection.rest.dto.ChargeSuccessPayload;
 import com.letsellify.logistics.components.logistics.core.paystackPaymentCollection.rest.dto.PaystackInitiateTransactionRequest;
 import com.letsellify.logistics.components.logistics.core.paystackPaymentCollection.rest.resource.PaystackInitiateTransactionResponse;
-import com.letsellify.logistics.components.logistics.core.user.UserManager;
-import com.letsellify.logistics.components.logistics.core.user.data.LogisticsAppUser;
-import com.letsellify.logistics.components.logistics.core.user.exception.UserNotFoundException;
+import com.letsellify.logistics.components.user.core.userManagement.UserManager;
+import com.letsellify.logistics.components.user.core.userManagement.exception.UserNotFoundException;
 
 import jakarta.annotation.PostConstruct;
 import lombok.NonNull;
@@ -39,8 +39,8 @@ import lombok.extern.slf4j.Slf4j;
 public class PaystackManager {
     private final PaystackPaymentRepository paymentRepository;
     private final UserManager userManager;
+    // this will go soon. another bounded context
     private final AccountManager accountManager;
-    private final MoneyManager moneyManager;
     private final RestClient restClient;
     private final String paystackSecret;
     private final List<String> paystackAllowedIps;
@@ -49,7 +49,6 @@ public class PaystackManager {
       final PaystackPaymentRepository paystackPaymentRepository,
       final UserManager userManager,
       final AccountManager accountManager,
-      final MoneyManager moneyManager,
       @Qualifier("PaystackRestClient") final RestClient restClient,
       @Value("${paystack.secret-key}") final String paystackSecret,
       @Value("${paystack.allowed-ips}") final List<String> paystackAllowedIps
@@ -57,7 +56,6 @@ public class PaystackManager {
         this.paymentRepository = paystackPaymentRepository;
         this.userManager = userManager;
         this.accountManager = accountManager;
-        this.moneyManager = moneyManager;
         this.restClient = restClient;
         this.paystackSecret = paystackSecret;
         this.paystackAllowedIps = paystackAllowedIps;
@@ -65,11 +63,9 @@ public class PaystackManager {
 
     // possibly do a validation to check that the provided string is all digit: amount(String)
     @Transactional
-    public Payment initializePayment(final @NonNull String email, final @NonNull String amount) throws UserNotFoundException {
-       final LogisticsAppUser appUser = this.userManager.getUserByEmail(email);
-       final BigDecimal actualAmount = new BigDecimal(amount);
-       final PaystackPaymentEntity entity = PaystackPaymentEntity.getInstance(actualAmount, appUser.getId());
-       final PaystackInitiateTransactionRequest requestBody = new PaystackInitiateTransactionRequest(email, amount);
+    public Payment initializePayment(final @NonNull String email, final @NonNull LogisticsAppRole userRole, final @NonNull BigDecimal amount) throws UserNotFoundException {
+       final PaystackPaymentEntity entity = PaystackPaymentEntity.getInstance(email, userRole, amount);
+       final PaystackInitiateTransactionRequest requestBody = new PaystackInitiateTransactionRequest(email, amount.toString());
        final PaystackInitiateTransactionResponse responseBody = this.restClient.post()
                                                                                .uri("/transaction/initialize")
                                                                                .body(requestBody)
@@ -87,9 +83,9 @@ public class PaystackManager {
 
 
     // verify transaction method: updates a payment based on webhook data
+    // add logging here
     @Transactional
     public void handleChargeSuccessWebhook(final @NonNull ChargeSuccessPayload payload) {
-        final LogisticsAccount account;
         final PaystackChargeSuccessWebhookEntity chargeSuccessWebhookEntity = PaystackDataMapper.INSTANCE.resourceToEntity(payload);
         final PaystackPaymentEntity paymentEntity = this.paymentRepository.findByAccessCode(payload.getData().getCustomer().getCustomerCode())
                                                                           .orElseThrow();
@@ -97,11 +93,13 @@ public class PaystackManager {
         paymentEntity.setSuccess(true);
         this.paymentRepository.save(paymentEntity);
         try {
-            final BigDecimal topUpAmount = this.moneyManager.convertAmount(payload.getData()
-                                                                                  .getAmount());
-            account = this.accountManager.topUpAccount(paymentEntity.getUserId(), topUpAmount);
+            // not needed, make sure to check paystack docs again, seems it's returned as string
+            // if so we convert string to bigDecimal
+            final BigDecimal topUpAmount = BigDecimal.valueOf(payload.getData().getAmount()).setScale(2, RoundingMode.HALF_UP);
+            // put it on a kafka, accountManager listens
+            final LogisticsAccountTransaction accountTransaction = this.accountManager.topUpAccount(paymentEntity.getUserEmail(), paymentEntity.getUserRole(), topUpAmount);
         }
-        catch (Exception e) {
+        catch (final Exception e) {
             throw new RuntimeException(e);
         }
     }

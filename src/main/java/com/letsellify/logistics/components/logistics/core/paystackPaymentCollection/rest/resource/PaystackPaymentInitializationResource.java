@@ -1,6 +1,9 @@
 package com.letsellify.logistics.components.logistics.core.paystackPaymentCollection.rest.resource;
 
+import java.math.BigDecimal;
+
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
@@ -11,6 +14,6 @@ import lombok.Data;
 
 @Data
 public class PaystackPaymentInitializationResource {
-    @NotBlank
-    private final String amount;
+    @NotNull
+    private final BigDecimal amount;
 }

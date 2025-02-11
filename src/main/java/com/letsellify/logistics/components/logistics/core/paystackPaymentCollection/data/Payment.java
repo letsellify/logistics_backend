@@ -3,6 +3,7 @@ package com.letsellify.logistics.components.logistics.core.paystackPaymentCollec
 import java.math.BigDecimal;
 import java.util.UUID;
 
+import com.letsellify.logistics.common.data.LogisticsAppRole;
 import com.letsellify.logistics.components.logistics.core.paystackPaymentCollection.dataMapper.PaystackDataMapper;
 import com.letsellify.logistics.components.logistics.core.paystackPaymentCollection.database.entity.PaystackPaymentEntity;
 import com.letsellify.logistics.components.logistics.core.paystackPaymentCollection.rest.resource.PaystackPaymentInitializationResource;
@@ -33,7 +34,10 @@ public class Payment {
 
     private String reference;
 
-    private UUID userId;
+    // user email instead, consider adding role too
+    private String userEmail;
+
+    private LogisticsAppRole userRole;
 
 
     public PaystackPaymentInitializationResource getResource() {
