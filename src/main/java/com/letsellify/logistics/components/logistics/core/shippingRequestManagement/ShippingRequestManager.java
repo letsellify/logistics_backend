@@ -75,7 +75,7 @@ public class ShippingRequestManager {
         return new LogisticsItemImage(logisticsItemImageEntity);
     }
 
-    public LogisticsRequest order(
+    public void order(
       final @NonNull String vendorEmail,
       final @NonNull String itemName,
       final @NonNull String description,
@@ -134,14 +134,13 @@ public class ShippingRequestManager {
           possibleDeliveryDateEnd
         );
 
-        this.commandGateway.sendAndWait(command);
+        this.commandGateway.send(command);
         // get current balance and update your balance
 
         final List<String> imagesPresignedUrls = itemImages
                                                    .stream()
                                                    .map(image -> this.fileStorageManager.generatePresignedUrl(image.getImagefilePath()))
                                                    .toList();
-        return new LogisticsRequest()
     }
 
     // logisticsVendor, logisticsItem
