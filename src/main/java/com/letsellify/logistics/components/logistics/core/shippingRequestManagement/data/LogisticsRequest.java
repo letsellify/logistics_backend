@@ -29,6 +29,8 @@ public class LogisticsRequest {
 
     private LogisticsItem item;
 
+    private List<String> images;
+
     private String currentState;
 
     private String currentLga;
@@ -76,7 +78,8 @@ public class LogisticsRequest {
         this.entity = entity;
         this.id = entity.getId();
         this.shippingRequestId = entity.getShippingRequestId();
-        this.item = new LogisticsItem(entity.getItem().getItemName(),entity.getItem().getItemDescription(),imagesPresignedUrl);
+        this.item = new LogisticsItem(entity.getItem().getItemName(),entity.getItem().getItemDescription());
+        this.images = imagesPresignedUrl;
         this.currentState = entity.getCurrentState();
         this.currentLga = entity.getCurrentLga();
         this.shippingState = entity.getShippingState();

@@ -1,6 +1,5 @@
 package com.letsellify.logistics.components.logistics.core.kycManagement.data;
 
-import com.letsellify.logistics.components.logistics.core.kycManagement.dataMapper.KycDataMapper;
 import com.letsellify.logistics.components.logistics.core.kycManagement.database.entity.KycEntity;
 
 import lombok.Data;
@@ -28,7 +27,7 @@ public class LogisticsKyc {
         this.kycFilePath = kycEntity.getFilePath();
     }
 
-    public KycIdentifier getResource() {
-        return KycDataMapper.INSTANCE.toResource();
-    }
+//    public KycIdentifier getResource() {
+//        return KycDataMapper.INSTANCE.toResource();
+//    }
 }

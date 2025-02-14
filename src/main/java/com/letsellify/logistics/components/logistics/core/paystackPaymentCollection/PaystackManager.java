@@ -38,7 +38,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PaystackManager {
     private final PaystackPaymentRepository paymentRepository;
-    private final UserManager userManager;
     // this will go soon. another bounded context
     private final AccountManager accountManager;
     private final RestClient restClient;
@@ -54,7 +53,6 @@ public class PaystackManager {
       @Value("${paystack.allowed-ips}") final List<String> paystackAllowedIps
     ) {
         this.paymentRepository = paystackPaymentRepository;
-        this.userManager = userManager;
         this.accountManager = accountManager;
         this.restClient = restClient;
         this.paystackSecret = paystackSecret;

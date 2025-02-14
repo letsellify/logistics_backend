@@ -18,10 +18,11 @@ import com.letsellify.logistics.common.data.LogisticsAppRole;
 import com.letsellify.logistics.components.fileStorage.core.FileStorageManager;
 import com.letsellify.logistics.components.fileStorage.core.data.StorageType;
 import com.letsellify.logistics.components.fileStorage.core.implementation.amazonS3.exception.LogisticsS3IOException;
-import com.letsellify.logistics.components.logistics.commands.LogisticsRequestCommand;
 import com.letsellify.logistics.components.logistics.core.financeAccountManagement.AccountManager;
 import com.letsellify.logistics.components.logistics.core.financeAccountManagement.exception.FinanceAccountNotFoundException;
 import com.letsellify.logistics.components.logistics.core.nigeriaStateLGA.StateLGAManager;
+import com.letsellify.logistics.components.logistics.core.nigeriaStateLGA.exception.IllegalLGAException;
+import com.letsellify.logistics.components.logistics.core.nigeriaStateLGA.exception.NoSuchStateException;
 import com.letsellify.logistics.components.logistics.core.paymentManagement.data.PaymentMethod;
 import com.letsellify.logistics.components.logistics.core.paymentManagement.exception.LogisticsInsufficientFundsException;
 import com.letsellify.logistics.components.logistics.core.shippingRequestManagement.data.LogisticsItemImage;
@@ -31,7 +32,8 @@ import com.letsellify.logistics.components.logistics.core.shippingRequestManagem
 import com.letsellify.logistics.components.logistics.core.shippingRequestManagement.database.repository.LogisticsItemImageRepository;
 import com.letsellify.logistics.components.logistics.core.shippingRequestManagement.database.repository.LogisticsRequestRepository;
 import com.letsellify.logistics.components.logistics.core.shippingRequestManagement.event.ShippingRequestBroadcast;
-import com.letsellify.logistics.components.logistics.core.shippingRequestManagement.eventStore.events.LogisticsRequestedEvent;
+import com.letsellify.logistics.components.logistics.core.shippingRequestManagement.eventStore.command.LogisticsRequestCommand;
+import com.letsellify.logistics.components.logistics.core.shippingRequestManagement.eventStore.event.LogisticsRequestedEvent;
 import com.letsellify.logistics.components.logistics.core.shippingRequestManagement.exception.InvalidLogisticsItemImageException;
 import com.letsellify.logistics.components.logistics.core.shippingRequestManagement.exception.NoSuchLogisticRequestException;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.VendorManager;
@@ -65,7 +67,15 @@ public class ShippingRequestManager {
     private final static BigDecimal PROFIT_PERCENT = new BigDecimal(12);
     private final static BigDecimal HUNDRED = new BigDecimal(100);
 
-    public void order(
+    // consider caching here to improve speed
+    public LogisticsItemImage uploadLogisticsItemImage(final @NonNull String vendorUsername, final @NonNull MultipartFile image) throws LogisticsS3IOException {
+        final String filePath = this.fileStorageManager.storeFile(StorageType.LOGISTICS, vendorUsername, LOGISTICS_IMAGE_TYPE, image);
+        final LogisticsItemImageEntity logisticsItemImageEntity = new LogisticsItemImageEntity(vendorUsername, filePath);
+        this.logisticsItemImageRepository.save(logisticsItemImageEntity);
+        return new LogisticsItemImage(logisticsItemImageEntity);
+    }
+
+    public LogisticsRequest order(
       final @NonNull String vendorEmail,
       final @NonNull String itemName,
       final @NonNull String description,
@@ -79,7 +89,7 @@ public class ShippingRequestManager {
       final @NonNull String shippingLga,
       final @NonNull LocalDate possibleDeliveryDateStart,
       final @NonNull LocalDate possibleDeliveryDateEnd
-    ) throws VendorNotFoundException, LogisticsInsufficientFundsException, InvalidLogisticsItemImageException {
+    ) throws NoSuchStateException, IllegalLGAException, VendorNotFoundException, LogisticsInsufficientFundsException, InvalidLogisticsItemImageException {
 
         this.stateLGAManager.validateStateAndLgaForLogistics(currentState, currentLga, shippingState, shippingLga);
 
@@ -126,6 +136,12 @@ public class ShippingRequestManager {
 
         this.commandGateway.sendAndWait(command);
         // get current balance and update your balance
+
+        final List<String> imagesPresignedUrls = itemImages
+                                                   .stream()
+                                                   .map(image -> this.fileStorageManager.generatePresignedUrl(image.getImagefilePath()))
+                                                   .toList();
+        return new LogisticsRequest()
     }
 
     // logisticsVendor, logisticsItem
@@ -207,15 +223,6 @@ public class ShippingRequestManager {
                                                        .map(itemImage -> this.fileStorageManager.generatePresignedUrl(itemImage.getImageFilePath()))
                                                        .toList();
         return new LogisticsRequest(entity,imagesPresignedUrls);
-    }
-
-
-    // consider caching here to improve speed
-    public LogisticsItemImage uploadLogisticsItemImage(final @NonNull String vendorUsername, final @NonNull MultipartFile image) throws LogisticsS3IOException {
-        final String filePath = this.fileStorageManager.storeFile(StorageType.LOGISTICS, LOGISTICS_IMAGE_TYPE, image);
-        final LogisticsItemImageEntity logisticsItemImageEntity = new LogisticsItemImageEntity(vendorUsername, filePath);
-        this.logisticsItemImageRepository.save(logisticsItemImageEntity);
-        return new LogisticsItemImage(logisticsItemImageEntity);
     }
 
 }

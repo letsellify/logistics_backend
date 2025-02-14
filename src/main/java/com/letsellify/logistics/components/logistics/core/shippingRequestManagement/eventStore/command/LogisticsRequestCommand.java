@@ -1,4 +1,4 @@
-package com.letsellify.logistics.components.logistics.commands;
+package com.letsellify.logistics.components.logistics.core.shippingRequestManagement.eventStore.command;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

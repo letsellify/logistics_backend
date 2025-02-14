@@ -39,8 +39,8 @@ public class S3Manager implements FileStorageManager {
     private final S3ConfigProperties configProperties;
 
     @Override
-    public String storeFile(final @NonNull StorageType storageType, final @NonNull String fileType, final @NonNull MultipartFile file) throws LogisticsS3IOException {
-        final String key = storageType + "/" + fileType + "/" + file.getOriginalFilename();
+    public String storeFile(final @NonNull StorageType storageType, final @NonNull String username, final @NonNull String fileType, final @NonNull MultipartFile file) throws LogisticsS3IOException {
+        final String key = storageType + "/" + username + "/" + fileType + "/" + file.getOriginalFilename();
         log.info("s3 file path structure: {}", key);
         try {
             this.s3Client.putObject(

@@ -49,9 +49,7 @@ public class TokenManager {
         }
 
         final String accessToken = this.createAccessToken(authentication);
-        final LogisticsAppSecurityToken securityToken = new LogisticsAppSecurityToken();
-        securityToken.setIssuer(ISSUER);
-        securityToken.setAccessToken(accessToken);
+        final LogisticsAppSecurityToken securityToken = new LogisticsAppSecurityToken(ISSUER, accessToken);
 
         final String refreshToken;
         if (authentication.getCredentials() instanceof final Jwt jwt) {
@@ -67,7 +65,7 @@ public class TokenManager {
         } else {
             refreshToken = this.createRefreshToken(authentication);
         }
-        securityToken.setRefreshToken(refreshToken);
+        securityToken.addRefreshToken(refreshToken);
 
         return securityToken;
     }

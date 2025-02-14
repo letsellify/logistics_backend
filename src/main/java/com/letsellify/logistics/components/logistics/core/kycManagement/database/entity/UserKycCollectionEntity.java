@@ -37,7 +37,7 @@ public class UserKycCollectionEntity extends Auditable {
     @OneToMany(mappedBy = "userKycCollection", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<KycEntity> kycs = new ArrayList<>();
 
-    private boolean approved;
+    private boolean approved = false;
 
     protected UserKycCollectionEntity() {
         super();
@@ -45,6 +45,7 @@ public class UserKycCollectionEntity extends Auditable {
 
     public static UserKycCollectionEntity getInstance(final String userEmail, final LogisticsAppRole userType) {
         final UserKycCollectionEntity kycEntity = new UserKycCollectionEntity();
+        kycEntity.id = UUID.randomUUID();
         kycEntity.userEmail = userEmail;
         kycEntity.userType = userType;
         return kycEntity;
@@ -57,7 +58,7 @@ public class UserKycCollectionEntity extends Auditable {
         if (LogisticsAppRole.VENDOR.equals(this.userType)) {
             throw  new RuntimeException("You are not allowed to add a Vendor Kyc");
         }
-
+        kyc.setUserKycCollection(this);
         this.kycs.add(kyc);
     }
 

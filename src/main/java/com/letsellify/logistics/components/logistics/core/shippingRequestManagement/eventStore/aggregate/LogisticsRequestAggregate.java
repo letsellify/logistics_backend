@@ -8,18 +8,18 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.spring.stereotype.Aggregate;
 
-import com.letsellify.logistics.components.logistics.commands.AcceptDispatchRequestCommand;
-import com.letsellify.logistics.components.logistics.commands.AcceptStorageRequestCommand;
-import com.letsellify.logistics.components.logistics.commands.LogisticsRequestCommand;
-import com.letsellify.logistics.components.logistics.commands.TriggerSettlementCommand;
+import com.letsellify.logistics.components.logistics.core.shippingRequestManagement.eventStore.command.AcceptDispatchRequestCommand;
+import com.letsellify.logistics.components.logistics.core.shippingRequestManagement.eventStore.command.AcceptStorageRequestCommand;
+import com.letsellify.logistics.components.logistics.core.shippingRequestManagement.eventStore.command.LogisticsRequestCommand;
+import com.letsellify.logistics.components.logistics.core.shippingRequestManagement.eventStore.command.TriggerSettlementCommand;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.LogisticsDispatcher;
 import com.letsellify.logistics.components.logistics.core.paymentManagement.data.PaymentMethod;
 import com.letsellify.logistics.components.logistics.core.shippingRequestManagement.data.LogisticsAgent;
 import com.letsellify.logistics.components.logistics.core.shippingRequestManagement.data.LogisticsStatus;
-import com.letsellify.logistics.components.logistics.core.shippingRequestManagement.eventStore.events.DispatchAcceptedEvent;
-import com.letsellify.logistics.components.logistics.core.shippingRequestManagement.eventStore.events.LogisticsRequestedEvent;
-import com.letsellify.logistics.components.logistics.core.shippingRequestManagement.eventStore.events.LogisticsSettlementEvent;
-import com.letsellify.logistics.components.logistics.core.shippingRequestManagement.eventStore.events.StorageAcceptedEvent;
+import com.letsellify.logistics.components.logistics.core.shippingRequestManagement.eventStore.event.DispatchAcceptedEvent;
+import com.letsellify.logistics.components.logistics.core.shippingRequestManagement.eventStore.event.LogisticsRequestedEvent;
+import com.letsellify.logistics.components.logistics.core.shippingRequestManagement.eventStore.event.LogisticsSettlementEvent;
+import com.letsellify.logistics.components.logistics.core.shippingRequestManagement.eventStore.event.StorageAcceptedEvent;
 
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 
@@ -108,10 +108,14 @@ public class LogisticsRequestAggregate {
         this.amountForDispatcher = event.amountForShipping();
         this.amountForAgent = event.amountForStorage();
         this.totalLogisticsAmountAfterTax = event.totalAmountAfterTax();
+        this.status = LogisticsStatus.REQUESTED;
     }
 
     @CommandHandler
     public void on(final AcceptDispatchRequestCommand cmd) {
+        if (this.status != LogisticsStatus.REQUESTED) {
+            throw new IllegalStateException("Cannot accept dispatch for request in status " + this.status);
+        }
         apply(new DispatchAcceptedEvent(
           this.requestId,
           cmd.dispatcher()
@@ -126,6 +130,9 @@ public class LogisticsRequestAggregate {
 
     @CommandHandler
     public void on(final AcceptStorageRequestCommand cmd) {
+        if (this.status != LogisticsStatus.REQUESTED) {
+            throw new IllegalStateException("Cannot accept dispatch for request in status " + this.status);
+        }
         apply(new StorageAcceptedEvent(
           this.requestId,
           cmd.agent()
@@ -152,6 +159,6 @@ public class LogisticsRequestAggregate {
 
     @EventSourcingHandler
     public void on(final LogisticsSettlementEvent event) {
-        this.logisticsCompleted = event.getTimestamp();
+        this.logisticsCompleted = event.timestamp();
     }
 }

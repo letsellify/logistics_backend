@@ -44,8 +44,8 @@ public class KycEntity extends Auditable {
     }
 
     public KycEntity(final KycDocumentType kycDocument, final String filePath) {
-        final KycEntity kycEntity = new KycEntity();
-        kycEntity.id = this.generateKycId(filePath);
+        super();
+        this.id = this.generateKycId(filePath);
         this.kycDocument = kycDocument;
         this.filePath = filePath;
     }

@@ -2,13 +2,14 @@ package com.letsellify.logistics.components.logistics.core.dispatcherManagement;
 
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.letsellify.logistics.common.data.LogisticsAppRole;
 import com.letsellify.logistics.components.fileStorage.core.implementation.amazonS3.exception.LogisticsS3IOException;
-import com.letsellify.logistics.components.logistics.commands.AcceptDispatchRequestCommand;
+import com.letsellify.logistics.components.logistics.core.shippingRequestManagement.eventStore.command.AcceptDispatchRequestCommand;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.LogisticsDispatcher;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.database.entity.DispatcherEntity;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.database.repository.DispatcherRepository;
@@ -37,7 +38,9 @@ public class DispatcherManager {
     private final KycManager kycManager;
     private final CommandGateway commandGateway;
 
+    @Async
     @EventListener
+    @Transactional
     public void on(final @NonNull UserOfRoleDispatcherCreated event) {
         log.info("Handling DispatcherCreatedEvent for email: {}", event.getUserEmail());
         // Dispatcher-specific logic here, e.g., assigning dispatch regions
@@ -88,7 +91,7 @@ public class DispatcherManager {
     public LogisticsKyc uploadKycDocument(final @NonNull String userEmail, final @NonNull KycDocumentType kycDocumentType, final @NonNull MultipartFile multipartFile) throws NoSuchDispatcherException, LogisticsS3IOException {
         final DispatcherEntity entity = this.dispatcherRepository.findByEmail(userEmail)
                                                                  .orElseThrow(() -> new NoSuchDispatcherException("No such dispatcher with email " + userEmail + " found"));
-        return this.kycManager.uploadKyc(userEmail, LogisticsAppRole.DISPATCHER, kycDocumentType, multipartFile);
+        return this.kycManager.uploadKyc(entity.getEmail(), LogisticsAppRole.DISPATCHER, kycDocumentType, multipartFile);
     }
 
     @Transactional

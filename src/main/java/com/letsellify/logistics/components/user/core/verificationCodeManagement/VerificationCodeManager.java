@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -12,12 +13,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.letsellify.logistics.common.data.LogisticsAppRole;
-import com.letsellify.logistics.components.user.core.userManagement.event.UserOfRoleAgentCreated;
-import com.letsellify.logistics.components.user.core.userManagement.event.UserOfRoleDispatcherCreated;
-import com.letsellify.logistics.components.user.core.userManagement.event.UserOfRoleVendorCreated;
+import com.letsellify.logistics.components.user.core.userManagement.UserManager;
+import com.letsellify.logistics.components.user.core.userManagement.data.LogisticsAppUser;
+import com.letsellify.logistics.components.user.core.userManagement.event.UnverifiedUserCreatedEvent;
+import com.letsellify.logistics.components.user.core.userManagement.exception.UserNotFoundException;
 import com.letsellify.logistics.components.user.core.verificationCodeManagement.database.entity.VerificationCodeEntity;
 import com.letsellify.logistics.components.user.core.verificationCodeManagement.database.repository.VerificationCodeRepository;
+import com.letsellify.logistics.components.user.core.verificationCodeManagement.event.UserVerifiedEvent;
 import com.letsellify.logistics.components.user.core.verificationCodeManagement.exception.InvalidVerificationCodeException;
+import com.letsellify.logistics.components.user.core.verificationCodeManagement.exception.UnableToCreateVerificationCodeException;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -36,25 +40,22 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class VerificationCodeManager {
     private final VerificationCodeRepository verificationCodeRepository;
+    private final UserManager userManager;
     private final JavaMailSender mailSender;
     private final ApplicationEventPublisher eventPublisher;
 
+
+    @Async
     @Transactional
-    public void generateAndSendVerificationCode(final @NonNull String userEmail, final @NonNull LogisticsAppRole appRole) {
-        if (appRole == LogisticsAppRole.ADMIN) {
-            throw new RuntimeException("Unable to generate verification code");
-        }
-        // Invalidate any existing unverified codes for this email
-        this.verificationCodeRepository.deleteByUserEmailAndVerifiedFalseAndExpiredFalse(userEmail);
-        final VerificationCodeEntity entity = new VerificationCodeEntity(userEmail, appRole);
-        this.verificationCodeRepository.save(entity);
-        this.sendVerificationEmail(userEmail, entity.getCode());
+    public void resendVerificationCode(final @NonNull String userEmail) throws UserNotFoundException, UnableToCreateVerificationCodeException {
+        this.generateAndSendVerificationCode(userEmail,null);
     }
 
 
     @Transactional
     public void verifyCode(final @NonNull String userEmail, final @NonNull String code) throws InvalidVerificationCodeException {
-        final Optional <VerificationCodeEntity> codeEntityOptional = this.verificationCodeRepository.findByUserEmailAndCodeAndExpiredFalseAndVerifiedFalse(userEmail, code);
+        final Optional <VerificationCodeEntity> codeEntityOptional = this.verificationCodeRepository
+                                                                       .findByUserEmailAndCodeAndExpiredFalseAndVerifiedFalse(userEmail, code);
 
         // throw exception instead
         if (codeEntityOptional.isEmpty()) {
@@ -74,25 +75,20 @@ public class VerificationCodeManager {
         // Mark as verified
         verificationCode.setToVerified();
         this.verificationCodeRepository.save(verificationCode);
-        switch (userRole) {
-            case VENDOR -> this.eventPublisher.publishEvent(new UserOfRoleVendorCreated(verificationCode.getUserEmail()));
-            case DISPATCHER -> this.eventPublisher.publishEvent(new UserOfRoleDispatcherCreated(verificationCode.getUserEmail()));
-            case AGENT -> this.eventPublisher.publishEvent(new UserOfRoleAgentCreated(verificationCode.getUserEmail()));
-            default -> log.warn("No event published for role: {}", userRole);
-        }
+        this.eventPublisher.publishEvent(new UserVerifiedEvent(verificationCode.getUserEmail(), verificationCode.getRole()));
     }
 
 
-    // Run daily at midnight
-    @Scheduled(cron = "0 0 0 * * ?")
-    public void cleanUpExpiredCodes() {
-        final long start = System.currentTimeMillis();
-
-        // Delete expired codes
-        this.verificationCodeRepository.deleteExpiredCodes();
-
-        final long duration = System.currentTimeMillis() - start;
-        log.info("Expired verification codes cleaned up in {} ms", duration);
+    @Async
+    @EventListener
+    @Transactional
+    public void on(final UnverifiedUserCreatedEvent unverifiedUserCreatedEvent) {
+        try {
+            this.verifyUser(unverifiedUserCreatedEvent.getUsername(),unverifiedUserCreatedEvent.getRole());
+        }
+        catch (UserNotFoundException | UnableToCreateVerificationCodeException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     @Async
@@ -124,4 +120,44 @@ public class VerificationCodeManager {
     }
 
 
+    // Run daily at midnight
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void cleanUpExpiredCodes() {
+        final long start = System.currentTimeMillis();
+
+        // Delete expired codes
+        this.verificationCodeRepository.deleteExpiredCodes();
+
+        final long duration = System.currentTimeMillis() - start;
+        log.info("Expired verification codes cleaned up in {} ms", duration);
+    }
+
+
+    private void verifyUser(final @NonNull String userEmail, @NonNull final LogisticsAppRole appRole) throws UserNotFoundException, UnableToCreateVerificationCodeException {
+        this.generateAndSendVerificationCode(userEmail,appRole);
+    }
+
+
+    private void generateAndSendVerificationCode(final @NonNull String userEmail, final LogisticsAppRole appRole) throws UserNotFoundException, UnableToCreateVerificationCodeException {
+        final LogisticsAppRole roleToUse;
+
+        if (appRole == null) {
+            final LogisticsAppUser user = this.userManager.getUserByEmail(userEmail);
+            roleToUse = user.getRole();
+        } else if (appRole == LogisticsAppRole.ADMIN) {
+            throw new UnableToCreateVerificationCodeException("Verification codes cannot be generated for ADMIN users.");
+        } else {
+            roleToUse = appRole;
+        }
+
+        // Invalidate existing unverified and unexpired codes
+        this.verificationCodeRepository.deleteByUserEmailAndVerifiedFalseAndExpiredFalse(userEmail);
+
+        // Create and save the new verification code entity
+        final VerificationCodeEntity entity = new VerificationCodeEntity(userEmail, roleToUse);
+        this.verificationCodeRepository.save(entity);
+
+        // Send the verification email
+        this.sendVerificationEmail(userEmail, entity.getCode());
+    }
 }

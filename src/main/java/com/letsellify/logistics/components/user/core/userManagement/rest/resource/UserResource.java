@@ -1,12 +1,11 @@
 package com.letsellify.logistics.components.user.core.userManagement.rest.resource;
 
-import java.time.Instant;
-
 import com.letsellify.logistics.common.data.LogisticsAppRole;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 
 /**
  * @author AHMAD BUBA
@@ -14,23 +13,16 @@ import lombok.Data;
  * Time:17:32
  */
 
-@Data
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
+@Getter
 public class UserResource {
-    @NotNull
-    private String name;
-    @NotNull
-    @NotBlank
-    private String email;
-    @NotNull
-    private LogisticsAppRole role;
-    @NotNull
-    private boolean active;
-    @NotNull
-    private Instant creationDate;
-    @NotNull
-    private Instant lastModifiedDate;
-    @NotNull
-    private String createdBy;
-    @NotNull
-    private String lastModifiedBy;
+    private final String name;
+
+    private final String email;
+
+    private final LogisticsAppRole role;
+
+    private final boolean active;
+
 }

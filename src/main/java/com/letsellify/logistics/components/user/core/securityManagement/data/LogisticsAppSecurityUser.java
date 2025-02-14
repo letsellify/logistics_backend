@@ -9,7 +9,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.letsellify.logistics.components.user.core.userManagement.data.LogisticsAppUser;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 /**
  * @author AHMAD BUBA
@@ -17,7 +18,8 @@ import lombok.Data;
  * Time:17:32
  */
 
-@Data
+@RequiredArgsConstructor
+@Getter
 public class LogisticsAppSecurityUser implements UserDetails {
     private final LogisticsAppUser user;
 

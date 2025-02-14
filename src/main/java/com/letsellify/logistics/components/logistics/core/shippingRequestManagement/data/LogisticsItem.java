@@ -1,7 +1,5 @@
 package com.letsellify.logistics.components.logistics.core.shippingRequestManagement.data;
 
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -17,5 +15,4 @@ import lombok.Data;
 public class LogisticsItem {
     private final String itemName;
     private final String itemDescription;
-    private final List<LogisticsItemImage> images;
 }

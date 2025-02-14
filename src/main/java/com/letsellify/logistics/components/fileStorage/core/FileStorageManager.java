@@ -12,7 +12,7 @@ import com.letsellify.logistics.components.fileStorage.core.implementation.amazo
  */
 
 public interface FileStorageManager {
-    String storeFile(StorageType storageType, String fileType, MultipartFile file) throws LogisticsS3IOException; // Returns a key or reference to the stored file
+    String storeFile(StorageType storageType, String username, String fileType, MultipartFile file) throws LogisticsS3IOException; // Returns a key or reference to the stored file
 
     String generatePresignedUrl(String fileReference);
 

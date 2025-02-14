@@ -4,12 +4,11 @@ import java.time.Instant;
 import java.util.UUID;
 
 import com.letsellify.logistics.common.data.LogisticsAppRole;
-import com.letsellify.logistics.components.user.core.userManagement.database.entity.UserEntity;
 import com.letsellify.logistics.components.user.core.userManagement.dataMapper.UserDataMapper;
+import com.letsellify.logistics.components.user.core.userManagement.database.entity.UserEntity;
 import com.letsellify.logistics.components.user.core.userManagement.rest.resource.UserResource;
 
-import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.Getter;
 
 /**
  * @author AHMAD BUBA
@@ -17,32 +16,30 @@ import lombok.Data;
  * Time:17:32
  */
 
-@Data
+@Getter
 public class LogisticsAppUser {
-    private UserEntity entity;
+    private final UserEntity entity;
 
-    @NotNull
-    private UUID id;
-    @NotNull
-    private String name;
-    @NotNull
-    private String email;
-    @NotNull
-    private String password;
-    @NotNull
-    private LogisticsAppRole role;
-    @NotNull
-    private boolean active;
-    @NotNull
-    private boolean isKycPerformed;
-    @NotNull
-    private Instant creationDate;
-    @NotNull
-    private Instant lastModifiedDate;
-    @NotNull
-    private String createdBy;
-    @NotNull
-    private String lastModifiedBy;
+
+    private final UUID id;
+
+    private final String name;
+
+    private final String email;
+
+    private final String password;
+
+    private final LogisticsAppRole role;
+
+    private final boolean active;
+
+    private final Instant creationDate;
+
+    private final Instant lastModifiedDate;
+
+    private final String createdBy;
+
+    private final String lastModifiedBy;
 
     public LogisticsAppUser(final UserEntity entity) {
         this.entity = entity;
@@ -55,6 +52,7 @@ public class LogisticsAppUser {
         this.creationDate = entity.getCreationDate();
         this.lastModifiedDate = entity.getLastModifiedDate();
         this.createdBy = entity.getCreatedBy();
+        this.lastModifiedBy = entity.getLastModifiedBy();
     }
 
     public UserResource getResource() {

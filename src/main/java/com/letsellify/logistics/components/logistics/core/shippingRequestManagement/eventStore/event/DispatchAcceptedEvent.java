@@ -1,4 +1,4 @@
-package com.letsellify.logistics.components.logistics.core.shippingRequestManagement.eventStore.events;
+package com.letsellify.logistics.components.logistics.core.shippingRequestManagement.eventStore.event;
 
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.LogisticsDispatcher;
 

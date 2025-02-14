@@ -104,7 +104,7 @@ public class LogisticsRequestEntity extends Auditable {
         entity.id = UUID.randomUUID();
         entity.shippingRequestId = requestId;
         entity.vendor = new LogisticsVendor(vendorEmail, vendorFirstName, vendorLastName, vendorPhone);
-        entity.item = new LogisticsItem(itemName, itemDescription, itemImages);
+        entity.item = new LogisticsItem(itemName, itemDescription);
         entity.getItemImages()
               .addAll(
                 itemImages

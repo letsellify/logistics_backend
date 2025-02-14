@@ -24,6 +24,7 @@ import com.letsellify.logistics.components.logistics.core.nigeriaStateLGA.databa
 import com.letsellify.logistics.components.logistics.core.nigeriaStateLGA.database.entity.StateEntity;
 import com.letsellify.logistics.components.logistics.core.nigeriaStateLGA.database.repository.LGARepository;
 import com.letsellify.logistics.components.logistics.core.nigeriaStateLGA.database.repository.StateRepository;
+import com.letsellify.logistics.components.logistics.core.nigeriaStateLGA.exception.IllegalLGAException;
 import com.letsellify.logistics.components.logistics.core.nigeriaStateLGA.exception.NoSuchStateException;
 import com.letsellify.logistics.components.logistics.core.nigeriaStateLGA.exception.StateLGAFileNotFountException;
 
@@ -47,9 +48,6 @@ public class StateLGAManager implements CommandLineRunner {
     private final StateLGAJsonFilePathConfig stateLGAJsonFilePathConfig;
     private final Map<String, Set<String>> stateLgaCache = new HashMap<>();
 
-    public void validateStateAndLgaForLogistics(final @NonNull String currentState, final @NonNull String currentLga, final @NonNull String shippingState, final @NonNull String shippingLga) {
-
-    }
 
     @Override
     @Transactional
@@ -73,6 +71,28 @@ public class StateLGAManager implements CommandLineRunner {
             }
         }
         this.preloadCache();
+    }
+
+    public void validateStateAndLgaForLogistics(final @NonNull String currentState, final @NonNull String currentLga, final @NonNull String shippingState, final @NonNull String shippingLga) throws NoSuchStateException, IllegalLGAException {
+        // Validate current state and LGA using cache
+        this.validateStateAndLgaFromCache(currentState, currentLga);
+
+        // Validate shipping state and LGA using cache
+        this.validateStateAndLgaFromCache(shippingState, shippingLga);
+    }
+
+
+    private void validateStateAndLgaFromCache(final @NonNull String state, final @NonNull String lga) throws NoSuchStateException, IllegalLGAException {
+        // Check if the state exists in cache (case-insensitive)
+        final Set<String> lgas = this.stateLgaCache.get(state.toLowerCase());
+        if (lgas == null) {
+            throw new NoSuchStateException("State '" + state + "' not found.");
+        }
+
+        // Check if the LGA belongs to the state
+        if (!lgas.contains(lga.toLowerCase())) {
+            throw new IllegalLGAException("LGA '" + lga + "' does not belong to state '" + state + "'.");
+        }
     }
 
     public NigerianStates getAllStates() {

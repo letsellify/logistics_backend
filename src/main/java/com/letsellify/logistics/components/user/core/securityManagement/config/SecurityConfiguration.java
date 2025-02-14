@@ -65,9 +65,9 @@ public class SecurityConfiguration {
 
 
     private static final String[] AUTH_WHITELIST = {
-            "/api/v1/authorize/login",
-            "/api/v1/authorize/token",
+            "/api/v1/authorize/**",
             "/api/v1/user-management/register",
+            "/api/v1/verification/**",
             "/api/v1/stateLGA/**",
             "/v2/api-docs",
             "/v3/api-docs",

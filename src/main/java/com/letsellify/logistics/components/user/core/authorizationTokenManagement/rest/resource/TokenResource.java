@@ -1,7 +1,9 @@
 package com.letsellify.logistics.components.user.core.authorizationTokenManagement.rest.resource;
 
-import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 
 /**
  * @author AHMAD BUBA
@@ -9,12 +11,13 @@ import lombok.Data;
  * Time:17:32
  */
 
-@Data
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
+@Getter
 public class TokenResource {
-    @NotBlank
-    private String issuer;
-    @NotBlank
-    private String accessToken;
-    @NotBlank
-    private String refreshToken;
+    private final String issuer;
+
+    private final String accessToken;
+
+    private final String refreshToken;
 }

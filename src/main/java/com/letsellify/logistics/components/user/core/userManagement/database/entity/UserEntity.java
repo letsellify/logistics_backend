@@ -11,8 +11,11 @@ import com.letsellify.logistics.common.data.LogisticsAppRole;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NonNull;
 
 /**
  * @author AHMAD BUBA
@@ -21,7 +24,7 @@ import lombok.Data;
  */
 
 @Entity
-@Data
+@Getter
 public class UserEntity extends Auditable {
 
     @Id
@@ -35,17 +38,16 @@ public class UserEntity extends Auditable {
 
     private String password;
 
+    @Enumerated(EnumType.STRING)
     private LogisticsAppRole role;
 
     private boolean active;
-
-    private boolean isKycPerformed;
 
     protected UserEntity() {
         super();
     }
 
-    public static UserEntity getInstance(final String name, final String email, final String password, final LogisticsAppRole role, final boolean enabled) {
+    public static UserEntity create(final String name, final String email, final String password, final LogisticsAppRole role, final boolean enabled) {
         Objects.requireNonNull(name, "Name cannot be null");
         Objects.requireNonNull(email, "Email cannot be null");
         Objects.requireNonNull(password, "Password cannot be null");
@@ -57,8 +59,23 @@ public class UserEntity extends Auditable {
         userEntity.password = password;
         userEntity.role = role;
         userEntity.active = enabled;
-        userEntity.isKycPerformed = false;
         return userEntity;
+    }
+
+    public void updateName(final String name) {
+        this.name = name;
+    }
+
+    public void updateEmail(final @NonNull String email) {
+       this.email = email;
+    }
+
+    public void activate() {
+        this.active = true;
+    }
+
+    public void updatePassword(final String encodedPassword) {
+        this.password = encodedPassword;
     }
 
     public String getCreatedBy() {

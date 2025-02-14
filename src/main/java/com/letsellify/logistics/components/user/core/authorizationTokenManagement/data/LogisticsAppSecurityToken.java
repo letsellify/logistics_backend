@@ -3,7 +3,8 @@ package com.letsellify.logistics.components.user.core.authorizationTokenManageme
 import com.letsellify.logistics.components.user.core.authorizationTokenManagement.mapper.TokenDataMapper;
 import com.letsellify.logistics.components.user.core.authorizationTokenManagement.rest.resource.TokenResource;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.NonNull;
 
 /**
  * @author AHMAD BUBA
@@ -11,13 +12,23 @@ import lombok.Data;
  * Time:17:32
  */
 
-@Data
+@Getter
 public class LogisticsAppSecurityToken {
-    private String issuer;
-    private String accessToken;
+    private final String issuer;
+    private final String accessToken;
     private String refreshToken;
+
+    public LogisticsAppSecurityToken(final @NonNull String issuer, final @NonNull String accessToken) {
+        this.issuer = issuer;
+        this.accessToken = accessToken;
+    }
+
+    public void addRefreshToken(final @NonNull String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
 
     public TokenResource toTokenResource() {
         return TokenDataMapper.INSTANCE.dataToResource(this);
     }
+
 }

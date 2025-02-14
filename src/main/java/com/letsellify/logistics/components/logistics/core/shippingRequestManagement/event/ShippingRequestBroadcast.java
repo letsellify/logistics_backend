@@ -50,8 +50,7 @@ public class ShippingRequestBroadcast extends ApplicationEvent {
         this.amountForShipping = logisticsRequest.getAmountForShipping();
         this.amountForStorage = logisticsRequest.getAmountForStorage();
         this.modeOfPayment = logisticsRequest.getModeOfPayment();
-        this.images = logisticsRequest.getItem()
-                                      .getItemImages();
+        this.images = logisticsRequest.getImages();
         this.currentState = logisticsRequest.getCurrentState();
         this.currentLga = logisticsRequest.getCurrentLga();
         this.shippingState = logisticsRequest.getShippingState();

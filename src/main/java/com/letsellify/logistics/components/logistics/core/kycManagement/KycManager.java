@@ -92,13 +92,13 @@ public class KycManager {
         final String filePath;
         switch (kycDocument) {
             case NIN ->
-              filePath = this.fileStorageManager.storeFile(StorageType.KYC, KycDocumentType.NIN.getValue(), multipartFile);
+              filePath = this.fileStorageManager.storeFile(StorageType.KYC, userEmail, KycDocumentType.NIN.getValue(), multipartFile);
             case BVN
-              -> filePath = this.fileStorageManager.storeFile(StorageType.KYC, KycDocumentType.BVN.getValue(), multipartFile);
+              -> filePath = this.fileStorageManager.storeFile(StorageType.KYC, userEmail, KycDocumentType.BVN.getValue(), multipartFile);
             case INTERNATIONAL_PASSPORT ->
-              filePath = this.fileStorageManager.storeFile(StorageType.KYC, KycDocumentType.INTERNATIONAL_PASSPORT.getValue(), multipartFile);
+              filePath = this.fileStorageManager.storeFile(StorageType.KYC, userEmail, KycDocumentType.INTERNATIONAL_PASSPORT.getValue(), multipartFile);
             case UTILITY_BILL ->
-              filePath = this.fileStorageManager.storeFile(StorageType.KYC, KycDocumentType.UTILITY_BILL.getValue(), multipartFile);
+              filePath = this.fileStorageManager.storeFile(StorageType.KYC, userEmail, KycDocumentType.UTILITY_BILL.getValue(), multipartFile);
             case DRIVER_LICENSE ->
               throw new UnsupportedOperationException("Driver license upload not yet supported");
             default ->
