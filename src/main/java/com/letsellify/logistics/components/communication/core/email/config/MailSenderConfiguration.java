@@ -1,21 +1,11 @@
-//package com.letsellify.logistics.components.communication.core.email.config;
-//
-//import java.nio.charset.StandardCharsets;
-//import java.util.Properties;
-//
-//import org.springframework.boot.context.properties.ConfigurationProperties;
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//import org.springframework.core.env.Environment;
-//import org.springframework.mail.javamail.JavaMailSender;
-//import org.springframework.mail.javamail.JavaMailSenderImpl;
-//
-///**
-// * @author AHMAD BUBA
-// * Date:1/5/25
-// * Time:21:10
-// */
-//
+package com.letsellify.logistics.components.communication.core.email.config;
+
+/**
+ * @author AHMAD BUBA
+ * Date:1/5/25
+ * Time:21:10
+ */
+
 //@Configuration
 //public class MailSenderConfiguration {
 //    private static final String MAIL_PROPERTIES_PREFIX = "spring.mail.properties";

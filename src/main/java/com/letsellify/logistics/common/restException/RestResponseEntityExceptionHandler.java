@@ -39,11 +39,11 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                 || hex.getHttpStatus() == HttpStatus.GONE
                 ) {
 
-                log.warn("TaskTodoAppRestException: Status [" + hex.getHttpStatus() + "] " + ex.getMessage());
+                log.warn("LogisticsAppRestException: Status [" + hex.getHttpStatus() + "] " + ex.getMessage());
 
             
             } else {
-                log.error("TaskTodoAppRestException: Status [" + hex.getHttpStatus() + "] " + ex.getMessage(), ex);
+                log.error("LogisticsAppRestException: Status [" + hex.getHttpStatus() + "] " + ex.getMessage(), ex);
 
             }
 

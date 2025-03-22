@@ -10,7 +10,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.letsellify.logistics.components.fileStorage.core.FileStorageManager;
 import com.letsellify.logistics.components.fileStorage.core.data.StorageType;
 import com.letsellify.logistics.components.fileStorage.core.implementation.amazonS3.config.S3ConfigProperties;
-import com.letsellify.logistics.components.fileStorage.core.implementation.amazonS3.exception.LogisticsS3IOException;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -39,21 +38,20 @@ public class S3Manager implements FileStorageManager {
     private final S3ConfigProperties configProperties;
 
     @Override
-    public String storeFile(final @NonNull StorageType storageType, final @NonNull String username, final @NonNull String fileType, final @NonNull MultipartFile file) throws LogisticsS3IOException {
-        final String key = storageType + "/" + username + "/" + fileType + "/" + file.getOriginalFilename();
+    public String storeFile(final @NonNull StorageType storageType, final @NonNull String username, final @NonNull MultipartFile file) throws IOException {
+        final String key = storageType + "/" + username +  "/" + file.getOriginalFilename();
         log.info("s3 file path structure: {}", key);
-        try {
-            this.s3Client.putObject(
-              PutObjectRequest.builder()
-                              .bucket(this.configProperties.bucketName())
-                              .key(key)
-                              .build(),
-              RequestBody.fromInputStream(file.getInputStream(), file.getSize())
-            );
-        } catch (final IOException e) {
-            throw new LogisticsS3IOException("Failed to upload file to S3", e);
-        }
-
+        this.s3Client.putObject(
+          PutObjectRequest.builder()
+                          .bucket(this.configProperties.bucketName())
+                          .key(key)
+                          .build(),
+          RequestBody
+            .fromInputStream(
+              file.getInputStream(),
+              file.getSize()
+            )
+        );
         return key; // Return the key to track the uploaded file.
     }
 

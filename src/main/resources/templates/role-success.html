@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Role Assigned</title>
+</head>
+<body>
+<h1>🎉 Success!</h1>
+
+<!-- Show success message -->
+<p th:if="${success}" style="color:green;" th:text="${success}"></p>
+
+<h3>Your role has been assigned successfully.</h3>
+
+<!-- Optional: Back to Dashboard Link -->
+<a href="/dashboard" th:href="@{/dashboard}">Back to Dashboard</a>
+</body>
+</html>

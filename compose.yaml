@@ -1,14 +1,17 @@
 services:
   postgres:
-    image: 'postgres:latest'
+    image: 'postgres:17-alpine'
+    container_name: 'letsellify-logistics-postgres'
     environment:
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
+      - 'POSTGRES_DB=logistics_db'
+      - 'POSTGRES_PASSWORD=KfiwSDrL3VPP8s15'
+      - 'POSTGRES_USER=letsellify'
     ports:
       - '5444:5432'
     volumes:
-      - './src/main/resources/data/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql'
+      - 'pgdata:/var/lib/postgresql/data'
+#      - './src/main/resources/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql'
+
   axonserver:
     image: 'axoniq/axonserver:latest'
     environment:
@@ -16,3 +19,22 @@ services:
     ports:
       - '8024:8024'
       - '8124:8124'
+    volumes:
+      - 'axon_data:/data'
+      - 'axon_events:/events'
+
+  redis:
+    image: 'redis:7-alpine'
+    container_name: 'logistics_redis'
+    restart: 'always'
+    ports:
+      - '6379:6379'
+    volumes:
+      - 'redis_data:/data'
+    command: ["redis-server", "--appendonly", "yes"]
+
+volumes:
+  pgdata:
+  axon_data:
+  axon_events:
+  redis_data:

@@ -1,0 +1,19 @@
+package com.letsellify.logistics.components.logistic.core.paystackPaymentGateway.rest.dto;
+
+import java.math.BigDecimal;
+
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+
+/**
+ * @author AHMAD BUBA
+ * Date:1/9/25
+ * Time:10:18
+ */
+
+@Data
+public class InitializePaymentDto {
+    // add custom validator to validate as digit and non negative amount greater than 1000
+    @NotNull
+    private final BigDecimal amount;
+}

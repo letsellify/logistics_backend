@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Role Selection</title>
+</head>
+<body>
+<h1>Welcome <span th:text="${userName}">User</span>!</h1>
+<p>Your email: <span th:text="${userEmail}"></span></p>
+<h3>Select Your Role to Get Started</h3>
+
+<!-- Show error messages -->
+<p th:if="${error}" style="color:red;" th:text="${error}"></p>
+
+<!--<form method="post" th:action="@{/dashboard/assign-role}">-->
+<!--    <input type="hidden" name="token" th:value="${token}" />-->
+
+<!--    <label>Select Role:</label>-->
+<!--    <select name="role" required>-->
+<!--        <option value="" disabled selected>Select a role...</option>-->
+<!--        <option th:each="role : ${roles}"-->
+<!--                th:value="${role}"-->
+<!--                th:text="${role}"></option>-->
+<!--    </select>-->
+<!--    <br><br>-->
+
+<!--    <button type="submit">Submit</button>-->
+<!--</form>-->
+
+<form method="post" th:action="@{/dashboard/assign-role}">
+    <input type="hidden" name="token" th:value="${token}" />
+
+    <label for="role">Select Role:</label>
+    <select id="role" name="role" required>
+        <option value="" disabled selected>Select a role...</option>
+        <option th:each="role : ${roles}"
+                th:value="${role}"
+                th:text="${role}"></option>
+    </select>
+    <br><br>
+
+    <button type="submit">Submit</button>
+</form>
+
+</body>
+</html>

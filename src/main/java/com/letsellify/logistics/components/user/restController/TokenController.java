@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.letsellify.logistics.components.user.core.authorizationTokenManagement.TokenDataService;
-import com.letsellify.logistics.components.user.core.authorizationTokenManagement.rest.dto.LoginDto;
-import com.letsellify.logistics.components.user.core.authorizationTokenManagement.rest.dto.NewTokenDto;
-import com.letsellify.logistics.components.user.core.authorizationTokenManagement.rest.resource.TokenResource;
+import com.letsellify.logistics.components.user.core.authorizationToken.AuthorizationTokenDataService;
+import com.letsellify.logistics.components.user.core.authorizationToken.rest.dto.LoginDto;
+import com.letsellify.logistics.components.user.core.authorizationToken.rest.dto.NewTokenDto;
+import com.letsellify.logistics.components.user.core.authorizationToken.rest.resource.TokenResource;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,9 +33,9 @@ import jakarta.validation.Valid;
 public class TokenController {
     private final DaoAuthenticationProvider daoAuthenticationProvider;
     private final JwtAuthenticationProvider refreshTokenAuthProvider;
-    private final TokenDataService tokenDataService;
+    private final AuthorizationTokenDataService tokenDataService;
 
-    public TokenController(final DaoAuthenticationProvider daoAuthenticationProvider, @Qualifier("jwtRefreshTokenAuthProvider") final JwtAuthenticationProvider refreshTokenAuthProvider, final TokenDataService tokenDataService) {
+    public TokenController(final DaoAuthenticationProvider daoAuthenticationProvider, @Qualifier("jwtRefreshTokenAuthProvider") final JwtAuthenticationProvider refreshTokenAuthProvider, final AuthorizationTokenDataService tokenDataService) {
         this.daoAuthenticationProvider = daoAuthenticationProvider;
         this.refreshTokenAuthProvider = refreshTokenAuthProvider;
         this.tokenDataService = tokenDataService;
