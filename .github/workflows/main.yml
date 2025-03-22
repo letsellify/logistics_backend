@@ -26,7 +26,7 @@ jobs:
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Push Image to Docker Hub
-        run: docker push letsellifytechnologies/logistics-backend:latest
+        run: docker push letsellifytechnologieslimited/logistics-backend:latest
 
   deploy:
     runs-on: ubuntu-latest
