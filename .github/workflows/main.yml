@@ -48,7 +48,7 @@ jobs:
             cd backend/logistics
 
             # Pull the latest image
-            docker compose -f logistics-compose.yaml pull   # ✅ Updated to use 'docker compose'
+            docker-compose -f logistics-compose.yaml pull   # ✅ Updated to use 'docker compose'
 
             # Restart the services
-            docker compose -f logistics-compose.yaml up -d --remove-orphans  # ✅ Ensures old containers are removed
+            docker-compose -f logistics-compose.yaml up -d --remove-orphans  # ✅ Ensures old containers are removed
