@@ -31,15 +31,21 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Test SSH Connection to VPS
+      - name: Deploy to VPS
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            echo "🚀 SSH Connection Successful!"
-            echo "GitHub Actions can access the VPS."
-            echo "Current user: $(whoami)"
-            echo "Current directory: $(pwd)"
-            ls -lah /opt
+            # Log in to Docker Hub
+            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+            
+            # Navigate to the directory containing your docker-compose file
+            cd backend/logistics
+
+            # Pull the latest image
+            docker-compose -f logistics-compose.yaml pull
+
+            # Restart the services
+            docker-compose -f logistics-compose.yaml up -d
