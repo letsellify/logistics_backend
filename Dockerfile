@@ -2,13 +2,13 @@
 FROM maven:3-eclipse-temurin-21-alpine AS build
 WORKDIR /app
 
-# Copy only the pom.xml first to leverage caching
+# Copy only the pom.xml first (leveraging Docker layer caching)
 COPY pom.xml .
 
-# Download dependencies (cached if pom.xml hasn't changed)
+# Download dependencies first to take advantage of caching
 RUN mvn dependency:go-offline
 
-# Copy the source code and build the application
+# Copy the entire source code and package the application
 COPY src ./src
 RUN mvn clean package -DskipTests
 
@@ -16,11 +16,11 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:21-alpine
 WORKDIR /app
 
-# Copy the built JAR from the build stage using a wildcard
+# Copy the built JAR from the build stage
 COPY --from=build /app/target/*.jar app.jar
 
-# Expose the port the application will run on
+# Expose the application port
 EXPOSE 8181
 
-# Set the entrypoint for the application
-ENTRYPOINT ["sh", "-c", "java -jar app.jar --spring.profiles.active=${SPRING_PROFILES_ACTIVE:dev}"]
+# Run the application without specifying a profile
+ENTRYPOINT ["sh", "-c", "java -jar app.jar"]
