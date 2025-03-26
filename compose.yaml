@@ -33,6 +33,27 @@ services:
       - 'redis_data:/data'
     command: ["redis-server", "--appendonly", "yes"]
 
+
+# Uncomment this to run entire app packed with all it services
+  app:
+    build:
+      context: '.'
+      dockerfile: 'Dockerfile'
+    container_name: 'letsellify-logistics-backend'
+    ports:
+      - "8181:8080"
+    env_file:
+      - .env
+    depends_on:
+      - 'postgres'
+      - 'axonserver'
+      - 'redis'
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8181/actuator/health || exit 1" ]
+      interval: '30s'
+      timeout: '10s'
+      retries: 5
+
 volumes:
   pgdata:
   axon_data:

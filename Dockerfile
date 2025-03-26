@@ -20,7 +20,7 @@ WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
 # Expose the application port
-EXPOSE 8181
+EXPOSE 8080
 
 # Run the application without specifying a profile
 ENTRYPOINT ["sh", "-c", "java -jar app.jar"]
