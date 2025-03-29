@@ -1,5 +1,8 @@
 package com.letsellify.logistics.components.user.restController;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,7 +46,12 @@ public class OAuth2Controller {
             throw new RuntimeException(e);
         }
 
-        model.addAttribute("roles", LogisticAppRole.values());
+        // Exclude ADMIN role
+        final List<LogisticAppRole> availableRoles = Arrays.stream(LogisticAppRole.values())
+                                                           .filter(role -> role != LogisticAppRole.ADMIN)
+                                                           .toList();
+
+        model.addAttribute("roles", availableRoles);
         model.addAttribute("token", token);
 
         return "role-selection";

@@ -29,7 +29,7 @@ public class UserDataService {
 
     public UserResource createUser(@NonNull final CreateUserDto createUserDto) {
         try {
-            return this.userManager.createUser(createUserDto.getName(), createUserDto.getEmail(), createUserDto.getPassword(), createUserDto.getRole(), false)
+            return this.userManager.createUser(createUserDto.getName(), createUserDto.getEmail(), createUserDto.getPassword(), createUserDto.getRole())
                                    .getResource();
         }
         catch (final UserExistsException e) {

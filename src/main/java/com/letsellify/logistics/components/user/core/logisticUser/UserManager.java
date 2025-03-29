@@ -73,21 +73,20 @@ public class UserManager {
     }
 
     @Transactional
-    LogisticsAppUser createUser(final @NonNull String name, final @NonNull  String email, final @NonNull  String password, final LogisticAppRole userRole, final boolean enabled) throws UserExistsException, UserUnAuthorizedException, UserNotFoundException, UnableToCreateVerificationCodeException {
-        if (this.repository.existsByEmail(email)) {
-            throw new UserExistsException("User with email " + email + " already exists");
-        }
+    LogisticsAppUser createUser(final @NonNull String name, final @NonNull  String email, final @NonNull  String password, final LogisticAppRole userRole) throws UserExistsException, UserUnAuthorizedException, UserNotFoundException, UnableToCreateVerificationCodeException {
         if (userRole.equals(LogisticAppRole.ADMIN)) {
             throw new UserUnAuthorizedException("ADMIN user cannot be created");
         }
-        final UserEntity entity = UserEntity.create(name, email, this.passwordEncoder.encode(password), userRole, enabled, DEFAULT_PROVIDER);
-        // send verificationCode
-        final LogisticsAppUser appUser = new LogisticsAppUser(entity);
-        if (!enabled) {
+        final UserEntity entity = UserEntity.create(name, email, this.passwordEncoder.encode(password), userRole, false, DEFAULT_PROVIDER);
+        try {
+            this.repository.save(entity);
+            final LogisticsAppUser appUser = new LogisticsAppUser(entity);
             this.eventPublisher.publishEvent(new UnverifiedUserCreatedEvent(appUser));
+            return appUser;
         }
-        this.repository.save(entity);
-        return appUser;
+        catch (final DataIntegrityViolationException e) {
+            throw new UserExistsException("User with email " + email + " already exists");
+        }
     }
 
 

@@ -152,7 +152,7 @@ public class SecurityConfiguration {
         return username -> {
             final LogisticsAppUser user;
             try {
-                user = SecurityConfiguration.this.userManager.getUserByEmail(username);
+                user = this.userManager.getUserByEmail(username);
             }
             catch (final UserNotFoundException e) {
                 throw new AuthenticationCredentialsNotFoundException(e.getMessage());
@@ -226,6 +226,4 @@ public class SecurityConfiguration {
         provider.setJwtAuthenticationConverter(this.jwtTokenToAuthentication);
         return provider;
     }
-
-
 }
