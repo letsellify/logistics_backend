@@ -73,11 +73,11 @@ public class UserManager {
     }
 
     @Transactional
-    LogisticsAppUser createUser(final @NonNull String name, final @NonNull  String email, final @NonNull  String password, final LogisticAppRole userRole) throws UserExistsException, UserUnAuthorizedException, UserNotFoundException, UnableToCreateVerificationCodeException {
+    LogisticsAppUser createUser(final @NonNull  String email, final @NonNull  String password, final LogisticAppRole userRole) throws UserExistsException, UserUnAuthorizedException, UserNotFoundException, UnableToCreateVerificationCodeException {
         if (userRole.equals(LogisticAppRole.ADMIN)) {
             throw new UserUnAuthorizedException("ADMIN user cannot be created");
         }
-        final UserEntity entity = UserEntity.create(name, email, this.passwordEncoder.encode(password), userRole, false, DEFAULT_PROVIDER);
+        final UserEntity entity = UserEntity.create(null, email, this.passwordEncoder.encode(password), userRole, false, DEFAULT_PROVIDER);
         try {
             this.repository.save(entity);
             final LogisticsAppUser appUser = new LogisticsAppUser(entity);

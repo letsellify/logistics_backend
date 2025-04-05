@@ -16,8 +16,6 @@ import lombok.Data;
 
 @Data
 public class CreateUserDto {
-    @NotNull
-    private String name;
     @NotBlank
     @Email
     private String email;

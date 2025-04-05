@@ -52,7 +52,6 @@ public class UserEntity extends Auditable {
     }
 
     public static UserEntity create(final String name, final String email, final String password, final LogisticAppRole role, final boolean enabled, final String provider) {
-        Objects.requireNonNull(name, "Name cannot be null");
         Objects.requireNonNull(email, "Email cannot be null");
         final UserEntity userEntity = new UserEntity();
         userEntity.id = UUID.randomUUID();
