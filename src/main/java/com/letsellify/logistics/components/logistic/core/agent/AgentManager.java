@@ -126,7 +126,7 @@ public class AgentManager {
     }
 
     @Transactional
-    void deleteKyc(final @NonNull String userEmail, final @NonNull String kycId) throws NoSuchAgentException, AgentApprovedException {
+    void deleteKyc(final @NonNull String userEmail, final @NonNull String kycId) throws NoSuchAgentException, AgentApprovedException, NoKycRecordFoundException {
         final AgentEntity entity = this.agentRepository.findByEmail(userEmail)
                                                                  .orElseThrow(() -> new NoSuchAgentException("No such agent with email " + userEmail + " found"));
         if (entity.isApprove()) {

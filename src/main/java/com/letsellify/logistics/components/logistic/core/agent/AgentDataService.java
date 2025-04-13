@@ -52,7 +52,7 @@ public class AgentDataService {
         try {
             this.agentManager.deleteKyc(authentication.getName(),kycIdentification);
         }
-        catch (final NoSuchAgentException e) {
+        catch (final NoSuchAgentException | NoKycRecordFoundException e) {
             throw new LogisticsResourceNotFoundException(e.getMessage());
         }
         catch (final AgentApprovedException e) {

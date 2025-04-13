@@ -52,7 +52,7 @@ public class DispatcherDataService {
         try {
             this.dispatcherManager.deleteKyc(authentication.getName(),kycIdentification);
         }
-        catch (final NoSuchDispatcherException e) {
+        catch (final NoSuchDispatcherException | NoKycRecordFoundException e) {
             throw new LogisticsResourceNotFoundException(e.getMessage());
         }
         catch (final DispatcherApprovedException e) {

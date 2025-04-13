@@ -141,15 +141,14 @@ public class DispatcherManager {
         return this.kycManager.uploadKyc(entity.getEmail(), LogisticAppRole.DISPATCHER, kycDocumentType, multipartFile);
     }
 
-    @Transactional
-    void deleteKyc(final @NonNull String userEmail, final @NonNull String kycId) throws NoSuchDispatcherException, DispatcherApprovedException {
+    @Transactional(readOnly = true)
+    void deleteKyc(final @NonNull String userEmail, final @NonNull String kycId) throws NoSuchDispatcherException, DispatcherApprovedException, NoKycRecordFoundException {
         final DispatcherEntity entity = this.dispatcherRepository.findByEmail(userEmail)
                                                                  .orElseThrow(() -> new NoSuchDispatcherException("No such dispatcher with email " + userEmail + " found"));
         if (entity.isApprove()) {
             throw new DispatcherApprovedException("Dispatcher with email " + userEmail + " all ready approved");
         }
         this.kycManager.deleteKyc(userEmail, kycId);
-
     }
 
     @Transactional

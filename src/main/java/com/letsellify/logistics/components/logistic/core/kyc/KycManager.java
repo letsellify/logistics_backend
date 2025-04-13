@@ -11,15 +11,14 @@ import com.letsellify.logistics.common.data.LogisticAppRole;
 import com.letsellify.logistics.components.fileStorage.core.FileStorageManager;
 import com.letsellify.logistics.components.fileStorage.core.data.StorageType;
 import com.letsellify.logistics.components.logistic.core.kyc.data.KycDocumentType;
-import com.letsellify.logistics.components.logistic.core.kyc.data.LogisticKycs;
 import com.letsellify.logistics.components.logistic.core.kyc.data.LogisticKycDocument;
+import com.letsellify.logistics.components.logistic.core.kyc.data.LogisticKycs;
 import com.letsellify.logistics.components.logistic.core.kyc.database.entity.KycEntity;
 import com.letsellify.logistics.components.logistic.core.kyc.database.entity.UserKycCollectionEntity;
 import com.letsellify.logistics.components.logistic.core.kyc.database.repository.KycRepository;
 import com.letsellify.logistics.components.logistic.core.kyc.database.repository.UserKycCollectionRepository;
 import com.letsellify.logistics.components.logistic.core.kyc.exception.NoKycRecordFoundException;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -103,9 +102,9 @@ public class KycManager {
 
 
     @Transactional
-    public void deleteKyc(final @NonNull String userEmail, final @NonNull String kycIdentifier) {
+    public void deleteKyc(final @NonNull String userEmail, final @NonNull String kycIdentifier) throws NoKycRecordFoundException {
         final KycEntity kycEntity = this.kycRepository.findById(kycIdentifier)
-                                                      .orElseThrow(EntityNotFoundException::new);
+                                                      .orElseThrow(() -> new NoKycRecordFoundException("No such kyc record exists"));
 
         final UserKycCollectionEntity userKycCollection = kycEntity.getUserKycCollection();
 
@@ -121,9 +120,9 @@ public class KycManager {
         this.fileStorageManager.deleteFile(kycEntity.getFilePath());
     }
 
-    public String viewKyc(final @NonNull String kycIdentifier) {
+    public String viewKyc(final @NonNull String kycIdentifier) throws NoKycRecordFoundException {
         final KycEntity kycEntity = this.kycRepository.findById(kycIdentifier)
-                                                      .orElseThrow(EntityNotFoundException::new);
+                                                      .orElseThrow(() -> new NoKycRecordFoundException("No such kyc record exists"));
         return this.fileStorageManager.generatePresignedUrl(kycEntity.getFilePath());
     }
 
