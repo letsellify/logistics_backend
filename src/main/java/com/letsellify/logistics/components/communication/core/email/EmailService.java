@@ -47,7 +47,7 @@ public class EmailService {
 
             helper.setTo(userEmail);
             helper.setSubject("Your Verification Code");
-            helper.setFrom("no-reply@letsellify.com");
+            helper.setFrom("Letsellify-Verification@letsellify.com");
 
             helper.setText("""
                 Hello,
