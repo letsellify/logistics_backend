@@ -33,7 +33,7 @@ public class UserDataService {
                                    .getResource();
         }
         catch (final UserExistsException e) {
-            throw new LogisticsConflictException("409", e);
+            throw new LogisticsConflictException("409",e);
         }
         catch (final UserUnAuthorizedException e) {
             throw new LogisticsBadRequestException(e.getMessage());

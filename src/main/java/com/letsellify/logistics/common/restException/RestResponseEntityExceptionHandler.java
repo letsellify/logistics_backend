@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -54,28 +55,34 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 
             return new ResponseEntity<>(errorResponse, hex.getHttpStatus());
         }
-        else if (ex instanceof BadCredentialsException || ex instanceof AuthenticationCredentialsNotFoundException || ex instanceof AuthenticationServiceException || ex instanceof DisabledException) {
+        else if (ex instanceof BadCredentialsException || ex instanceof AuthenticationCredentialsNotFoundException || ex instanceof AuthenticationServiceException || ex instanceof DisabledException || ex instanceof DataIntegrityViolationException) {
             final LogisticsErrorResponse errorResponse = new LogisticsErrorResponse();
             errorResponse.setMessage(ex.getMessage());
-            if (ex instanceof BadCredentialsException) {
-                errorResponse.setErrorCode("400");
-                return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
-            }
-            // eg user not found when daoAuthentication tries to authenticate
-            else if (ex instanceof AuthenticationServiceException) {
-                errorResponse.setErrorCode("401");
-                return new ResponseEntity<>(errorResponse,HttpStatus.UNAUTHORIZED);
-            }
+            switch (ex) {
+                case final BadCredentialsException badCredentialsException -> {
+                    errorResponse.setErrorCode("400");
+                    return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+                }
 
-            else if (ex instanceof  DisabledException) {
-                errorResponse.setErrorCode("403");
-                return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
-                
-            }
-            // eg from within when we dont find a user
-            else {
-                errorResponse.setErrorCode("404");
-                return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+                // eg user not found when daoAuthentication tries to authenticate
+                case final AuthenticationServiceException authenticationServiceException -> {
+                    errorResponse.setErrorCode("401");
+                    return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+                }
+                case final DisabledException disabledException -> {
+                    errorResponse.setErrorCode("403");
+                    return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+                }
+                case final DataIntegrityViolationException dataIntegrityViolationException -> {
+                    errorResponse.setErrorCode("409");
+                    return new ResponseEntity<>(errorResponse,HttpStatus.CONFLICT);
+                }
+
+                // eg from within when we dont find a user
+                default -> {
+                    errorResponse.setErrorCode("404");
+                    return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+                }
             }
 
         }
