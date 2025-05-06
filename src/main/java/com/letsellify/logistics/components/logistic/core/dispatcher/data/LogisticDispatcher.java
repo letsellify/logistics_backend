@@ -34,13 +34,14 @@ public record LogisticDispatcher(
 
     public LogisticDispatcher(final DispatcherEntity dispatcherEntity) {
         this(
-          dispatcherEntity.getName(),
+          dispatcherEntity.getPersonalInfo()
+                          .getName(),
           dispatcherEntity.getEmail(),
-          dispatcherEntity.getPersonalInfo().getWhatsAppPhone(),
-          dispatcherEntity.getPersonalInfo().getPhone(),
-          dispatcherEntity.getPersonalInfo().getState(),
-          dispatcherEntity.getPersonalInfo().getLga(),
-          dispatcherEntity.getPersonalInfo().getAddress()
+          dispatcherEntity.getContactInfo().getWhatsAppPhone(),
+          dispatcherEntity.getContactInfo().getPhone(),
+          dispatcherEntity.getPersonalInfo().getHomeState(),
+          dispatcherEntity.getPersonalInfo().getHomeLga(),
+          dispatcherEntity.getPersonalInfo().getHomeAddress()
         );
     }
 

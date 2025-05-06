@@ -145,7 +145,7 @@ public class LogisticRequestAggregate {
     @CommandHandler
     public void on(final LogisticInDispatcherPossessionCommand cmd) {
         if (this.status != LogisticsStatus.REQUESTED || this.dispatcher == null) {
-            throw new IllegalStateException("Invalid state, for the status of the request");
+            throw new IllegalStateException("Invalid homeState, for the status of the request");
         }
         apply(new InDispatcherPossessionEvent(
           this.requestId,

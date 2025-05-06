@@ -1,23 +1,23 @@
-package com.letsellify.logistics.components.logistic.core.dispatcher.rest.dto;
+package com.letsellify.logistics.components.logistic.core.agent.rest.dto;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.NotBlank;
 
 /**
  * @author AHMAD BUBA
- * Date:2/22/25
- * Time:21:31
+ * Date:5/3/25
+ * Time:18:04
  */
 
-public record DispatcherPersonalInfoDto(
-  @NotBlank(message = "Name cannot be empty.")
-  String name,
-
+public record StoreDetailDto(
   @NotBlank(message = "State cannot be empty.")
   String state,
 
   @NotBlank(message = "LGA cannot be empty.")
   String lga,
 
+  @JsonProperty("store_address")
   @NotBlank(message = "Address cannot be empty.")
   String address
 ) {}

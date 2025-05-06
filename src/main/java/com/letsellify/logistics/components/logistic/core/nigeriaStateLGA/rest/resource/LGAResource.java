@@ -12,6 +12,6 @@ import lombok.Data;
 
 @Data
 public class LGAResource {
-    @JsonProperty("lga")
+    @JsonProperty("homeLga")
     private String name;
 }

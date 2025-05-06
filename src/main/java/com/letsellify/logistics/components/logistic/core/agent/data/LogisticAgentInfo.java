@@ -28,13 +28,13 @@ public record LogisticAgentInfo(
     public LogisticAgentInfo(final AgentEntity entity, final Map<KycDocumentType,String> kycs) {
         this(
           entity.getEmail(),
-          entity.getName(),
+          entity.getPersonalInfo().getName(),
           entity.getKycId(),
-          entity.getPersonalInfo().getWhatsAppPhone(),
-          entity.getPersonalInfo().getPhone(),
-          entity.getPersonalInfo().getState(),
-          entity.getPersonalInfo().getLga(),
-          entity.getPersonalInfo().getAddress(),
+          entity.getContactInfo().getWhatsAppPhone(),
+          entity.getContactInfo().getPhone(),
+          entity.getPersonalInfo().getHomeState(),
+          entity.getPersonalInfo().getHomeLga(),
+          entity.getPersonalInfo().getHomeAddress(),
           kycs
         );
     }

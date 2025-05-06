@@ -1,25 +1,16 @@
 package com.letsellify.logistics.components.logistic.core.agent.rest.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 
 /**
  * @author AHMAD BUBA
- * Date:2/27/25
- * Time:11:30
+ * Date:5/3/25
+ * Time:18:02
  */
 
 public record AgentPersonalInfoDto(
-  @NotBlank(message = "WhatsApp phone number cannot be empty.")
-  @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Invalid WhatsApp phone number format.")
-  @Size(min = 10, max = 15, message = "WhatsApp phone number must be between 10 and 15 digits.")
-  String whatsAppPhone,
-
-  @NotBlank(message = "Phone number cannot be empty.")
-  @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Invalid phone number format.")
-  @Size(min = 10, max = 15, message = "Phone number must be between 10 and 15 digits.")
-  String phone,
+  @NotBlank(message = "Name cannot be empty.")
+  String name,
 
   @NotBlank(message = "State cannot be empty.")
   String state,
@@ -30,4 +21,3 @@ public record AgentPersonalInfoDto(
   @NotBlank(message = "Address cannot be empty.")
   String address
 ) {}
-

@@ -12,12 +12,14 @@ import com.letsellify.logistics.common.restException.LogisticsResourceNotFoundEx
 import com.letsellify.logistics.components.logistic.core.agent.exception.AgentApprovedException;
 import com.letsellify.logistics.components.logistic.core.agent.exception.NoSuchAgentException;
 import com.letsellify.logistics.components.logistic.core.agent.exception.UnapprovedAgentException;
-import com.letsellify.logistics.components.logistic.core.agent.rest.dto.AgentPersonalInfoDto;
+import com.letsellify.logistics.components.logistic.core.agent.rest.dto.AgentInfoDto;
 import com.letsellify.logistics.components.logistic.core.agent.rest.resource.AgentPersonalInfoResource;
 import com.letsellify.logistics.components.logistic.core.agent.rest.resource.LogisticAgentInfoResource;
 import com.letsellify.logistics.components.logistic.core.agent.rest.resource.LogisticAgentResource;
 import com.letsellify.logistics.components.logistic.core.kyc.data.KycDocumentType;
 import com.letsellify.logistics.components.logistic.core.kyc.exception.NoKycRecordFoundException;
+import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.IllegalLGAException;
+import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.NoSuchStateException;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -60,13 +62,16 @@ public class AgentDataService {
         }
     }
 
-    public AgentPersonalInfoResource setPersonalInfo(final @NonNull Authentication authentication, final @NonNull AgentPersonalInfoDto personalInfoDto) {
+    public AgentPersonalInfoResource setInfo(final @NonNull Authentication authentication, final @NonNull AgentInfoDto personalInfoDto) {
         try {
-            return this.agentManager.setPersonalInfo(authentication.getName(), personalInfoDto.whatsAppPhone(), personalInfoDto.phone(), personalInfoDto.state(), personalInfoDto.lga(), personalInfoDto.address())
+            return this.agentManager.setInfo(authentication.getName(), personalInfoDto.personalInfo(), personalInfoDto.contactInfo(), personalInfoDto.storeDetail())
                                          .getResource();
         }
         catch (final NoSuchAgentException e) {
             throw new LogisticsResourceNotFoundException(e.getMessage());
+        }
+        catch (final NoSuchStateException | IllegalLGAException e) {
+            throw new LogisticsBadRequestException(e.getMessage());
         }
     }
 

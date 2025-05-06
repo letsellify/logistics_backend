@@ -10,9 +10,14 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.Setter;
 
 /**
  * @author AHMAD BUBA
@@ -27,11 +32,16 @@ import lombok.NonNull;
 public class DispatcherEntity extends Auditable {
     @Id
     private UUID id;
-    private String name;
+
     @NaturalId
     @Column(unique = true)
     private String email;
+    @Setter
     private PersonalInfoEmbeddable personalInfo;
+    @Setter
+    private ContactInfoEmbeddable contactInfo;
+    @Setter
+    private DispatchDetailEmbeddable dispatchDetail;
     private UUID kycId;
     private boolean currentlyAcceptingDelivery;
     private boolean approve;
@@ -45,7 +55,7 @@ public class DispatcherEntity extends Auditable {
         final DispatcherEntity dispatcherEntity = new DispatcherEntity();
         dispatcherEntity.id = UUID.randomUUID();
         dispatcherEntity.email = email;
-        dispatcherEntity.name = name;
+        dispatcherEntity.personalInfo = new PersonalInfoEmbeddable(name);
         dispatcherEntity.approve = false;
         dispatcherEntity.currentlyAcceptingDelivery = false;
         return dispatcherEntity;
@@ -57,29 +67,40 @@ public class DispatcherEntity extends Auditable {
 
 
     @Embeddable
-    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    @Getter
     public static class PersonalInfoEmbeddable {
-        private String whatsAppPhone;
-        private String phone;
-        private String state;
-        private String lga;
-        private String address;
+        private String name;
+        private String homeState;
+        private String homeLga;
+        private String homeAddress;
 
-
-        // Constructor with parameters
-        public PersonalInfoEmbeddable(final String whatsAppPhone, final String phone, final String state, final String lga, final String address) {
-            this.whatsAppPhone = whatsAppPhone;
-            this.phone = phone;
-            this.state = state;
-            this.lga = lga;
-            this.address = address;
-        }
-
-        // No-arg constructor for JPA (required)
-        protected PersonalInfoEmbeddable() {
-            // JPA requires a no-arg constructor, but it can be protected
+        public PersonalInfoEmbeddable(final String name) {
+            this.name = name;
         }
 
     }
 
+    @Embeddable
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    @Getter
+    public static class ContactInfoEmbeddable {
+        private String whatsAppPhone;
+        private String phone;
+    }
+
+    @Embeddable
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    @Getter
+    public static class DispatchDetailEmbeddable {
+        private String identificationNumber;
+        private String stateOfDispatch;
+        private String stateOfLga;
+    }
 }

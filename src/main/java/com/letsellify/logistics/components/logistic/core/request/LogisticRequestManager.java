@@ -212,7 +212,7 @@ public class LogisticRequestManager {
             // send an email to the vendor here saying due to insufficient funds
             // the order cannot go through
             // possibly accountManager should publish an event with the current balance
-            // as the means an inconsistent state
+            // as the means an inconsistent homeState
             // vendor module listens and updates to the current balance
             catch (final InsufficientFundsException e) {
                 throw new RuntimeException(e);

@@ -16,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.letsellify.logistics.components.logistic.core.dispatcher.DispatcherDataService;
-import com.letsellify.logistics.components.logistic.core.dispatcher.rest.dto.DispatcherPersonalInfoDto;
+import com.letsellify.logistics.components.logistic.core.dispatcher.rest.dto.DispatcherInfoDto;
 import com.letsellify.logistics.components.logistic.core.dispatcher.rest.resource.DispatcherPersonalInfoResource;
 import com.letsellify.logistics.components.logistic.core.dispatcher.rest.resource.LogisticDispatcherInfoResource;
 import com.letsellify.logistics.components.logistic.core.dispatcher.rest.resource.LogisticDispatcherResource;
@@ -58,8 +58,8 @@ public class DispatcherController {
     }
 
     @PostMapping("personal-info")
-    public DispatcherPersonalInfoResource setPersonalInfo(final @NonNull Authentication authentication, final @Valid @RequestBody DispatcherPersonalInfoDto personalInfoDto) {
-        return this.dispatcherDataService.setPersonalInfo(authentication, personalInfoDto);
+    public DispatcherPersonalInfoResource setPersonalInfo(final @NonNull Authentication authentication, final @Valid @RequestBody DispatcherInfoDto infoDto) {
+        return this.dispatcherDataService.setPersonalInfo(authentication, infoDto);
     }
 
     @PostMapping("confirm-info")

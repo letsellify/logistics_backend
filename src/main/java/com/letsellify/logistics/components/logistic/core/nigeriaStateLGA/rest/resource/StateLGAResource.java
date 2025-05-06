@@ -14,8 +14,8 @@ import lombok.Data;
 
 @Data
 public class StateLGAResource {
-    @JsonProperty("state")
+    @JsonProperty("homeState")
     private String name;
-    @JsonProperty("lga's")
+    @JsonProperty("homeLga's")
     private List<String> lgas;
 }

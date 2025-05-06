@@ -13,6 +13,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.letsellify.logistics.common.data.LogisticAppRole;
+import com.letsellify.logistics.components.logistic.core.agent.event.AgentNameUpdateEvent;
+import com.letsellify.logistics.components.logistic.core.dispatcher.event.DispatcherNameUpdateEvent;
+import com.letsellify.logistics.components.logistic.core.vendor.event.VendorNameUpdateEvent;
 import com.letsellify.logistics.components.user.core.logisticUser.data.LogisticsAppUser;
 import com.letsellify.logistics.components.user.core.logisticUser.data.LogisticsAppUsers;
 import com.letsellify.logistics.components.user.core.logisticUser.database.entity.UserEntity;
@@ -72,6 +75,36 @@ public class UserManager {
         this.repository.save(entity);
     }
 
+    @Async
+    @EventListener
+    @Transactional
+    public void on(final AgentNameUpdateEvent agentNameUpdateEvent) throws UserNotFoundException {
+        final UserEntity entity = this.repository.findByEmailAndRole(agentNameUpdateEvent.getAgentEmail(), LogisticAppRole.AGENT)
+                                                 .orElseThrow(() -> new UserNotFoundException("User with email "+ agentNameUpdateEvent.getAgentEmail() + " and role" + LogisticAppRole.AGENT + " not found."));
+        entity.updateName(agentNameUpdateEvent.getAgentNameAfterUpdate());
+        this.repository.save(entity);
+    }
+
+    @Async
+    @EventListener
+    @Transactional
+    public void on(final VendorNameUpdateEvent vendorNameUpdateEvent) throws UserNotFoundException {
+        final UserEntity entity = this.repository.findByEmailAndRole(vendorNameUpdateEvent.getVendorEmail(), LogisticAppRole.VENDOR)
+                                                 .orElseThrow(() -> new UserNotFoundException("User with email "+ vendorNameUpdateEvent.getVendorEmail() + " and role" + LogisticAppRole.VENDOR + " not found."));
+        entity.updateName(vendorNameUpdateEvent.getVendorNameAfterUpdate());
+        this.repository.save(entity);
+    }
+
+    @Async
+    @EventListener
+    @Transactional
+    public void on(final DispatcherNameUpdateEvent dispatcherNameUpdateEvent) throws UserNotFoundException {
+        final UserEntity entity = this.repository.findByEmailAndRole(dispatcherNameUpdateEvent.getDispatcherEmail(), LogisticAppRole.DISPATCHER)
+                                                 .orElseThrow(() -> new UserNotFoundException("User with email "+ dispatcherNameUpdateEvent.getDispatcherEmail() + " and role" + LogisticAppRole.DISPATCHER + " not found."));
+        entity.updateName(dispatcherNameUpdateEvent.getDispatcherNameAfterUpdate());
+        this.repository.save(entity);
+    }
+
     @Transactional
     LogisticsAppUser createUser(final @NonNull  String email, final @NonNull  String password, final LogisticAppRole userRole) throws UserExistsException, UserUnAuthorizedException, UserNotFoundException, UnableToCreateVerificationCodeException {
         if (userRole.equals(LogisticAppRole.ADMIN)) {
@@ -104,7 +137,7 @@ public class UserManager {
     }
 
     @Transactional
-    public void assignRoleToUser(final @NonNull String username, final LogisticAppRole logisticsAppRole) throws UserNotFoundException {
+    public void assignRoleForAuthUser(final @NonNull String username, final LogisticAppRole logisticsAppRole) throws UserNotFoundException {
         final UserEntity entity = this.repository.findByEmail(username)
                                                  .orElseThrow(() -> new UserNotFoundException("User with email " + username + " not found."));
         entity.setRole(logisticsAppRole);

@@ -19,4 +19,6 @@ import com.letsellify.logistics.components.logistic.core.dispatcher.database.ent
 public interface DispatcherRepository extends JpaRepository<DispatcherEntity, UUID> {
     Optional<DispatcherEntity> findByEmail(String email);
     List<DispatcherEntity> findByCurrentlyAcceptingDeliveryAndApprove(boolean currentlyAcceptingDelivery, boolean approve);
+    boolean existsByEmail(String dispatcherEmail);
+
 }

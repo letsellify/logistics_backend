@@ -17,20 +17,28 @@ import org.springframework.web.multipart.MultipartFile;
 import com.letsellify.logistics.common.data.LogisticAppRole;
 import com.letsellify.logistics.components.communication.core.email.EmailService;
 import com.letsellify.logistics.components.fileStorage.core.FileStorageManager;
-import com.letsellify.logistics.components.logistic.core.agent.data.AgentPersonalInfo;
+import com.letsellify.logistics.components.logistic.core.agent.data.AgentInfo;
 import com.letsellify.logistics.components.logistic.core.agent.data.LogisticAgent;
 import com.letsellify.logistics.components.logistic.core.agent.data.LogisticAgentInfo;
 import com.letsellify.logistics.components.logistic.core.agent.database.entity.AgentEntity;
 import com.letsellify.logistics.components.logistic.core.agent.database.repository.AgentRepository;
 import com.letsellify.logistics.components.logistic.core.agent.event.AgentAwaitApproval;
+import com.letsellify.logistics.components.logistic.core.agent.event.AgentNameUpdateEvent;
 import com.letsellify.logistics.components.logistic.core.agent.exception.AgentApprovedException;
+import com.letsellify.logistics.components.logistic.core.agent.exception.AgentExistsException;
 import com.letsellify.logistics.components.logistic.core.agent.exception.NoSuchAgentException;
 import com.letsellify.logistics.components.logistic.core.agent.exception.UnapprovedAgentException;
+import com.letsellify.logistics.components.logistic.core.agent.rest.dto.AgentContactInfoDto;
+import com.letsellify.logistics.components.logistic.core.agent.rest.dto.AgentPersonalInfoDto;
+import com.letsellify.logistics.components.logistic.core.agent.rest.dto.StoreDetailDto;
 import com.letsellify.logistics.components.logistic.core.kyc.KycManager;
 import com.letsellify.logistics.components.logistic.core.kyc.data.KycDocumentType;
 import com.letsellify.logistics.components.logistic.core.kyc.data.LogisticKycDocument;
 import com.letsellify.logistics.components.logistic.core.kyc.data.LogisticKycs;
 import com.letsellify.logistics.components.logistic.core.kyc.exception.NoKycRecordFoundException;
+import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.StateLGAManager;
+import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.IllegalLGAException;
+import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.NoSuchStateException;
 import com.letsellify.logistics.components.logistic.core.request.event.LogisticRequestBroadcast;
 import com.letsellify.logistics.components.user.core.logisticUser.event.UserOfRoleAgentCreated;
 
@@ -50,6 +58,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AgentManager {
     private final AgentRepository agentRepository;
     private final KycManager kycManager;
+    private final StateLGAManager stateLGAManager;
     private final ApplicationEventPublisher eventPublisher;
     private final FileStorageManager fileStorageManager;
     private final EmailService emailService;
@@ -58,10 +67,15 @@ public class AgentManager {
     @Async
     @EventListener
     @Transactional
-    public void on(final UserOfRoleAgentCreated event) {
+    public void on(final UserOfRoleAgentCreated event) throws AgentExistsException {
         log.info("Handling AgentCreatedEvent for email: {}", event.getUserEmail());
         // Agent-specific logic here, e.g., assigning delivery zones
-        final AgentEntity entity = new AgentEntity(event.getUserEmail(),event.getName());
+        final String agentEmail = event.getUserEmail();
+        final String agentName = event.getName();
+        if (this.agentRepository.existsByEmail(agentEmail)) {
+            throw new AgentExistsException("Agent with email " + agentEmail + " all ready exists");
+        }
+        final AgentEntity entity = new AgentEntity(agentEmail,agentName);
         this.agentRepository.save(entity);
     }
 
@@ -137,13 +151,30 @@ public class AgentManager {
     }
 
     @Transactional
-    AgentPersonalInfo setPersonalInfo(final @NonNull String email, final String whatsAppPhone, final @NonNull String phone, final @NonNull String state, final @NonNull String lga, final @NonNull String address) throws NoSuchAgentException {
+    public AgentInfo setInfo(
+      final @NonNull String email,
+      final @NonNull AgentPersonalInfoDto personalInfoDto,
+      final @NonNull AgentContactInfoDto contactInfoDto,
+      final @NonNull StoreDetailDto storeDetailDto
+    ) throws NoSuchAgentException, NoSuchStateException, IllegalLGAException {
         final AgentEntity entity = this.agentRepository.findByEmail(email)
                                                                  .orElseThrow(() -> new NoSuchAgentException("No such agent with email " + email + " found"));
-        final AgentEntity.PersonalInfoEmbeddable personalInfoEmbeddable = new AgentEntity.PersonalInfoEmbeddable(whatsAppPhone, phone, state, lga, address);
+
+        final String agentNameBeforeUpdate = entity.getPersonalInfo().getName();
+        this.stateLGAManager.validateStateLga(personalInfoDto.state(),personalInfoDto.lga());
+        this.stateLGAManager.validateStateLga(storeDetailDto.state(),storeDetailDto.lga());
+        final AgentEntity.PersonalInfoEmbeddable personalInfoEmbeddable = new AgentEntity.PersonalInfoEmbeddable(personalInfoDto.name(), personalInfoDto.state(), personalInfoDto.lga(), personalInfoDto.address());
+        final AgentEntity.ContactInfoEmbeddable contactInfoEmbeddable = new AgentEntity.ContactInfoEmbeddable(contactInfoDto.whatsAppPhone(),contactInfoDto.phone());
+        final AgentEntity.StoreDetailEmbeddable storeDetailEmbeddable = new AgentEntity.StoreDetailEmbeddable(storeDetailDto.state(),storeDetailDto.lga(), storeDetailDto.address());
         entity.setPersonalInfo(personalInfoEmbeddable);
+        entity.setContactInfo(contactInfoEmbeddable);
+        entity.setStoreDetail(storeDetailEmbeddable);
+        final String agentNameAfterUpdate = entity.getPersonalInfo().getName();
+        if (personalInfoDto.name() != null && !agentNameBeforeUpdate.equals(entity.getPersonalInfo().getName())) {
+            this.eventPublisher.publishEvent(new AgentNameUpdateEvent(entity.getEmail(),agentNameBeforeUpdate, agentNameAfterUpdate));
+        }
         this.agentRepository.save(entity);
-        return new AgentPersonalInfo(personalInfoEmbeddable);
+        return new AgentInfo(entity);
     }
 
     @Transactional

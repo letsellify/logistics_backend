@@ -4,20 +4,15 @@ import jakarta.validation.constraints.NotBlank;
 
 /**
  * @author AHMAD BUBA
- * Date:2/22/25
- * Time:21:31
+ * Date:5/3/25
+ * Time:21:36
  */
 
-public record DispatcherPersonalInfoDto(
-  @NotBlank(message = "Name cannot be empty.")
-  String name,
-
+public record DispatchDetailDto(
+  @NotBlank(message = "Please provide plate number of dispatch")
+  String identificationNumber,
   @NotBlank(message = "State cannot be empty.")
   String state,
-
   @NotBlank(message = "LGA cannot be empty.")
-  String lga,
-
-  @NotBlank(message = "Address cannot be empty.")
-  String address
+  String lga
 ) {}

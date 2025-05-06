@@ -29,12 +29,16 @@ import lombok.Setter;
 public class AgentEntity extends Auditable {
     @Id
     private UUID id;
-    private String name;
+
     @NaturalId
     @Column(unique = true)
     private String email;
     @Setter
     private PersonalInfoEmbeddable personalInfo;
+    @Setter
+    private ContactInfoEmbeddable contactInfo;
+    @Setter
+    private StoreDetailEmbeddable storeDetail;
     @Setter
     private UUID kycId;
     @Setter
@@ -45,7 +49,7 @@ public class AgentEntity extends Auditable {
         super();
         this.id = UUID.randomUUID();
         this.email = email;
-        this.name = name;
+        this.personalInfo = new PersonalInfoEmbeddable(name);
         this.currentlyAcceptingStorage = false;
         this.approve = false;
     }
@@ -61,10 +65,35 @@ public class AgentEntity extends Auditable {
     @Builder
     @Getter
     public static class PersonalInfoEmbeddable {
+        private String name;
+        private String homeState;
+        private String homeLga;
+        private String homeAddress;
+
+        public PersonalInfoEmbeddable(final String name) {
+            this.name = name;
+        }
+
+    }
+
+    @Embeddable
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    @Getter
+    public static class ContactInfoEmbeddable {
         private String whatsAppPhone;
         private String phone;
-        private String state;
-        private String lga;
-        private String address;
+    }
+
+    @Embeddable
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    @Getter
+    public static class StoreDetailEmbeddable {
+        private String storeState;
+        private String storeLga;
+        private String storeAddress;
     }
 }

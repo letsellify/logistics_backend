@@ -3,14 +3,14 @@
 -- GRANT ALL PRIVILEGES ON DATABASE logistics_db TO letsellify;
 
 
--- CREATE TABLE state (
+-- CREATE TABLE homeState (
 --                        id BIGSERIAL PRIMARY KEY,
 --                        name VARCHAR(255) NOT NULL UNIQUE
 -- );
 --
--- CREATE TABLE lga (
+-- CREATE TABLE homeLga (
 --                      id BIGSERIAL PRIMARY KEY,
 --                      name VARCHAR(255) NOT NULL,
 --                      state_id BIGINT NOT NULL,
---                      FOREIGN KEY (state_id) REFERENCES state (id)
+--                      FOREIGN KEY (state_id) REFERENCES homeState (id)
 -- );

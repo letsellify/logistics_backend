@@ -35,13 +35,14 @@ public class LogisticAgent {
   private String address;
 
     public LogisticAgent(final AgentEntity agentEntity) {
-          this.name = agentEntity.getName();
+          this.name = agentEntity.getPersonalInfo()
+                                 .getName();
           this.email = agentEntity.getEmail();
-          this.whatsAppPhone = agentEntity.getPersonalInfo().getWhatsAppPhone();
-          this.phone = agentEntity.getPersonalInfo().getPhone();
-          this.state = agentEntity.getPersonalInfo().getState();
-          this.lga = agentEntity.getPersonalInfo().getLga();
-          this.address = agentEntity.getPersonalInfo().getAddress();
+          this.whatsAppPhone = agentEntity.getContactInfo().getWhatsAppPhone();
+          this.phone = agentEntity.getContactInfo().getPhone();
+          this.state = agentEntity.getPersonalInfo().getHomeState();
+          this.lga = agentEntity.getPersonalInfo().getHomeLga();
+          this.address = agentEntity.getPersonalInfo().getHomeAddress();
     }
 
     public LogisticAgentResource getResource() {

@@ -12,6 +12,6 @@ import lombok.Data;
 
 @Data
 public class StateResource {
-    @JsonProperty("state")
+    @JsonProperty("homeState")
     private String name;
 }

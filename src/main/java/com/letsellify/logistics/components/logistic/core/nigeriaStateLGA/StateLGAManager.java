@@ -75,26 +75,30 @@ public class StateLGAManager implements CommandLineRunner {
     }
 
     public void validateStateAndLgaForLogistics(final @NonNull String currentState, final @NonNull String currentLga, final @NonNull String shippingState, final @NonNull String shippingLga) throws NoSuchStateException, IllegalLGAException {
-        // Validate current state and LGA using cache
+        // Validate current homeState and LGA using cache
         this.validateStateAndLgaFromCache(currentState, currentLga);
 
-        // Validate shipping state and LGA using cache
+        // Validate shipping homeState and LGA using cache
         this.validateStateAndLgaFromCache(shippingState, shippingLga);
+    }
+
+    public void validateStateLga(final @NonNull String state, final @NonNull String lga) throws NoSuchStateException, IllegalLGAException {
+        this.validateStateAndLgaFromCache(state,lga);
     }
 
 
     private void validateStateAndLgaFromCache(final @NonNull String state, final @NonNull String lga) throws NoSuchStateException, IllegalLGAException {
-        // Check if the state exists in cache (case-insensitive)
+        // Check if the homeState exists in cache (case-insensitive)
         final Set<String> lgas = this.stateLgaCache.get(state);
         log.info("State requested, {}", state);
-        log.info("lGAs of state requested, {}", lgas.toString());
+        log.info("lGAs of homeState requested, {}", lgas.toString());
         if (lgas == null) {
-            throw new NoSuchStateException("No such state exists: " + state);
+            throw new NoSuchStateException("No such homeState exists: " + state);
         }
 
-        // Check if the LGA belongs to the state
+        // Check if the LGA belongs to the homeState
         if (!lgas.contains(lga)) {
-            throw new IllegalLGAException("LGA '" + lga + "' does not belong to state '" + state + "'.");
+            throw new IllegalLGAException("LGA '" + lga + "' does not belong to homeState '" + state + "'.");
         }
     }
 
@@ -109,7 +113,7 @@ public class StateLGAManager implements CommandLineRunner {
     public NigerianStateLGA getStateLGA(final @NonNull String stateName) throws NoSuchStateException {
         final Set<String> lgas = this.stateLgaCache.get(stateName);
         if (lgas == null) {
-            throw new NoSuchStateException("No such state exists: " + stateName);
+            throw new NoSuchStateException("No such homeState exists: " + stateName);
         }
         return new NigerianStateLGA(stateName, lgas);
     }
@@ -141,10 +145,10 @@ public class StateLGAManager implements CommandLineRunner {
     private void preloadCache() {
         log.info("Preloading from cache");
         this.stateRepository.findAll().forEach(state -> {
-            log.info("the current state: {}", state.getName());
+            log.info("the current homeState: {}", state.getName());
             final Set<String> lgaSet = this.lgaRepository.findByState(state).stream()
                                                          .map(lga -> {
-                                                             log.info("the lga: {}", lga.getName());
+                                                             log.info("the homeLga: {}", lga.getName());
                                                              return lga.getName();
                                                          })
                                                          .collect(Collectors.toSet());

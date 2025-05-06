@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import com.letsellify.logistics.common.data.LogisticAppRole;
 import com.letsellify.logistics.components.user.core.logisticUser.database.entity.UserEntity;
 
 /**
@@ -19,4 +20,6 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
     Optional<UserEntity> findByEmail(String email);
     boolean existsByEmail(String email);
     void deleteByEmail(String email);
+    Optional<UserEntity>findByEmailAndRole(String agentEmail, LogisticAppRole logisticAppRole);
+
 }

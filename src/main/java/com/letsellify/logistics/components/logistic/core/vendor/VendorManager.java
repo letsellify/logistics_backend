@@ -57,19 +57,20 @@ public class VendorManager {
 
     @EventListener
     public void handleUserOfRoleVendorCreation(final UserOfRoleVendorCreated event) throws VendorExistsException {
-        final String vendorEmail = event.getUserEmail();
-        log.info("Handling VendorCreatedEvent for email: {}", vendorEmail);
+        log.info("Handling VendorCreatedEvent for email: {}", event.getUserEmail() );
         // Vendor-specific logic here, e.g., notifying the vendor
+        final String vendorEmail = event.getUserEmail();
+        final String vendorName = event.getName();
         if (this.vendorRepository.existsByEmail(vendorEmail)) {
             throw new VendorExistsException("Vendor with email " + vendorEmail + " all ready exists");
         }
-        final VendorEntity entity = VendorEntity.getInstance(vendorEmail);
+        final VendorEntity entity = VendorEntity.getInstance(vendorEmail, vendorName);
         this.vendorRepository.save(entity);
         log.info("Vendor Created for email: {}", entity.getEmail());
     }
 
     // this exception is sensitve in this context
-    // might mean that vendor changed email or something(inconsistent db state)
+    // might mean that vendor changed email or something(inconsistent db homeState)
     // therefore in prod this exception should result in slack or email notification to admin
     @EventListener
     public void handleAccountTopUp(final VendorTopUpAccountEvent event) throws VendorNotFoundException {

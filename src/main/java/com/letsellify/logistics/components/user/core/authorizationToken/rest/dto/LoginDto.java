@@ -14,7 +14,7 @@ import lombok.Data;
 @Data
 public class LoginDto {
     @NotBlank
-    @Email(message = "Invalid mail address")
+    @Email(message = "Invalid mail homeAddress")
     private String email;
     @NotBlank
     @Size(min = 6, message = "Invalid Password")

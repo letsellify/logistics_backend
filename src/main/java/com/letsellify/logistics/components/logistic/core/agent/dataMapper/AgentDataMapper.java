@@ -3,7 +3,7 @@ package com.letsellify.logistics.components.logistic.core.agent.dataMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-import com.letsellify.logistics.components.logistic.core.agent.data.AgentPersonalInfo;
+import com.letsellify.logistics.components.logistic.core.agent.data.AgentInfo;
 import com.letsellify.logistics.components.logistic.core.agent.data.LogisticAgent;
 import com.letsellify.logistics.components.logistic.core.agent.data.LogisticAgentInfo;
 import com.letsellify.logistics.components.logistic.core.agent.rest.resource.AgentPersonalInfoResource;
@@ -24,6 +24,6 @@ public interface AgentDataMapper {
 
     LogisticAgentInfoResource toResource(LogisticAgentInfo data);
 
-    AgentPersonalInfoResource toResource(AgentPersonalInfo data);
+    AgentPersonalInfoResource toResource(AgentInfo data);
 
 }

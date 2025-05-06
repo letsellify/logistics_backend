@@ -12,12 +12,14 @@ import com.letsellify.logistics.common.restException.LogisticsResourceNotFoundEx
 import com.letsellify.logistics.components.logistic.core.dispatcher.exception.DispatcherApprovedException;
 import com.letsellify.logistics.components.logistic.core.dispatcher.exception.NoSuchDispatcherException;
 import com.letsellify.logistics.components.logistic.core.dispatcher.exception.UnapprovedDispatcherException;
-import com.letsellify.logistics.components.logistic.core.dispatcher.rest.dto.DispatcherPersonalInfoDto;
+import com.letsellify.logistics.components.logistic.core.dispatcher.rest.dto.DispatcherInfoDto;
+import com.letsellify.logistics.components.logistic.core.dispatcher.rest.resource.DispatcherPersonalInfoResource;
 import com.letsellify.logistics.components.logistic.core.dispatcher.rest.resource.LogisticDispatcherInfoResource;
 import com.letsellify.logistics.components.logistic.core.dispatcher.rest.resource.LogisticDispatcherResource;
-import com.letsellify.logistics.components.logistic.core.dispatcher.rest.resource.DispatcherPersonalInfoResource;
 import com.letsellify.logistics.components.logistic.core.kyc.data.KycDocumentType;
 import com.letsellify.logistics.components.logistic.core.kyc.exception.NoKycRecordFoundException;
+import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.IllegalLGAException;
+import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.NoSuchStateException;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -60,13 +62,16 @@ public class DispatcherDataService {
         }
     }
 
-    public DispatcherPersonalInfoResource setPersonalInfo(final @NonNull Authentication authentication, final @NonNull DispatcherPersonalInfoDto personalInfoDto) {
+    public DispatcherPersonalInfoResource setPersonalInfo(final @NonNull Authentication authentication, final @NonNull DispatcherInfoDto infoDto) {
         try {
-            return this.dispatcherManager.setPersonalInfo(authentication.getName(), personalInfoDto.whatsAppPhone(), personalInfoDto.phone(), personalInfoDto.state(), personalInfoDto.lga(), personalInfoDto.address())
+            return this.dispatcherManager.setInfo(authentication.getName(), infoDto.personalInfo(), infoDto.contactInfo(), infoDto.dispatchDetail())
                      .getResource();
         }
         catch (final NoSuchDispatcherException e) {
             throw new LogisticsResourceNotFoundException(e.getMessage());
+        }
+        catch (final NoSuchStateException | IllegalLGAException e) {
+            throw new LogisticsBadRequestException(e.getMessage());
         }
     }
 

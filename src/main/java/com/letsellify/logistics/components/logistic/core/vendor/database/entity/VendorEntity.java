@@ -18,7 +18,7 @@ import lombok.EqualsAndHashCode;
 
 @Entity
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 public class VendorEntity extends Auditable {
     @Id
     private UUID id;
@@ -32,10 +32,11 @@ public class VendorEntity extends Auditable {
         super();
     }
 
-    public static VendorEntity getInstance(final String email) {
+    public static VendorEntity getInstance(final String email, final String name) {
         final VendorEntity entity = new VendorEntity();
         entity.id = UUID.randomUUID();
         entity.email = email;
+        entity.vendorName = name;
         entity.currentAccountBalance = BigDecimal.ZERO;
         return entity;
     }

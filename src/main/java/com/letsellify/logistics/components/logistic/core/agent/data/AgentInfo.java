@@ -10,7 +10,7 @@ import com.letsellify.logistics.components.logistic.core.agent.rest.resource.Age
  * Time:13:46
  */
 
-public record AgentPersonalInfo(
+public record AgentInfo(
   String whatsAppPhone,
   String phone,
   String state,
@@ -18,13 +18,13 @@ public record AgentPersonalInfo(
   String address
 ) {
 
-    public AgentPersonalInfo(final AgentEntity.PersonalInfoEmbeddable personalInfoEmbeddable) {
+    public AgentInfo(final AgentEntity agentEntity) {
         this(
-          personalInfoEmbeddable.getWhatsAppPhone(),
-          personalInfoEmbeddable.getPhone(),
-          personalInfoEmbeddable.getState(),
-          personalInfoEmbeddable.getLga(),
-          personalInfoEmbeddable.getAddress()
+          agentEntity.getContactInfo().getWhatsAppPhone(),
+          agentEntity.getContactInfo().getPhone(),
+          agentEntity.getPersonalInfo().getHomeState(),
+          agentEntity.getPersonalInfo().getHomeLga(),
+          agentEntity.getPersonalInfo().getHomeAddress()
         );
     }
 

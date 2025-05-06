@@ -16,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.letsellify.logistics.components.logistic.core.agent.AgentDataService;
-import com.letsellify.logistics.components.logistic.core.agent.rest.dto.AgentPersonalInfoDto;
+import com.letsellify.logistics.components.logistic.core.agent.rest.dto.AgentInfoDto;
 import com.letsellify.logistics.components.logistic.core.agent.rest.resource.AgentPersonalInfoResource;
 import com.letsellify.logistics.components.logistic.core.agent.rest.resource.LogisticAgentInfoResource;
 import com.letsellify.logistics.components.logistic.core.agent.rest.resource.LogisticAgentResource;
@@ -58,8 +58,8 @@ public class AgentController {
     }
 
     @PostMapping("personal-info")
-    public AgentPersonalInfoResource setPersonalInfo(final @NonNull Authentication authentication, final @Valid @RequestBody AgentPersonalInfoDto personalInfoDto) {
-        return this.agentDataService.setPersonalInfo(authentication, personalInfoDto);
+    public AgentPersonalInfoResource setPersonalInfo(final @NonNull Authentication authentication, final @Valid @RequestBody AgentInfoDto personalInfoDto) {
+        return this.agentDataService.setInfo(authentication, personalInfoDto);
     }
 
     @PostMapping("confirm-info")

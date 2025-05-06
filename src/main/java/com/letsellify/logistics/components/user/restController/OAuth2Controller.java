@@ -64,7 +64,7 @@ public class OAuth2Controller {
     public String assignRole(@RequestParam final String token, @RequestParam final LogisticAppRole role, final RedirectAttributes redirectAttributes) {
         try {
             final String username = this.tokenManager.getUsernameFromToken(token);
-            this.userManager.assignRoleToUser(username, role);
+            this.userManager.assignRoleForAuthUser(username, role);
             redirectAttributes.addFlashAttribute("success", "Congratulations, " + username + "! Your role is assigned.");
             return "redirect:/dashboard/success";
         } catch (final Exception e) {

@@ -11,7 +11,7 @@ import com.letsellify.logistics.components.logistic.core.dispatcher.rest.resourc
  */
 
 
-public record DispatcherPersonalInfo(
+public record DispatcherInfo(
   String whatsAppPhone,
   String phone,
   String state,
@@ -20,13 +20,13 @@ public record DispatcherPersonalInfo(
 ) {
 
 
-    public DispatcherPersonalInfo(final DispatcherEntity.PersonalInfoEmbeddable personalInfoEmbeddable) {
+    public DispatcherInfo(final DispatcherEntity dispatcherEntity) {
         this(
-          personalInfoEmbeddable.getWhatsAppPhone(),
-          personalInfoEmbeddable.getPhone(),
-          personalInfoEmbeddable.getState(),
-          personalInfoEmbeddable.getLga(),
-          personalInfoEmbeddable.getAddress()
+          dispatcherEntity.getContactInfo().getWhatsAppPhone(),
+          dispatcherEntity.getContactInfo().getPhone(),
+          dispatcherEntity.getPersonalInfo().getHomeState(),
+          dispatcherEntity.getPersonalInfo().getHomeLga(),
+          dispatcherEntity.getPersonalInfo().getHomeAddress()
         );
     }
 
