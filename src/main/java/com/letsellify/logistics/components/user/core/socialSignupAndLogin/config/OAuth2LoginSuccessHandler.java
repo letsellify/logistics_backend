@@ -1,8 +1,6 @@
 package com.letsellify.logistics.components.user.core.socialSignupAndLogin.config;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.http.MediaType;
@@ -21,12 +19,14 @@ import com.letsellify.logistics.components.user.core.logisticUser.data.Logistics
 import com.letsellify.logistics.components.user.core.logisticUser.exception.UserExistsException;
 import com.letsellify.logistics.components.user.core.logisticUser.exception.UserNotFoundException;
 import com.letsellify.logistics.components.user.core.socialSignupAndLogin.data.LogisticOAuth2User;
+import com.letsellify.logistics.components.user.restController.TokenController;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 
 /**
  * @author AHMAD BUBA
@@ -48,7 +48,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         final String email = (String) oauthUser.getAttribute("email");
         final OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
         final String provider = oauthToken.getAuthorizedClientRegistrationId();
-
         LogisticsAppUser appUser;
         try {
             appUser = this.userManager.getUserByEmail(Objects.requireNonNull(email));
@@ -57,27 +56,27 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 final LogisticOAuth2User oAuth2User = new LogisticOAuth2User(oauthUser, provider);
                 appUser = this.userManager.processOAuth2User(oAuth2User);
             } catch (final UserExistsException ex) {
-                this.writeErrorResponse(response, ex.getMessage());
+                log.error("User exists " +  ex.getMessage());
                 return;
             }
         }
 
         final LogisticsAppSecurityUser securityUser = new LogisticsAppSecurityUser(appUser);
 
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        this.addSecurityHeaders(response);
+//        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+//        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+//        this.addSecurityHeaders(response);
 
         if (appUser.getRole() == null) {
             final String token = this.tokenManager.getAccessTokenForOAuth2(securityUser);
-            final Map<String, String> jsonResponse = Map.of(
-              "action", "role-selection",
-              "token", token
-            );
-            this.objectMapper.writeValue(response.getWriter(), jsonResponse);
+            response.sendRedirect("http://localhost:5173/join-as/SIGNUP?" + token);
         } else {
+            final String domain = "localhost";
             final LogisticsAppSecurityToken securityToken = this.tokenManager.getToken(securityUser);
-            this.objectMapper.writeValue(response.getWriter(), securityToken);
+            TokenController.addCookie(response, domain, "access_token", securityToken.getAccessToken(), 15 * 60);
+            TokenController.addCookie(response, domain,"refresh_token", securityToken.getRefreshToken(), 7 * 24 * 60 * 60);
+            this.addSecurityHeaders(response);
+            response.sendRedirect("http://localhost:5173/gmail-autorization");
         }
     }
 

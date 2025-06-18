@@ -34,6 +34,7 @@ public class OAuth2Controller {
 
     /**
      * Show the role selection form using Thymeleaf
+     * Instead on prod you redirect to frontend page together with token thats from successHandler
      */
     @GetMapping
     public String showRoleSelectionPage(@RequestParam final String token, final Model model) {
@@ -57,8 +58,10 @@ public class OAuth2Controller {
         return "role-selection";
     }
 
+
     /**
      * Handle Role Assignment
+     * Have its equivalent for prod but now expects a payload of token and Role
      */
     @PostMapping("/assign-role")
     public String assignRole(@RequestParam final String token, @RequestParam final LogisticAppRole role, final RedirectAttributes redirectAttributes) {

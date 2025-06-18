@@ -32,6 +32,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.letsellify.logistics.common.security.config.CookieBearerTokenResolver;
 import com.letsellify.logistics.common.security.config.JwtTokenToAuthentication;
 import com.letsellify.logistics.components.user.core.authorizationToken.AuthorizationTokenManager;
 import com.letsellify.logistics.common.security.config.keys.AccessTokenRsaKey;
@@ -66,6 +67,7 @@ public class SecurityConfiguration {
     private final AccessTokenRsaKey accessTokenRsaKey;
     private final RefreshTokenRsaKey refreshTokenRsaKey;
     private final JwtTokenToAuthentication jwtTokenToAuthentication;
+    private final CookieBearerTokenResolver bearerTokenResolver;
     private final UserManager userManager;
     private final ObjectProvider<AuthorizationTokenManager> tokenManagerProvider;
     private final ObjectMapper objectMapper;
@@ -118,8 +120,9 @@ public class SecurityConfiguration {
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                .oauth2ResourceServer((oauth2) ->
-                        oauth2.jwt((jwt) -> jwt.jwtAuthenticationConverter(this.jwtTokenToAuthentication))
+                .oauth2ResourceServer(oauth2 ->
+                                        oauth2.bearerTokenResolver(this.bearerTokenResolver)
+                                              .jwt((jwt) -> jwt.jwtAuthenticationConverter(this.jwtTokenToAuthentication))
                 )
                 .oauth2Login(oauth2Login -> oauth2Login
                                               .successHandler(this.oAuth2LoginSuccessHandler())
@@ -182,6 +185,7 @@ public class SecurityConfiguration {
         configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "PUT", "DELETE"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
+        configuration.setExposedHeaders(List.of("Authorization", "Set-Cookie"));
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
@@ -196,7 +200,9 @@ public class SecurityConfiguration {
     @Bean
     @Primary
     public JwtEncoder jwtAccessTokenEncoder() {
-        final JWK jwk = new RSAKey.Builder(this.accessTokenRsaKey.publicKey()).privateKey(this.accessTokenRsaKey.privateKey()).build();
+        final JWK jwk = new RSAKey.Builder(this.accessTokenRsaKey.publicKey())
+                          .privateKey(this.accessTokenRsaKey.privateKey())
+                          .build();
         final JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
         return new NimbusJwtEncoder(jwks);
     }
