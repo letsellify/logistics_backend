@@ -19,7 +19,7 @@ import com.letsellify.logistics.components.user.core.logisticUser.data.Logistics
 import com.letsellify.logistics.components.user.core.logisticUser.exception.UserExistsException;
 import com.letsellify.logistics.components.user.core.logisticUser.exception.UserNotFoundException;
 import com.letsellify.logistics.components.user.core.socialSignupAndLogin.data.LogisticOAuth2User;
-import com.letsellify.logistics.components.user.restController.TokenController;
+import com.letsellify.logistics.components.user.util.CookieUtil;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -73,8 +73,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         } else {
             final String domain = "localhost";
             final LogisticsAppSecurityToken securityToken = this.tokenManager.getToken(securityUser);
-            TokenController.addCookie(response, domain, "access_token", securityToken.getAccessToken(), 15 * 60);
-            TokenController.addCookie(response, domain,"refresh_token", securityToken.getRefreshToken(), 7 * 24 * 60 * 60);
+            CookieUtil.addCookie(response, domain, "access_token", securityToken.getAccessToken(), 15 * 60);
+            CookieUtil.addCookie(response, domain,"refresh_token", securityToken.getRefreshToken(), 7 * 24 * 60 * 60);
             this.addSecurityHeaders(response);
             response.sendRedirect("http://localhost:5173/gmail-autorization");
         }

@@ -14,6 +14,7 @@ import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Component;
 
 import com.letsellify.logistics.components.user.core.authorizationToken.data.LogisticsAppSecurityToken;
@@ -83,7 +84,7 @@ public class AuthorizationTokenManager {
         return this.buildAccessTokenForOAuth2(securityUser);
     }
 
-    public String getUsernameFromToken(final String token) {
+    public String getUsernameFromToken(final String token) throws JwtException {
         final Jwt jwt = this.jwtDecoder.decode(token);
         return jwt.getSubject();
     }

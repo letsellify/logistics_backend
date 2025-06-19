@@ -21,10 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.letsellify.logistics.components.user.core.authorizationToken.AuthorizationTokenDataService;
 import com.letsellify.logistics.components.user.core.authorizationToken.rest.dto.LoginDto;
 import com.letsellify.logistics.components.user.core.authorizationToken.rest.resource.TokenResource;
+import com.letsellify.logistics.components.user.util.CookieUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
@@ -73,8 +73,8 @@ public class TokenController {
             }
 
             if (domain != null) {
-                addCookie(httpServletResponse, domain, "access_token", tokenResource.getAccessToken(), 15 * 60);
-                addCookie(httpServletResponse, domain, "refresh_token", tokenResource.getRefreshToken(), 7 * 24 * 60 * 60);
+                CookieUtil.addCookie(httpServletResponse, domain, "access_token", tokenResource.getAccessToken(), 15 * 60);
+                CookieUtil.addCookie(httpServletResponse, domain, "refresh_token", tokenResource.getRefreshToken(), 7 * 24 * 60 * 60);
                 return ResponseEntity.ok(Map.of("message", "Login Successful"));
             }
         }
@@ -131,8 +131,8 @@ public class TokenController {
             if (domain == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Origin header not detected");
             }
-            this.addCookie(httpServletResponse, domain, "access_token", tokenResource.getAccessToken(), 15*60);
-            this.addCookie(httpServletResponse, domain, "refresh_token",tokenResource.getRefreshToken(),7 * 24 * 60 * 60);
+            CookieUtil.addCookie(httpServletResponse, domain, "access_token", tokenResource.getAccessToken(), 15 * 60);
+            CookieUtil.addCookie(httpServletResponse, domain, "refresh_token",tokenResource.getRefreshToken(),7 * 24 * 60 * 60);
             return ResponseEntity.ok(Map.of("message", "Token successfully refreshed"));
 
         }
@@ -143,14 +143,5 @@ public class TokenController {
         ));
     }
 
-    public static void addCookie(final HttpServletResponse response, final String domain, final String name, final String value, final int maxAge) {
-        final Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(!domain.equalsIgnoreCase("localhost"));
-        cookie.setPath("/");
-        cookie.setDomain(domain);
-        cookie.setMaxAge(maxAge);
-        response.addCookie(cookie);
-    }
 
 }

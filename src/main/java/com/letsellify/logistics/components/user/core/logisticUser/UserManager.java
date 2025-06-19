@@ -137,7 +137,7 @@ public class UserManager {
     }
 
     @Transactional
-    public void assignRoleForAuthUser(final @NonNull String username, final LogisticAppRole logisticsAppRole) throws UserNotFoundException {
+    public LogisticsAppUser assignRoleForAuthUser(final @NonNull String username, final @NonNull LogisticAppRole logisticsAppRole) throws UserNotFoundException {
         final UserEntity entity = this.repository.findByEmail(username)
                                                  .orElseThrow(() -> new UserNotFoundException("User with email " + username + " not found."));
         entity.setRole(logisticsAppRole);
@@ -151,6 +151,7 @@ public class UserManager {
             default -> log.warn("No event published for role: {}", userRole);
         }
         this.repository.save(entity);
+        return appUser;
     }
 
     public LogisticsAppUser getUserById(@NonNull final UUID id) throws UserNotFoundException {
