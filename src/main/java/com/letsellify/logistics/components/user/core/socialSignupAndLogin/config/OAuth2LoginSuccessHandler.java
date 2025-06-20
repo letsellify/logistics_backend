@@ -76,7 +76,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             CookieUtil.addCookie(response, domain, "access_token", securityToken.getAccessToken(), 15 * 60);
             CookieUtil.addCookie(response, domain,"refresh_token", securityToken.getRefreshToken(), 7 * 24 * 60 * 60);
             this.addSecurityHeaders(response);
-            response.sendRedirect("http://localhost:5173/gmail-autorization");
+            response.sendRedirect("http://localhost:5173/homepage");
         }
     }
 
