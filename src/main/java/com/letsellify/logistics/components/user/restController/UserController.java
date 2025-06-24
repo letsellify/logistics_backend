@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author AHMAD BUBA
@@ -26,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/user")
 @Tag(name = "User API", description = "API's for users")
+@Slf4j
 public class UserController {
     private final UserDataService userDataService;
 
@@ -45,6 +47,7 @@ public class UserController {
     )
     @GetMapping("/me")
     public UserResource getMyself(final Authentication authentication) {
+        log.info("User Details requested for: {} ", authentication.getName() );
         return this.userDataService.getUser(authentication.getName());
     }
 

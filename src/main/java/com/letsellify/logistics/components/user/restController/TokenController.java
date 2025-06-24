@@ -27,6 +27,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author AHMAD BUBA
@@ -38,6 +39,7 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/v1/authorize")
 @Tag(name = "Authorization API",
      description = "API's for obtaining authorization tokens")
+@Slf4j
 public class TokenController {
 
     private final DaoAuthenticationProvider daoAuthenticationProvider;
@@ -59,6 +61,7 @@ public class TokenController {
       @RequestBody final @Valid LoginDto loginDto,
       final HttpServletResponse httpServletResponse
     ) {
+        log.info("Origin: {}", origin);
         if (clientType == null || clientType.isEmpty() || (!clientType.equalsIgnoreCase("mobile") && !clientType.equalsIgnoreCase("web"))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid client type");
         }
@@ -72,6 +75,7 @@ public class TokenController {
                 domain = ".letsellify";
             }
 
+            log.info("Request comes from: {}", domain);
             if (domain != null) {
                 CookieUtil.addCookie(httpServletResponse, domain, "access_token", tokenResource.getAccessToken(), 15 * 60);
                 CookieUtil.addCookie(httpServletResponse, domain, "refresh_token", tokenResource.getRefreshToken(), 7 * 24 * 60 * 60);

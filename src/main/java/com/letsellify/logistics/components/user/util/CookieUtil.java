@@ -15,8 +15,10 @@ public class CookieUtil {
         cookie.setHttpOnly(true);
         cookie.setSecure(!domain.equalsIgnoreCase("localhost"));
         cookie.setPath("/");
-        cookie.setDomain(domain);
         cookie.setMaxAge(maxAge);
+        if (!"localhost".equalsIgnoreCase(domain)) {
+            cookie.setDomain(domain);
+        }
         response.addCookie(cookie);
     }
 }
