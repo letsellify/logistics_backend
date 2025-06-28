@@ -82,6 +82,7 @@ public class SecurityConfiguration {
             "/api/v1/authorize/**",
             "/api/v1/user/register",
             "/api/v1/verification/**",
+            "/api/v1/social-signup/**",
             "/api/v1/paystack/**",
             "/api/v1/stateLGA/**",
             "/v2/api-docs",
