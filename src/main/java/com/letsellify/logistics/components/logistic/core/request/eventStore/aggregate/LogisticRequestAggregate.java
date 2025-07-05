@@ -1,19 +1,22 @@
 package com.letsellify.logistics.components.logistic.core.request.eventStore.aggregate;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
 
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.spring.stereotype.Aggregate;
 
-import com.letsellify.logistics.components.logistic.core.agent.data.LogisticAgent;
-import com.letsellify.logistics.components.logistic.core.dispatcher.data.LogisticDispatcher;
+import com.letsellify.logistics.components.logistic.core.request.data.Item;
+import com.letsellify.logistics.components.logistic.core.request.data.LogisticsItemImage;
 import com.letsellify.logistics.components.logistic.core.request.data.LogisticsStatus;
-import com.letsellify.logistics.components.logistic.core.request.eventStore.command.AcceptDispatchRequestCommand;
+import com.letsellify.logistics.components.logistic.core.request.data.Receiver;
 import com.letsellify.logistics.components.logistic.core.request.eventStore.command.AcceptStorageRequestCommand;
+import com.letsellify.logistics.components.logistic.core.request.eventStore.command.DispatchRequestAcceptedCommand;
 import com.letsellify.logistics.components.logistic.core.request.eventStore.command.LogisticInDispatcherPossessionCommand;
 import com.letsellify.logistics.components.logistic.core.request.eventStore.command.LogisticRequestCommand;
 import com.letsellify.logistics.components.logistic.core.request.eventStore.command.TriggerSettlementCommand;
@@ -36,19 +39,41 @@ public class LogisticRequestAggregate {
     @AggregateIdentifier
     private String requestId;
 
-    private BigDecimal amountForDispatcher;
+    private UUID senderId;
 
-    private BigDecimal amountForAgent;
+    private Item item;
 
-    private BigDecimal totalLogisticsAmountAfterTax;
+    private Receiver receiver;
 
-    private LogisticDispatcher dispatcher;
+    private List<LogisticsItemImage> images;
 
-    private Instant handedToDispatcher;
+    private BigDecimal agentPay;
 
-    private LocalDateTime collectedAsDispatcher;
+    private BigDecimal dispatcherPay;
 
-    private LogisticAgent agent;
+    private BigDecimal totalSpendingAfterTax;
+
+    private LocalDate dispatcherPickUpDate;
+
+    private LocalDate dispatcherDeliveryDate;
+
+    private String pickUpState;
+
+    private String pickUpLga;
+
+    private String pickUpAddress;
+
+    private LocalDateTime requestDate;
+
+    private UUID dispatcherId;
+
+    private UUID agentId;
+
+    private LogisticsStatus status;
+
+    private LocalDateTime handedToDispatcher;
+
+    private LocalDateTime acceptedForDispatch;
 
     // dispatcher hands over not vendor here
     private LocalDateTime handedToAgent;
@@ -64,7 +89,7 @@ public class LogisticRequestAggregate {
 
     private LocalDateTime logisticsCompleted;
 
-    private LogisticsStatus status;
+
 
 
     //have another field to track the status.
@@ -80,71 +105,91 @@ public class LogisticRequestAggregate {
         // Emit the event
         apply(new LogisticRequestedEvent(
           command.getRequestId(),
-          command.getVendorEmail(),
-          command.getVendorName(),
-          command.getVendorPhone(),
+          command.getSender(),
           command.getItemName(),
+          command.getQuantity(),
           command.getDescription(),
-          command.getAmountForShipping(),
-          command.getAmountForStorage(),
-          command.getTotalAmountAfterTax(),
+          command.getFragility(),
+          command.getCondition(),
+          command.getWeight(),
           command.getImages(),
-          command.getCurrentState(),
-          command.getCurrentLga(),
-          command.getShippingState(),
-          command.getShippingLga(),
-          command.getPossibleDeliveryDateStart(),
-          command.getPossibleDeliveryDateEnd()
-        ));
+          command.getReceiverFullName(),
+          command.getReceiverLocation(),
+          command.getReceiverState(),
+          command.getReceiverLga(),
+          command.getReceiverEmail(),
+          command.getReceiverCallNumber(),
+          command.getReceiverWhatsAppNumber(),
+          command.getAgentPay(),
+          command.getDispatcherPay(),
+          command.getTotalSpendingAfterTax(),
+          command.getDispatcherPickUpDate(),
+          command.getDispatcherDeliveryDate(),
+          command.getPickUpState(),
+          command.getPickUpLga(),
+          command.getPickUpAddress(),
+          command.getRequestDate()
+              )
+        );
     }
 
 
     @EventSourcingHandler
-    public void on(final LogisticRequestedEvent event) {
+    public void onLogisticRequestedEvent(final LogisticRequestedEvent event) {
         this.requestId = event.getRequestId();
-        this.amountForDispatcher = event.getAmountForShipping();
-        this.amountForAgent = event.getAmountForStorage();
-        this.totalLogisticsAmountAfterTax = event.getTotalAmountAfterTax();
+        this.senderId = event.getSender().getSenderId();
+        this.item = new Item(event.getItemName(), event.getQuantity(), event.getDescription(), event.getFragility(), event.getCondition(), event.getWeight());
+        this.images = event.getImages();
+        this.receiver = new Receiver(event.getReceiverFullName(),event.getReceiverLocation(), event.getReceiverState(), event.getReceiverLga(), event.getReceiverEmail(), event.getReceiverCallNumber(), event.getReceiverWhatsAppNumber());
+        this.agentPay = event.getAgentPay();
+        this.dispatcherPay = event.getDispatcherPay();
+        this.totalSpendingAfterTax = event.getTotalSpendingAfterTax();
+        this.dispatcherPickUpDate = event.getDispatcherPickUpDate();
+        this.dispatcherDeliveryDate = event.getDispatcherDeliveryDate();
+        this.pickUpState = event.getPickUpState();
+        this.pickUpLga = event.getPickUpLga();
+        this.pickUpAddress = event.getPickUpAddress();
         this.status = LogisticsStatus.REQUESTED;
+        this.requestDate = event.getRequestDate();
     }
 
     @CommandHandler
-    public void on(final AcceptDispatchRequestCommand cmd) {
-        if (this.dispatcher != null) {
+    public void onLogisticRequestedEvent(final DispatchRequestAcceptedCommand cmd) {
+        if (this.dispatcherId != null) {
             throw new IllegalStateException("A dispatcher has all ready accepted this request");
         }
         apply(new DispatchAcceptedEvent(
           this.requestId,
-          cmd.dispatcher()
+          cmd.dispatcherId()
         ));
     }
 
     @EventSourcingHandler
-    public void on(final DispatchAcceptedEvent event) {
-        this.dispatcher = event.dispatcher();
+    public void onLogisticRequestedEvent(final DispatchAcceptedEvent event) {
+        this.dispatcherId = event.dispatcherId();
     }
 
 
     @CommandHandler
-    public void on(final AcceptStorageRequestCommand cmd) {
-        if (this.agent != null) {
+    public void onLogisticRequestedEvent(final AcceptStorageRequestCommand cmd) {
+        if (this.agentId != null) {
             throw new IllegalStateException("An agent has all ready accepted this request");
         }
         apply(new StorageAcceptedEvent(
           this.requestId,
-          cmd.agent()
+          cmd.agentId()
         ));
     }
 
     @EventSourcingHandler
-    public void on(final StorageAcceptedEvent event) {
-        this.agent = event.agent();
+    public void onLogisticRequestedEvent(final StorageAcceptedEvent event) {
+        this.agentId = event.agentId();
     }
 
 
     @CommandHandler
-    public void on(final LogisticInDispatcherPossessionCommand cmd) {
-        if (this.status != LogisticsStatus.REQUESTED || this.dispatcher == null) {
+    public void onLogisticRequestedEvent(final LogisticInDispatcherPossessionCommand cmd) {
+        if (this.status != LogisticsStatus.REQUESTED || this.dispatcherId == null) {
             throw new IllegalStateException("Invalid homeState, for the status of the request");
         }
         apply(new InDispatcherPossessionEvent(
@@ -154,26 +199,26 @@ public class LogisticRequestAggregate {
     }
 
     @EventSourcingHandler
-    public void on(final InDispatcherPossessionEvent event) {
+    public void onLogisticRequestedEvent(final InDispatcherPossessionEvent event) {
         this.handedToDispatcher = event.timestamp();
         this.status = LogisticsStatus.IN_DISPATCHER_POSSESSION;
     }
 
 
     @CommandHandler
-    public void on(final TriggerSettlementCommand cmd) {
+    public void onLogisticRequestedEvent(final TriggerSettlementCommand cmd) {
         apply(new LogisticSettlementEvent(
           this.requestId,
-          this.agent,
-          this.dispatcher,
-          this.amountForAgent,
-          this.amountForDispatcher,
+          this.agentId,
+          this.dispatcherId,
+          this.agentPay,
+          this.dispatcherPay,
           cmd.getTriggeredOn()
         ));
     }
 
     @EventSourcingHandler
-    public void on(final LogisticSettlementEvent event) {
+    public void onLogisticRequestedEvent(final LogisticSettlementEvent event) {
         this.logisticsCompleted = event.timestamp();
     }
 }

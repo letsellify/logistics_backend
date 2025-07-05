@@ -2,16 +2,17 @@ package com.letsellify.logistics.components.logistic.core.request.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import com.letsellify.logistics.components.logistic.core.agent.data.LogisticAgent;
-import com.letsellify.logistics.components.logistic.core.dispatcher.data.LogisticDispatcher;
 import com.letsellify.logistics.components.logistic.core.request.dataMapper.LogisticRequestDataMapper;
 import com.letsellify.logistics.components.logistic.core.request.database.entity.LogisticRequestEntity;
 import com.letsellify.logistics.components.logistic.core.request.rest.resource.LogisticRequestResource;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 
 /**
  * @author AHMAD BUBA
@@ -19,75 +20,81 @@ import lombok.Data;
  * Time:16:01
  */
 
-@Data
-public class LogisticsRequest {
-    private final LogisticRequestEntity entity;
+@AllArgsConstructor
+@Builder
+@Getter
+public final class LogisticsRequest {
 
-    private UUID id;
+    private final UUID id;
 
-    private String shippingRequestId;
+    private final String shippingRequestId;
 
-    private LogisticsItem item;
+    private final UUID senderId;
 
-    private List<String> images;
+    private final Item item;
 
-    private String currentState;
+    private final List<String> images;
 
-    private String currentLga;
+    private final String receiverFullName;
 
-    private String shippingState;
+    private final String receiverLocation;
 
-    private String shippingLga;
+    private final String receiverState;
 
-    private LocalDate startDate;
+    private final String receiverLga;
 
-    private LocalDate endDate;
+    private final String receiverEmail;
 
-    private BigDecimal amountForShipping;
+    private final String receiverCallNumber;
 
-    private BigDecimal amountForStorage;
+    private final String receiverWhatsAppNumber;
 
-    private LogisticDispatcher dispatcher;
+    private final BigDecimal agentPay;
 
-    private LogisticsVendor vendor;
+    private final BigDecimal dispatcherPay;
 
-    private LogisticAgent agent;
+    private final BigDecimal totalSpendingAfterTax;
 
-    public LogisticsRequest(final LogisticRequestEntity entity) {
-        this.entity = entity;
-        this.id = entity.getId();
-        this.shippingRequestId = entity.getShippingRequestId();
-        this.item = entity.getItem();
-        this.currentState = entity.getCurrentState();
-        this.currentLga = entity.getCurrentLga();
-        this.shippingState = entity.getShippingState();
-        this.shippingLga = entity.getShippingLga();
-        this.startDate = entity.getStartDate();
-        this.endDate = entity.getEndDate();
-        this.amountForShipping = entity.getAmountForShipping();
-        this.amountForStorage = entity.getAmountForStorage();
-        this.dispatcher = entity.getDispatcher();
-        this.vendor = entity.getVendor();
-        this.agent = entity.getAgent();
-    }
+    private final LocalDate dispatcherPickUpDate;
+
+    private final LocalDate dispatcherDeliveryDate;
+
+    private final String pickUpState;
+
+    private final String pickUpLga;
+
+    private final String pickUpAddress;
+
+    private final LocalDateTime requestDate;
+
+//    public LogisticsRequest(final LogisticRequestEntity entity) {
+//        this.id = entity.getId();
+//        this.shippingRequestId = entity.getShippingRequestId();
+//        this.item = entity.getItem();
+//    }
 
     public LogisticsRequest(final LogisticRequestEntity entity, final List<String> imagesPresignedUrl) {
-        this.entity = entity;
         this.id = entity.getId();
         this.shippingRequestId = entity.getShippingRequestId();
-        this.item = new LogisticsItem(entity.getItem().getItemName(),entity.getItem().getItemDescription());
+        this.senderId = entity.getSenderId();
+        this.item = entity.getItem();
         this.images = imagesPresignedUrl;
-        this.currentState = entity.getCurrentState();
-        this.currentLga = entity.getCurrentLga();
-        this.shippingState = entity.getShippingState();
-        this.shippingLga = entity.getShippingLga();
-        this.startDate = entity.getStartDate();
-        this.endDate = entity.getEndDate();
-        this.amountForShipping = entity.getAmountForShipping();
-        this.amountForStorage = entity.getAmountForStorage();
-        this.dispatcher = entity.getDispatcher();
-        this.vendor = entity.getVendor();
-        this.agent = entity.getAgent();
+        this.receiverFullName = entity.getReceiver().getReceiverFullName();
+        this.receiverLocation = entity.getReceiver().getReceiverLocation();
+        this.receiverState = entity.getReceiver().getReceiverState();
+        this.receiverLga = entity.getReceiver().getReceiverLga();
+        this.receiverEmail = entity.getReceiver().getReceiverEmail();
+        this.receiverCallNumber = entity.getReceiver().getReceiverCallNumber();
+        this.receiverWhatsAppNumber = entity.getReceiver().getReceiverWhatsAppNumber();
+        this.agentPay = entity.getAgentPay();
+        this.dispatcherPay = entity.getDispatcherPay();
+        this.totalSpendingAfterTax = entity.getTotalSpending();
+        this.dispatcherPickUpDate = entity.getDispatcherPickUpDate();
+        this.dispatcherDeliveryDate = entity.getDispatcherDeliveryDate();
+        this.pickUpState = entity.getPickUpState();
+        this.pickUpLga = entity.getPickUpLga();
+        this.pickUpAddress = entity.getPickUpAddress();
+        this.requestDate = entity.getRequestDate();
     }
 
     public LogisticRequestResource getResource() {

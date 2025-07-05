@@ -27,7 +27,7 @@ public class EventHandling {
      */
     @EventHandler
     public void processLogisticsRequest(final LogisticRequestedEvent event) {
-       this.manager.write(event);
+       this.manager.writeLogisticRequestEvent(event);
     }
 
     /**

@@ -189,7 +189,9 @@ public class EmailService {
                 <tr><td style="padding: 8px;"><strong>🚚 Pickup Location:</strong></td><td>%s, %s</td></tr>
                 <tr><td style="padding: 8px;"><strong>🎯 Destination:</strong></td><td>%s, %s</td></tr>
                 <tr><td style="padding: 8px;"><strong>💰 Shipping Fee:</strong></td><td>₦%,.2f</td></tr>
-                <tr><td style="padding: 8px;"><strong>🕒 Expected Delivery:</strong></td><td>%s - %s</td></tr>
+                <tr><td style="padding: 8px;"><strong>💰 Storage Fee:</strong></td><td>₦%,.2f</td></tr>
+                <tr><td style="padding: 8px;"><strong>🕒 PickUp Date:</strong></td><td>%s</td></tr>
+                <tr><td style="padding: 8px;"><strong>🕒 Delivery Date:</strong></td><td>%s</td></tr>
             </table>
 
             <p style="margin-top: 20px;">You can check more details and accept this request on your dashboard.</p>
@@ -207,11 +209,12 @@ public class EmailService {
               name,
               broadcast.getRequestId(),
               broadcast.getItemName(),
-              broadcast.getCurrentLga(), broadcast.getCurrentState(),
-              broadcast.getShippingLga(), broadcast.getShippingState(),
-              broadcast.getAmountForShipping(),
-              broadcast.getPossibleDeliveryDateStart(),
-              broadcast.getPossibleDeliveryDateEnd(),
+              broadcast.getPickUpLga(), broadcast.getPickUpState(),
+              broadcast.getReceiverLga(), broadcast.getReceiverState(),
+              broadcast.getDispatcherPay(),
+              broadcast.getAgentPay(),
+              broadcast.getDispatcherPickUpDate(),
+              broadcast.getDispatcherDeliveryDate(),
               dashboardUrl
             );
 

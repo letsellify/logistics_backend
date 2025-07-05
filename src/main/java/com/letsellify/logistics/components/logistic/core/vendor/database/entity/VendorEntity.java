@@ -26,6 +26,7 @@ public class VendorEntity extends Auditable {
     private String vendorName;
     private String email;
     private String phone;
+    private String whatsAppPhone;
     private BigDecimal currentAccountBalance;
 
     protected VendorEntity() {

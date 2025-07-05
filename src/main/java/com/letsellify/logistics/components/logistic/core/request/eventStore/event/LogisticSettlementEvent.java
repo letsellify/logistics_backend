@@ -2,9 +2,7 @@ package com.letsellify.logistics.components.logistic.core.request.eventStore.eve
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
-import com.letsellify.logistics.components.logistic.core.dispatcher.data.LogisticDispatcher;
-import com.letsellify.logistics.components.logistic.core.agent.data.LogisticAgent;
+import java.util.UUID;
 
 /**
  * @author AHMAD BUBA
@@ -15,8 +13,8 @@ import com.letsellify.logistics.components.logistic.core.agent.data.LogisticAgen
 
 public record LogisticSettlementEvent(
   String requestId,
-  LogisticAgent agent,
-  LogisticDispatcher dispatcher,
+  UUID agentId,
+  UUID dispatcherId,
   BigDecimal amountForAgent,
   BigDecimal amountForDispatcher,
   LocalDateTime timestamp

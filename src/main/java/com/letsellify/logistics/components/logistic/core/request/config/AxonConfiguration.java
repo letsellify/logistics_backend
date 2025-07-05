@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Configuration
 public class AxonConfiguration {
     @Bean
-    InitializingBean initializingBean(ObjectMapper objectMapper) {
+    InitializingBean initializingBean(final ObjectMapper objectMapper) {
         return () -> objectMapper.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(),
                                                          ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT
         );

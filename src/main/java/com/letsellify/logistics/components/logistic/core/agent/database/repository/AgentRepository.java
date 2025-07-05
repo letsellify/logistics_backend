@@ -18,7 +18,7 @@ import com.letsellify.logistics.components.logistic.core.agent.database.entity.A
 @Repository
 public interface AgentRepository extends JpaRepository<AgentEntity, UUID> {
     Optional<AgentEntity> findByEmail(String email);
-    List<AgentEntity> findByCurrentlyAcceptingStorageAndApprove(boolean currentlyAcceptingDelivery, boolean approve);
+    List<AgentEntity> findByApprovedAndAcceptingStorage(boolean approved, boolean acceptingStorage);
     boolean existsByEmail(String agentEmail);
 
 }

@@ -3,7 +3,7 @@ package com.letsellify.logistics.components.logistic.core.vendor;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import org.springframework.context.event.EventListener;
@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.letsellify.logistics.common.data.LogisticAppRole;
 import com.letsellify.logistics.components.logistic.core.financeAccount.event.VendorTopUpAccountEvent;
 import com.letsellify.logistics.components.logistic.core.financeAccount.exception.InsufficientFundsException;
-import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.IllegalLGAException;
+import com.letsellify.logistics.components.logistic.core.request.exception.IllegalLGAException;
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.NoSuchStateException;
 import com.letsellify.logistics.components.logistic.core.paystackPaymentGateway.PaystackManager;
 import com.letsellify.logistics.components.logistic.core.paystackPaymentGateway.rest.resource.PaystackInitiateTransactionResponse;
@@ -98,16 +98,27 @@ public class VendorManager {
     public CompletableFuture<String> order(
       final @NonNull String vendorEmail,
       final @NonNull String itemName,
+      final int quantity,
       final @NonNull String description,
-      final @NonNull BigDecimal amountForShipping,
-      final @NonNull BigDecimal amountForStorage,
-      final @NonNull List<String> images,
-      final @NonNull String currentState,
-      final @NonNull String currentLga,
-      final @NonNull String shippingState,
-      final @NonNull String shippingLga,
-      final @NonNull LocalDate possibleDeliveryDateStart,
-      final @NonNull LocalDate possibleDeliveryDateEnd
+      final String fragility,
+      final @NonNull Set<String> condition,
+      final int weight,
+      final String imageUrl1,
+      final String imageUrl2,
+      final @NonNull String receiverFullName,
+      final @NonNull String location,
+      final @NonNull String state,
+      final @NonNull String lga,
+      final String email,
+      final @NonNull String callPhoneNumber,
+      final String whatsAppPhoneNumber,
+      final @NonNull BigDecimal agentPay,
+      final @NonNull BigDecimal dispatcherPay,
+      final @NonNull LocalDate dispatcherPickUpDate,
+      final @NonNull LocalDate dispatcherDeliveryDate,
+      final @NonNull String pickUpState,
+      final @NonNull String pickUpLga,
+      final @NonNull String pickUpAddress
     ) throws VendorNotFoundException, InvalidLogisticItemImageException, InsufficientFundsException, NoSuchStateException, IllegalLGAException {
         final VendorEntity entity = this.vendorRepository.findByEmail(vendorEmail)
                                                          .orElseThrow(() -> new VendorNotFoundException("Vendor with username " + vendorEmail + " not found."));
@@ -115,16 +126,27 @@ public class VendorManager {
                  .order(
                    new Vendor(entity),
                    itemName,
+                   quantity,
                    description,
-                   amountForShipping,
-                   amountForStorage,
-                   images,
-                   currentState,
-                   currentLga,
-                   shippingState,
-                   shippingLga,
-                   possibleDeliveryDateStart,
-                   possibleDeliveryDateEnd
+                   fragility,
+                   condition,
+                   weight,
+                   imageUrl1,
+                   imageUrl2,
+                   receiverFullName,
+                   location,
+                   state,
+                   lga,
+                   email,
+                   callPhoneNumber,
+                   whatsAppPhoneNumber,
+                   agentPay,
+                   dispatcherPay,
+                   dispatcherPickUpDate,
+                   dispatcherDeliveryDate,
+                   pickUpState,
+                   pickUpLga,
+                   pickUpAddress
                  );
     }
 

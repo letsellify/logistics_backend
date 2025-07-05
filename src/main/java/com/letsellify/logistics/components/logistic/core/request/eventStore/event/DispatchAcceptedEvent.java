@@ -1,6 +1,6 @@
 package com.letsellify.logistics.components.logistic.core.request.eventStore.event;
 
-import com.letsellify.logistics.components.logistic.core.dispatcher.data.LogisticDispatcher;
+import java.util.UUID;
 
 /**
  * @author AHMAD BUBA
@@ -10,5 +10,5 @@ import com.letsellify.logistics.components.logistic.core.dispatcher.data.Logisti
 
 public record DispatchAcceptedEvent(
   String requestId,
-  LogisticDispatcher dispatcher
+  UUID dispatcherId
 ) {}

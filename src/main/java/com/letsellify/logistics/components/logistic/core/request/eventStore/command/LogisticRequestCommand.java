@@ -2,12 +2,15 @@ package com.letsellify.logistics.components.logistic.core.request.eventStore.com
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
 import com.letsellify.logistics.components.logistic.core.request.data.LogisticsItemImage;
+import com.letsellify.logistics.components.logistic.core.request.data.Sender;
 
 import lombok.Getter;
 
@@ -22,54 +25,80 @@ import lombok.Getter;
 public class LogisticRequestCommand {
     @TargetAggregateIdentifier
     private final String requestId;
-    private final String vendorEmail;
-    private final String vendorName;
-    private final String vendorPhone;
+    private final Sender sender;
     private final String itemName;
+    private final int quantity;
     private final String description;
-    private final BigDecimal amountForShipping;
-    private final BigDecimal amountForStorage;
-    private final BigDecimal totalAmountAfterTax;
+    private final String fragility;
+    private final Set<String> condition;
+    private final int weight;
     private final List<LogisticsItemImage> images;
-    private final String currentState;
-    private final String currentLga;
-    private final String shippingState;
-    private final String shippingLga;
-    private final LocalDate possibleDeliveryDateStart;
-    private final LocalDate possibleDeliveryDateEnd;
+    private final String receiverFullName;
+    private final String receiverLocation;
+    private final String receiverState;
+    private final String receiverLga;
+    private final String receiverEmail;
+    private final String receiverCallNumber;
+    private final String receiverWhatsAppNumber;
+    private final BigDecimal agentPay;
+    private final BigDecimal dispatcherPay;
+    private final BigDecimal totalSpendingAfterTax;
+    private final LocalDate dispatcherPickUpDate;
+    private final LocalDate dispatcherDeliveryDate;
+    private final String pickUpState;
+    private final String pickUpLga;
+    private final String pickUpAddress;
+    private final LocalDateTime requestDate;
 
     public LogisticRequestCommand(
-      final String vendorEmail,
-      final String vendorName,
-      final String vendorPhone,
+      final Sender sender,
       final String itemName,
+      final int quantity,
       final String description,
-      final BigDecimal amountForShipping,
-      final BigDecimal amountForStorage,
-      final BigDecimal totalAmountAfterTax,
+      final String fragility,
+      final Set<String> condition,
+      final int weight,
       final List<LogisticsItemImage> images,
-      final String currentState,
-      final String currentLga,
-      final String shippingState,
-      final String shippingLga,
-      final LocalDate possibleDeliveryDateStart,
-      final LocalDate possibleDeliveryDateEnd
+      final String receiverFullName,
+      final String receiverLocation,
+      final String receiverState,
+      final String receiverLga,
+      final String receiverEmail,
+      final String receiverCallPhoneNumber,
+      final String receiverWhatsAppPhoneNumber,
+      final BigDecimal agentPay,
+      final BigDecimal dispatcherPay,
+      final BigDecimal totalSpendingAfterTax,
+      final LocalDate dispatcherPickUpDate,
+      final LocalDate dispatcherDeliveryDate,
+      final String pickUpState,
+      final String pickUpLga,
+      final String pickUpAddress
     ) {
         this.requestId = UUID.randomUUID().toString();
-        this.vendorEmail = vendorEmail;
-        this.vendorName = vendorName;
-        this.vendorPhone = vendorPhone;
+        this.sender = sender;
         this.itemName = itemName;
+        this.quantity = quantity;
         this.description = description;
-        this.amountForShipping = amountForShipping;
-        this.amountForStorage = amountForStorage;
-        this.totalAmountAfterTax = totalAmountAfterTax;
+        this.fragility = fragility;
+        this.condition = condition;
+        this.weight = weight;
         this.images = images;
-        this.currentState = currentState;
-        this.currentLga = currentLga;
-        this.shippingState = shippingState;
-        this.shippingLga = shippingLga;
-        this.possibleDeliveryDateStart = possibleDeliveryDateStart;
-        this.possibleDeliveryDateEnd = possibleDeliveryDateEnd;
+        this.receiverFullName = receiverFullName;
+        this.receiverLocation = receiverLocation;
+        this.receiverState = receiverState;
+        this.receiverLga = receiverLga;
+        this.receiverEmail = receiverEmail;
+        this.receiverCallNumber = receiverCallPhoneNumber;
+        this.receiverWhatsAppNumber = receiverWhatsAppPhoneNumber;
+        this.agentPay = agentPay;
+        this.dispatcherPay = dispatcherPay;
+        this.totalSpendingAfterTax = totalSpendingAfterTax;
+        this.dispatcherPickUpDate = dispatcherPickUpDate;
+        this.dispatcherDeliveryDate = dispatcherDeliveryDate;
+        this.pickUpState = pickUpState;
+        this.pickUpLga = pickUpLga;
+        this.pickUpAddress = pickUpAddress;
+        this.requestDate = LocalDateTime.now();
     }
 }

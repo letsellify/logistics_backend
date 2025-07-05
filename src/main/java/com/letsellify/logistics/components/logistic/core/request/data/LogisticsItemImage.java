@@ -14,17 +14,17 @@ import lombok.Getter;
 
 
 @Getter
-public class LogisticsItemImage {
-    private LogisticItemImageEntity entity;
-    private String imageId;
-    private String imageFilePath;
-    private String vendorUsername;
+public final class LogisticsItemImage {
+    private final LogisticItemImageEntity entity;
+    private final String imageId;
+    private final String imageFilePath;
+    private final String senderUsername;
 
     public LogisticsItemImage(final LogisticItemImageEntity entity) {
         this.entity = entity;
         this.imageId = entity.getId();
         this.imageFilePath = entity.getImageFilePath();
-        this.vendorUsername = entity.getVendorUsername();
+        this.senderUsername = entity.getSenderUsername();
     }
 
     public LogisticItemImageResource getResource() {

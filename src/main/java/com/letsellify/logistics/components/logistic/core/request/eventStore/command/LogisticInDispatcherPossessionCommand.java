@@ -1,6 +1,6 @@
 package com.letsellify.logistics.components.logistic.core.request.eventStore.command;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
@@ -10,8 +10,8 @@ import org.axonframework.modelling.command.TargetAggregateIdentifier;
  * Time:16:11
  */
 
-public record LogisticInDispatcherPossessionCommand(@TargetAggregateIdentifier String requestId, Instant timestamp) {
+public record LogisticInDispatcherPossessionCommand(@TargetAggregateIdentifier String requestId, LocalDateTime timestamp) {
     public LogisticInDispatcherPossessionCommand(final String requestId) {
-        this(requestId, Instant.now());
+        this(requestId, LocalDateTime.now());
     }
 }

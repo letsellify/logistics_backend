@@ -1,22 +1,23 @@
 package com.letsellify.logistics.components.logistic.core.request.database.entity;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import com.letsellify.logistics.common.entityAudit.entity.Auditable;
-import com.letsellify.logistics.components.logistic.core.agent.data.LogisticAgent;
-import com.letsellify.logistics.components.logistic.core.dispatcher.data.LogisticDispatcher;
-import com.letsellify.logistics.components.logistic.core.request.data.LogisticsItem;
+import com.letsellify.logistics.components.logistic.core.request.data.Item;
 import com.letsellify.logistics.components.logistic.core.request.data.LogisticsItemImage;
-import com.letsellify.logistics.components.logistic.core.request.data.LogisticsVendor;
+import com.letsellify.logistics.components.logistic.core.request.data.LogisticsStatus;
+import com.letsellify.logistics.components.logistic.core.request.data.Receiver;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
@@ -39,37 +40,39 @@ public class LogisticRequestEntity extends Auditable {
     private String shippingRequestId;
 
     @Embedded
-    private LogisticsItem item;
+    private Item item;
 
-    private String currentState;
+    private UUID senderId;
 
-    private String currentLga;
+    private String pickUpState;
 
-    private String shippingState;
+    private String pickUpLga;
 
-    private String shippingLga;
+    private String pickUpAddress;
 
-    private LocalDate startDate;
+    private UUID dispatcherId;
 
-    private LocalDate endDate;
-
-    private BigDecimal amountForShipping;
-
-    private BigDecimal amountForStorage;
-
-    // dispatcher info
-    @Embedded
-    private LogisticDispatcher dispatcher;
+    private UUID agentId;
 
     @Embedded
-    private LogisticsVendor vendor;
+    private Receiver receiver;
 
-    @Embedded
-    private LogisticAgent agent;
+    private BigDecimal dispatcherPay;
 
-    private Instant dispatcherPossession;
+    private BigDecimal agentPay;
 
-    // agent info
+    private BigDecimal totalSpending;
+
+    private LocalDate dispatcherPickUpDate;
+
+    private LocalDate dispatcherDeliveryDate;
+
+    private LocalDateTime requestDate;
+
+    @Enumerated(EnumType.STRING)
+    private LogisticsStatus status;
+
+    private LocalDateTime dispatcherPossession;
 
     @OneToMany(mappedBy = "logisticsRequest", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<LogisticItemImageEntity> itemImages = new ArrayList<>();
@@ -80,26 +83,24 @@ public class LogisticRequestEntity extends Auditable {
 
     public static LogisticRequestEntity create(
       final String requestId,
-      final String vendorEmail,
-      final String vendorName,
-      final String vendorPhone,
-      final String itemName,
-      final String itemDescription,
+      final UUID senderId,
+      final Item item,
       final List<LogisticsItemImage> itemImages,
-      final String currentState,
-      final String currentLga,
-      final String shippingState,
-      final String shippingLga,
-      final LocalDate startDate,
-      final LocalDate endDate,
-      final BigDecimal amountForShipping,
-      final BigDecimal amountForStorage
+      final String pickUpState,
+      final String pickUpLga,
+      final Receiver receiver,
+      final BigDecimal agentPay,
+      final BigDecimal dispatcherPay,
+      final BigDecimal totalSpending,
+      final LocalDate dispatcherPickUpDate,
+      final LocalDate dispatcherDeliveryDate,
+      final LocalDateTime requestDate
     ) {
         final LogisticRequestEntity entity = new LogisticRequestEntity();
         entity.id = UUID.randomUUID();
         entity.shippingRequestId = requestId;
-        entity.vendor = new LogisticsVendor(vendorEmail, vendorName, vendorPhone);
-        entity.item = new LogisticsItem(itemName, itemDescription);
+        entity.senderId = senderId;
+        entity.item = item;
         entity.getItemImages()
               .addAll(
                 itemImages
@@ -111,14 +112,15 @@ public class LogisticRequestEntity extends Auditable {
                   })
                   .toList()
               );
-        entity.currentState = currentState;
-        entity.currentLga = currentLga;
-        entity.shippingState = shippingState;
-        entity.shippingLga = shippingLga;
-        entity.startDate = startDate;
-        entity.endDate = endDate;
-        entity.amountForShipping = amountForShipping;
-        entity.amountForStorage = amountForStorage;
+        entity.pickUpState = pickUpState;
+        entity.pickUpLga = pickUpLga;
+        entity.receiver = receiver;
+        entity.dispatcherPay = dispatcherPay;
+        entity.agentPay = agentPay;
+        entity.totalSpending = totalSpending;
+        entity.dispatcherPickUpDate = dispatcherPickUpDate;
+        entity.dispatcherDeliveryDate = dispatcherDeliveryDate;
+        entity.requestDate = requestDate;
         return entity;
     }
 }

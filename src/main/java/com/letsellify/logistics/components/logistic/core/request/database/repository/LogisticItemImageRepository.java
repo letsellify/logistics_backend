@@ -15,5 +15,5 @@ import com.letsellify.logistics.components.logistic.core.request.database.entity
 
 @Repository
 public interface LogisticItemImageRepository extends JpaRepository<LogisticItemImageEntity, String> {
-    Optional<LogisticItemImageEntity> findByIdAndVendorUsername(String id, String vendorUsername);
+    Optional<LogisticItemImageEntity> findByIdAndSenderUsername(String id, String senderUsername);
 }

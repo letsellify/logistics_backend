@@ -42,20 +42,20 @@ public class AgentEntity extends Auditable {
     @Setter
     private UUID kycId;
     @Setter
-    private boolean currentlyAcceptingStorage;
-    private boolean approve;
+    private boolean acceptingStorage;
+    private boolean approved;
 
     public AgentEntity(final @NonNull String email, final String name) {
         super();
         this.id = UUID.randomUUID();
         this.email = email;
         this.personalInfo = new PersonalInfoEmbeddable(name);
-        this.currentlyAcceptingStorage = false;
-        this.approve = false;
+        this.acceptingStorage = false;
+        this.approved = false;
     }
 
     public void approve() {
-        this.approve = true;
+        this.approved = true;
     }
 
 

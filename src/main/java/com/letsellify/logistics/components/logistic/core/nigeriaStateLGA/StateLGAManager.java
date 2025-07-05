@@ -24,7 +24,6 @@ import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.databas
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.database.entity.StateEntity;
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.database.repository.LGARepository;
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.database.repository.StateRepository;
-import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.IllegalLGAException;
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.NoSuchStateException;
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.StateLGAFileNotFountException;
 
@@ -74,32 +73,30 @@ public class StateLGAManager implements CommandLineRunner {
         this.preloadCache();
     }
 
-    public void validateStateAndLgaForLogistics(final @NonNull String currentState, final @NonNull String currentLga, final @NonNull String shippingState, final @NonNull String shippingLga) throws NoSuchStateException, IllegalLGAException {
-        // Validate current homeState and LGA using cache
-        this.validateStateAndLgaFromCache(currentState, currentLga);
-
-        // Validate shipping homeState and LGA using cache
-        this.validateStateAndLgaFromCache(shippingState, shippingLga);
+    public boolean validateStateAndLgaForLogistics(final @NonNull String currentState, final @NonNull String currentLga, final @NonNull String shippingState, final @NonNull String shippingLga) throws NoSuchStateException {
+//        // Validate current homeState and LGA using cache
+//        this.validateStateAndLgaFromCache(currentState, currentLga);
+//
+//        // Validate shipping homeState and LGA using cache
+//        this.validateStateAndLgaFromCache(shippingState, shippingLga);
+        return this.validateStateLga(currentState, currentLga) && this.validateStateLga(shippingState, shippingLga);
     }
 
-    public void validateStateLga(final @NonNull String state, final @NonNull String lga) throws NoSuchStateException, IllegalLGAException {
-        this.validateStateAndLgaFromCache(state,lga);
+    public boolean validateStateLga(final @NonNull String state, final @NonNull String lga) throws NoSuchStateException {
+        return this.validateStateAndLgaFromCache(state,lga);
     }
 
 
-    private void validateStateAndLgaFromCache(final @NonNull String state, final @NonNull String lga) throws NoSuchStateException, IllegalLGAException {
+    private boolean validateStateAndLgaFromCache(final @NonNull String state, final @NonNull String lga) throws NoSuchStateException {
         // Check if the homeState exists in cache (case-insensitive)
         final Set<String> lgas = this.stateLgaCache.get(state);
         log.info("State requested, {}", state);
         log.info("lGAs of homeState requested, {}", lgas.toString());
-        if (lgas == null) {
+        if (lgas.isEmpty()) {
             throw new NoSuchStateException("No such homeState exists: " + state);
         }
-
         // Check if the LGA belongs to the homeState
-        if (!lgas.contains(lga)) {
-            throw new IllegalLGAException("LGA '" + lga + "' does not belong to homeState '" + state + "'.");
-        }
+        return lgas.contains(lga);
     }
 
     public NigerianStates getAllStates() {

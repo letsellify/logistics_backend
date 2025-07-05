@@ -6,6 +6,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import org.axonframework.commandhandling.gateway.CommandGateway;
@@ -27,10 +28,12 @@ import com.letsellify.logistics.components.logistic.core.financeAccount.FinanceA
 import com.letsellify.logistics.components.logistic.core.financeAccount.exception.FinanceAccountNotFoundException;
 import com.letsellify.logistics.components.logistic.core.financeAccount.exception.InsufficientFundsException;
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.StateLGAManager;
-import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.IllegalLGAException;
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.NoSuchStateException;
+import com.letsellify.logistics.components.logistic.core.request.data.Item;
 import com.letsellify.logistics.components.logistic.core.request.data.LogisticsItemImage;
 import com.letsellify.logistics.components.logistic.core.request.data.LogisticsRequest;
+import com.letsellify.logistics.components.logistic.core.request.data.Receiver;
+import com.letsellify.logistics.components.logistic.core.request.data.Sender;
 import com.letsellify.logistics.components.logistic.core.request.database.entity.LogisticItemImageEntity;
 import com.letsellify.logistics.components.logistic.core.request.database.entity.LogisticRequestEntity;
 import com.letsellify.logistics.components.logistic.core.request.database.repository.LogisticItemImageRepository;
@@ -41,6 +44,7 @@ import com.letsellify.logistics.components.logistic.core.request.eventStore.comm
 import com.letsellify.logistics.components.logistic.core.request.eventStore.event.InDispatcherPossessionEvent;
 import com.letsellify.logistics.components.logistic.core.request.eventStore.event.LogisticRequestedEvent;
 import com.letsellify.logistics.components.logistic.core.request.eventStore.query.CompleteLogisticQuery;
+import com.letsellify.logistics.components.logistic.core.request.exception.IllegalLGAException;
 import com.letsellify.logistics.components.logistic.core.request.exception.InvalidLogisticItemImageException;
 import com.letsellify.logistics.components.logistic.core.request.exception.LogisticFraudException;
 import com.letsellify.logistics.components.logistic.core.request.exception.NoSuchLogisticRequestException;
@@ -61,7 +65,7 @@ public class LogisticRequestManager {
     private final CommandGateway commandGateway;
     private final StateLGAManager stateLGAManager;
     private final DispatcherManager dispatcherManager;
-    private final RedisTemplate<String, LogisticRequestEntity> redisTemplate;
+    private final RedisTemplate<String, LogisticRequestEntity> requestCache;
     private final ApplicationEventPublisher eventPublisher; // in the case we become a microservice, this becomes a queue, so other components listen
     private final FinanceAccountManager financeAccountManager;  // tight dependency
     private final FileStorageManager fileStorageManager;
@@ -75,7 +79,7 @@ public class LogisticRequestManager {
       final StateLGAManager stateLGAManager,
       final DispatcherManager dispatcherManager,
       @Qualifier("logisticRequestRedisTemplate")
-      final RedisTemplate<String, LogisticRequestEntity> redisTemplate,
+      final RedisTemplate<String, LogisticRequestEntity> requestCache,
       final ApplicationEventPublisher eventPublisher,
       final FinanceAccountManager financeAccountManager,
       final FileStorageManager fileStorageManager
@@ -85,7 +89,7 @@ public class LogisticRequestManager {
      this.commandGateway = commandGateway;
      this.stateLGAManager = stateLGAManager;
      this.dispatcherManager = dispatcherManager;
-     this.redisTemplate = redisTemplate;
+     this.requestCache = requestCache;
      this.eventPublisher = eventPublisher;
      this.financeAccountManager = financeAccountManager;
      this.fileStorageManager = fileStorageManager;
@@ -100,59 +104,49 @@ public class LogisticRequestManager {
     }
 
 
-    void setLogisticsToInDispatcherPossession(final @NonNull String dispatcherUsername, final @NonNull String shippingRequestId) throws NoSuchLogisticRequestException, NoSuchDispatcherException, LogisticFraudException {
-        // First, check Redis cache
-        final String cacheKey = "logistics:" + shippingRequestId;
-        LogisticRequestEntity logisticRequestEntity = this.redisTemplate.opsForValue().get(cacheKey);
-
-        // If not in cache, fetch from database
-        if (logisticRequestEntity == null) {
-            logisticRequestEntity = this.logisticsRequestRepository.findByShippingRequestId(shippingRequestId)
-                                                                   .orElseThrow(() -> new NoSuchLogisticRequestException("No logistic request found with this id " + shippingRequestId));
-
-            // Cache it in Redis for future use
-            this.redisTemplate.opsForValue().set(cacheKey, logisticRequestEntity);
-        }
-
-        final LogisticDispatcher dispatcher = this.dispatcherManager.findDispatcher(dispatcherUsername);
-
-        if (!logisticRequestEntity.getDispatcher().equals(dispatcher)) {
-            throw new LogisticFraudException("Unable to proceed, this logistic request does not belong to dispatcher");
-        }
-        final LogisticInDispatcherPossessionCommand cmd = new LogisticInDispatcherPossessionCommand(shippingRequestId);
-        this.commandGateway.sendAndWait(cmd);
-    }
-
-
-
     public CompletableFuture<String> order(
       final @NonNull Vendor vendor,
       final @NonNull String itemName,
+      final int quantity,
       final @NonNull String description,
-      final @NonNull BigDecimal amountForShipping,
-      final @NonNull BigDecimal amountForStorage,
-      final @NonNull List<String> images,
-      final @NonNull String currentState,
-      final @NonNull String currentLga,
-      final @NonNull String shippingState,
-      final @NonNull String shippingLga,
-      final @NonNull LocalDate possibleDeliveryDateStart,
-      final @NonNull LocalDate possibleDeliveryDateEnd
+      final String fragility,
+      final @NonNull Set<String> condition,
+      final int weight,
+      final String imageUrl1,
+      final String imageUrl2,
+      final @NonNull String receiverFullName,
+      final @NonNull String location,
+      final @NonNull String state,
+      final @NonNull String lga,
+      final String email,
+      final @NonNull String callPhoneNumber,
+      final String whatsAppPhoneNumber,
+      final @NonNull BigDecimal agentPay,
+      final @NonNull BigDecimal dispatcherPay,
+      final @NonNull LocalDate dispatcherPickUpDate,
+      final @NonNull LocalDate dispatcherDeliveryDate,
+      final @NonNull String pickUpState,
+      final @NonNull String pickUpLga,
+      final @NonNull String pickUpAddress
     ) throws NoSuchStateException, IllegalLGAException, InsufficientFundsException, InvalidLogisticItemImageException
     {
 
-        this.stateLGAManager.validateStateAndLgaForLogistics(currentState, currentLga, shippingState, shippingLga);
+        if (!this.stateLGAManager.validateStateAndLgaForLogistics(pickUpState, pickUpLga, state, lga)) {
+            throw new IllegalLGAException("LGA does not belong to state");
+        }
 
+        final Set<String> images = Set.of(imageUrl1, imageUrl2);
         final List<LogisticsItemImage> itemImages = new ArrayList<>();
 
         for (final String image: images) {
-            final LogisticItemImageEntity imageEntity = this.logisticsItemImageRepository.findByIdAndVendorUsername(image, vendor.getEmail())
-                                                                                         .orElseThrow(() -> new InvalidLogisticItemImageException("Image " + image + " not found or associated with" + vendor.getEmail()));
-            itemImages.add(new LogisticsItemImage(imageEntity));
-
+            if (image != null && !image.isBlank()) {
+                final LogisticItemImageEntity imageEntity = this.logisticsItemImageRepository.findByIdAndSenderUsername(image, vendor.getEmail())
+                                                                                             .orElseThrow(() -> new InvalidLogisticItemImageException("Image " + image + " not found or associated with" + vendor.getEmail()));
+                itemImages.add(new LogisticsItemImage(imageEntity));
+            }
         }
 
-        final BigDecimal totalOrderAmount = amountForShipping.add(amountForStorage);
+        final BigDecimal totalOrderAmount = dispatcherPay.add(agentPay);
 
         final BigDecimal totalSpendingAfterTax = totalOrderAmount
                                                    .multiply(PROFIT_PERCENT)
@@ -164,43 +158,79 @@ public class LogisticRequestManager {
 
 
         final LogisticRequestCommand command = new LogisticRequestCommand(
-          vendor.getEmail(),
-          vendor.getVendorName(),
-          vendor.getPhone(),
+          new Sender(vendor.getId(), vendor.getEmail(), vendor.getName(),vendor.getPhone(), vendor.getWhatsAppPhone()),
           itemName,
+          quantity,
           description,
-          amountForShipping,
-          amountForStorage,
-          totalSpendingAfterTax,
+          fragility,
+          condition,
+          weight,
           itemImages,
-          currentState,
-          currentLga,
-          shippingState,
-          shippingLga,
-          possibleDeliveryDateStart,
-          possibleDeliveryDateEnd
+          receiverFullName,
+          location,
+          state,
+          lga,
+          email,
+          callPhoneNumber,
+          whatsAppPhoneNumber,
+          agentPay,
+          dispatcherPay,
+          totalSpendingAfterTax,
+          dispatcherPickUpDate,
+          dispatcherDeliveryDate,
+          pickUpState,
+          pickUpLga,
+          pickUpAddress
         );
 
         // get current balance and update your balance
 
-        final List<String> imagesPresignedUrls = itemImages
-                                                   .stream()
-                                                   .map(image -> this.fileStorageManager.generatePresignedUrl(image.getImageFilePath()))
-                                                   .toList();
+        final List<String> imagesPreSignedUrl = itemImages
+                                                  .stream()
+                                                  .map(image -> this.fileStorageManager.generatePresignedUrl(image.getImageFilePath()))
+                                                  .toList();
         return this.commandGateway.send(command);
 
     }
 
 
+    void setLogisticsToInDispatcherPossession(final @NonNull String dispatcherUsername, final @NonNull String shippingRequestId) throws NoSuchLogisticRequestException, NoSuchDispatcherException, LogisticFraudException {
+        // First, check Redis cache
+        final String cacheKey = "logistics:" + shippingRequestId;
+        LogisticRequestEntity logisticRequestEntity = this.requestCache.opsForValue().get(cacheKey);
+
+        // If not in cache, fetch from database
+        if (logisticRequestEntity == null) {
+            logisticRequestEntity = this.logisticsRequestRepository.findByShippingRequestId(shippingRequestId)
+                                                                   .orElseThrow(() -> new NoSuchLogisticRequestException("No logistic request found with this id " + shippingRequestId));
+
+            // Cache it in Redis for future use
+            this.requestCache.opsForValue().set(cacheKey, logisticRequestEntity);
+        }
+
+        final LogisticDispatcher dispatcher = this.dispatcherManager.findDispatcher(dispatcherUsername);
+
+        if (!logisticRequestEntity.getDispatcherId().equals(dispatcher.id())) {
+            throw new LogisticFraudException("Unable to proceed, this logistic request does not belong to dispatcher");
+        }
+        final LogisticInDispatcherPossessionCommand cmd = new LogisticInDispatcherPossessionCommand(shippingRequestId);
+        this.commandGateway.sendAndWait(cmd);
+    }
+
+
+
+
+
+
     @Transactional
-    public void write(final LogisticRequestedEvent event) {
+    public void writeLogisticRequestEvent(final LogisticRequestedEvent event) {
         try {
                 this.financeAccountManager.escrowForLogistics(
-                    event.getVendorEmail(),
+                    event.getSender().getEmail(),
                     LogisticAppRole.VENDOR,
                     event.getRequestId(),
-                    event.getAmountForShipping(),
-                    event.getAmountForStorage()
+                    event.getDispatcherPay(),
+                    event.getAgentPay()
                   );
 
             }
@@ -223,20 +253,18 @@ public class LogisticRequestManager {
         // this entity should accept a list of iamgees above. it sets the each image to have a reference to this: within the class
         final LogisticRequestEntity entity = LogisticRequestEntity.create(
           event.getRequestId(),
-          event.getVendorEmail(),
-          event.getVendorName(),
-          event.getVendorPhone(),
-          event.getItemName(),
-          event.getDescription(),
+          event.getSender().getSenderId(),
+          new Item(event.getItemName(),event.getQuantity(),event.getDescription(),event.getFragility(),event.getCondition(),event.getWeight()),
           event.getImages(),
-          event.getCurrentState(),
-          event.getCurrentLga(),
-          event.getShippingState(),
-          event.getShippingLga(),
-          event.getPossibleDeliveryDateStart(),
-          event.getPossibleDeliveryDateEnd(),
-          event.getAmountForShipping(),
-          event.getAmountForStorage()
+          event.getPickUpState(),
+          event.getPickUpLga(),
+          new Receiver(event.getReceiverFullName(), event.getReceiverLocation(), event.getReceiverState(), event.getReceiverLga(), event.getReceiverEmail(), event.getReceiverCallNumber(), event.getReceiverWhatsAppNumber()),
+          event.getAgentPay(),
+          event.getDispatcherPay(),
+          event.getTotalSpendingAfterTax(),
+          event.getDispatcherPickUpDate(),
+          event.getDispatcherDeliveryDate(),
+          event.getRequestDate()
         );
 
         this.logisticsRequestRepository.save(entity);
@@ -257,7 +285,7 @@ public class LogisticRequestManager {
         final String cacheKey = "logistics:" + event.requestId();
 
         // Retrieve from cache
-        LogisticRequestEntity logisticRequestEntity = this.redisTemplate.opsForValue().get(cacheKey);
+        LogisticRequestEntity logisticRequestEntity = this.requestCache.opsForValue().get(cacheKey);
 
         if (logisticRequestEntity == null) {
             // If not found in cache, fallback to DB (optional)
@@ -266,7 +294,7 @@ public class LogisticRequestManager {
         }
         logisticRequestEntity.setDispatcherPossession(event.timestamp());
         this.logisticsRequestRepository.save(logisticRequestEntity);
-        this.redisTemplate.opsForValue().set(cacheKey, logisticRequestEntity);
+        this.requestCache.opsForValue().set(cacheKey, logisticRequestEntity);
     }
 
     // whenever giving out a view to outside always poplute images list with

@@ -1,8 +1,8 @@
 package com.letsellify.logistics.components.logistic.core.request.eventStore.command;
 
-import org.axonframework.modelling.command.TargetAggregateIdentifier;
+import java.util.UUID;
 
-import com.letsellify.logistics.components.logistic.core.agent.data.LogisticAgent;
+import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
 /**
  * @author AHMAD BUBA
@@ -12,5 +12,5 @@ import com.letsellify.logistics.components.logistic.core.agent.data.LogisticAgen
 
 public record AcceptStorageRequestCommand(
   @TargetAggregateIdentifier String requestId,
-  LogisticAgent agent
+  UUID agentId
 ) {}

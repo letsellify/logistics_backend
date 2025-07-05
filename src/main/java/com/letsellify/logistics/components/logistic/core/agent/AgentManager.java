@@ -37,7 +37,7 @@ import com.letsellify.logistics.components.logistic.core.kyc.data.LogisticKycDoc
 import com.letsellify.logistics.components.logistic.core.kyc.data.LogisticKycs;
 import com.letsellify.logistics.components.logistic.core.kyc.exception.NoKycRecordFoundException;
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.StateLGAManager;
-import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.IllegalLGAException;
+import com.letsellify.logistics.components.logistic.core.request.exception.IllegalLGAException;
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.NoSuchStateException;
 import com.letsellify.logistics.components.logistic.core.request.event.LogisticRequestBroadcast;
 import com.letsellify.logistics.components.user.core.logisticUser.event.UserOfRoleAgentCreated;
@@ -82,8 +82,8 @@ public class AgentManager {
 
     @EventListener
     public void on(final LogisticRequestBroadcast broadcast) {
-        log.info("we have got a shipping request order from: {}", broadcast.getVendorEmail());
-        final List<AgentEntity> agentEntityList = this.agentRepository.findByCurrentlyAcceptingStorageAndApprove(true,true);
+        log.info("we have got a shipping request order from: {}", broadcast.getSenderId());
+        final List<AgentEntity> agentEntityList = this.agentRepository.findByApprovedAndAcceptingStorage(true,true);
         final Set<LogisticAgent> agents = new HashSet<>();
         for (final AgentEntity entity: agentEntityList) {
             agents.add(new LogisticAgent(entity));
@@ -105,7 +105,7 @@ public class AgentManager {
     public LogisticAgent approveAgent(final @NonNull String email) throws NoSuchAgentException, AgentApprovedException, NoKycRecordFoundException {
         final AgentEntity entity = this.agentRepository.findByEmail(email)
                                                                  .orElseThrow(() -> new NoSuchAgentException("No such agent with email " + email + " found"));
-        if (entity.isApprove()) {
+        if (entity.isApproved()) {
             throw new AgentApprovedException("Agent with email " + email + " all ready approved");
         }
         this.kycManager.approveKyc(entity.getKycId());
@@ -133,7 +133,7 @@ public class AgentManager {
     LogisticKycDocument uploadKycDocument(final @NonNull String userEmail, final @NonNull KycDocumentType kycDocumentType, final @NonNull MultipartFile multipartFile) throws NoSuchAgentException, IOException, AgentApprovedException {
         final AgentEntity entity = this.agentRepository.findByEmail(userEmail)
                                                                  .orElseThrow(() -> new NoSuchAgentException("No such agent with email " + userEmail + " found"));
-        if (entity.isApprove()) {
+        if (entity.isApproved()) {
             throw new AgentApprovedException("Agent with email " + userEmail + " all ready approved");
         }
         return this.kycManager.uploadKyc(entity.getEmail(), LogisticAppRole.DISPATCHER, kycDocumentType, multipartFile);
@@ -143,7 +143,7 @@ public class AgentManager {
     void deleteKyc(final @NonNull String userEmail, final @NonNull String kycId) throws NoSuchAgentException, AgentApprovedException, NoKycRecordFoundException {
         final AgentEntity entity = this.agentRepository.findByEmail(userEmail)
                                                                  .orElseThrow(() -> new NoSuchAgentException("No such agent with email " + userEmail + " found"));
-        if (entity.isApprove()) {
+        if (entity.isApproved()) {
             throw new AgentApprovedException("Agent with email " + userEmail + " all ready approved");
         }
         this.kycManager.deleteKyc(userEmail, kycId);
@@ -181,7 +181,7 @@ public class AgentManager {
     LogisticAgentInfo confirmInfoSubmissionForApproval(final @NonNull String email) throws NoSuchAgentException, AgentApprovedException, NoKycRecordFoundException {
         final AgentEntity entity = this.agentRepository.findByEmail(email)
                                                                  .orElseThrow(() -> new NoSuchAgentException("No such agent with email " + email + " found"));
-        if (entity.isApprove()) {
+        if (entity.isApproved()) {
             throw new AgentApprovedException("Agent with email " + email + " all ready approved");
         }
         final LogisticKycs kyc = this.kycManager.findAgentKyc(email);
@@ -198,10 +198,10 @@ public class AgentManager {
     LogisticAgent setCurrentlyAcceptingStorage(final @NonNull String email, final boolean status) throws NoSuchAgentException, UnapprovedAgentException {
         final AgentEntity entity = this.agentRepository.findByEmail(email)
                                                        .orElseThrow(() -> new NoSuchAgentException("No such agent with email " + email + " found"));
-        if (!entity.isApprove()) {
+        if (!entity.isApproved()) {
             throw new UnapprovedAgentException("You have not been approved");
         }
-        entity.setCurrentlyAcceptingStorage(status);
+        entity.setAcceptingStorage(status);
         this.agentRepository.save(entity);
         return new LogisticAgent(entity);
     }

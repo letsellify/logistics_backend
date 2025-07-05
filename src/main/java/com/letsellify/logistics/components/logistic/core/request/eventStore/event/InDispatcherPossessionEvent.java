@@ -1,6 +1,6 @@
 package com.letsellify.logistics.components.logistic.core.request.eventStore.event;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 /**
  * @author AHMAD BUBA
@@ -8,4 +8,4 @@ import java.time.Instant;
  * Time:16:26
  */
 
-public record InDispatcherPossessionEvent(String requestId, Instant timestamp) {}
+public record InDispatcherPossessionEvent(String requestId, LocalDateTime timestamp) {}

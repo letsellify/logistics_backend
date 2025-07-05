@@ -2,7 +2,9 @@ package com.letsellify.logistics.components.logistic.core.request.event;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.context.ApplicationEvent;
 
@@ -19,39 +21,55 @@ import lombok.Getter;
 
 @Getter
 public class LogisticRequestBroadcast extends ApplicationEvent {
-    String requestId;
-    String vendorEmail;
-    String vendorName;
-    String vendorPhone;
-    String itemName;
-    String description;
-    BigDecimal amountForShipping;
-    BigDecimal amountForStorage;
-    List<String> images;
-    String currentState;
-    String currentLga;
-    String shippingState;
-    String shippingLga;
-    LocalDate possibleDeliveryDateStart;
-    LocalDate possibleDeliveryDateEnd;
+    private final String requestId;
+    private final UUID senderId;
+    private final String itemName;
+    private final String itemDescription;
+    private final String itemFragility;
+    private final int itemWeight;
+    private final List<String> images;
+    private final String receiverFullName;
+    private final String receiverLocation;
+    private final String receiverState;
+    private final String receiverLga;
+    private final String receiverEmail;
+    private final String receiverCallNumber;
+    private final String receiverWhatsAppNumber;
+    private final BigDecimal agentPay;
+    private final BigDecimal dispatcherPay;
+    private final BigDecimal totalSpendingAfterTax;
+    private final LocalDate dispatcherPickUpDate;
+    private final LocalDate dispatcherDeliveryDate;
+    private final String pickUpState;
+    private final String pickUpLga;
+    private final String pickUpAddress;
+    private final LocalDateTime requestDate;
 
     public LogisticRequestBroadcast(final LogisticsRequest logisticsRequest) {
         super(logisticsRequest);
         this.requestId = logisticsRequest.getShippingRequestId();
-        this.vendorEmail = logisticsRequest.getVendor().getVendorEmail();
-        this.vendorName = logisticsRequest.getVendor().getVendorName();
-        this.vendorPhone = logisticsRequest.getVendor().getVendorPhone();
-        this.itemName = logisticsRequest.getItem().getItemName();
-        this.description = logisticsRequest.getItem().getItemDescription();
-        this.amountForShipping = logisticsRequest.getAmountForShipping();
-        this.amountForStorage = logisticsRequest.getAmountForStorage();
+        this.senderId = logisticsRequest.getSenderId();
+        this.itemName = logisticsRequest.getItem().getName();
+        this.itemDescription = logisticsRequest.getItem().getDescription();
+        this.itemFragility = logisticsRequest.getItem().getFragility();
+        this.itemWeight = logisticsRequest.getItem().getWeight();
+        this.agentPay = logisticsRequest.getAgentPay();
+        this.dispatcherPay = logisticsRequest.getDispatcherPay();
+        this.receiverEmail = logisticsRequest.getReceiverEmail();
+        this.receiverFullName = logisticsRequest.getReceiverFullName();
+        this.receiverCallNumber = logisticsRequest.getReceiverCallNumber();
+        this.receiverWhatsAppNumber = logisticsRequest.getReceiverWhatsAppNumber();
+        this.receiverState = logisticsRequest.getReceiverState();
+        this.receiverLga = logisticsRequest.getReceiverLga();
+        this.receiverLocation = logisticsRequest.getReceiverLocation();
         this.images = logisticsRequest.getImages();
-        this.currentState = logisticsRequest.getCurrentState();
-        this.currentLga = logisticsRequest.getCurrentLga();
-        this.shippingState = logisticsRequest.getShippingState();
-        this.shippingLga = logisticsRequest.getShippingLga();
-        this.possibleDeliveryDateStart = logisticsRequest.getStartDate();
-        this.possibleDeliveryDateEnd = logisticsRequest.getEndDate();
+        this.totalSpendingAfterTax = logisticsRequest.getTotalSpendingAfterTax();
+        this.dispatcherPickUpDate = logisticsRequest.getDispatcherPickUpDate();
+        this.dispatcherDeliveryDate = logisticsRequest.getDispatcherDeliveryDate();
+        this.pickUpState = logisticsRequest.getPickUpState();
+        this.pickUpLga = logisticsRequest.getPickUpLga();
+        this.pickUpAddress = logisticsRequest.getPickUpAddress();
+        this.requestDate = logisticsRequest.getRequestDate();
     }
 
 }

@@ -11,7 +11,7 @@ import com.letsellify.logistics.common.restException.LogisticsBadRequestExceptio
 import com.letsellify.logistics.common.restException.LogisticsInternalServerErrorException;
 import com.letsellify.logistics.components.fileStorage.core.FileStorageManager;
 import com.letsellify.logistics.components.logistic.core.financeAccount.exception.InsufficientFundsException;
-import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.IllegalLGAException;
+import com.letsellify.logistics.components.logistic.core.request.exception.IllegalLGAException;
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.NoSuchStateException;
 import com.letsellify.logistics.components.logistic.core.paystackPaymentGateway.rest.resource.PaystackInitiateTransactionResponse;
 import com.letsellify.logistics.components.logistic.core.request.exception.InvalidLogisticItemImageException;
@@ -37,7 +37,7 @@ public class VendorDataService {
     private final FileStorageManager fileStorageManager;
 
     public PaystackInitiateTransactionResponse initializeTopUp(final Authentication authentication, final VendorTopUpDto topUp) {
-        System.out.println("Amount recieved " + topUp.amount());
+        System.out.println("Amount received " + topUp.amount());
         try {
             return this.vendorManager.initializeTopUp(authentication.getName(), topUp.amount());
         }
@@ -50,17 +50,32 @@ public class VendorDataService {
         try {
             return this.vendorManager.order(
                          authentication.getName(),
-                         orderDto.itemName(),
-                         orderDto.description(),
-                         orderDto.amountForShipping(),
-                         orderDto.amountForStorage(),
-                         orderDto.images(),
-                         orderDto.currentState(),
-                         orderDto.currentLga(),
-                         orderDto.shippingState(),
-                         orderDto.shippingLga(),
-                         orderDto.possibleDeliveryDateStart(),
-                         orderDto.possibleDeliveryDateEnd()
+                         orderDto.goodInformation().itemName(),
+                         orderDto.goodInformation().quantity(),
+                         orderDto.goodInformation().description(),
+                         orderDto.goodInformation().fragility(),
+                         orderDto.goodInformation().condition(),
+                         orderDto.goodInformation().weight(),
+                         orderDto.goodInformation().imageUrl1(),
+                         orderDto.goodInformation().imageUrl2(),
+                         orderDto.receiverInformation().fullName(),
+                         orderDto.receiverInformation().location(),
+                         orderDto.receiverInformation().state(),
+                         orderDto.receiverInformation().lga(),
+                         orderDto.receiverInformation().email(),
+                         orderDto.receiverInformation().callPhoneNumber(),
+                         orderDto.receiverInformation().whatsAppPhoneNumber(),
+                         orderDto.otherDetails()
+                                 .agentPay(),
+                         orderDto.otherDetails()
+                                 .dispatcherPay(),
+                         orderDto.otherDetails()
+                                 .dispatcherPickUpDate(),
+                         orderDto.otherDetails()
+                                 .dispatcherDeliveryDate(),
+                         orderDto.otherDetails().pickUpState(),
+                         orderDto.otherDetails().pickUpLga(),
+                         orderDto.otherDetails().pickUpAddress()
                        );
         }
 
