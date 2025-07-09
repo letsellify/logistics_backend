@@ -115,6 +115,9 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(AUTH_WHITELIST)
                         .permitAll()
+                        .requestMatchers("/api/v1/agent/**").hasRole("VENDOR")
+                        .requestMatchers("/api/v1/dispatcher/**").hasRole("DISPATCHER")
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest()
                         .authenticated()
                 )

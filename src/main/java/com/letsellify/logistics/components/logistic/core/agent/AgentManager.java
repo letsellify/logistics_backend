@@ -161,6 +161,9 @@ public class AgentManager {
                                                                  .orElseThrow(() -> new NoSuchAgentException("No such agent with email " + email + " found"));
 
         final String agentNameBeforeUpdate = entity.getPersonalInfo().getName();
+        if (this.stateLGAManager.validateStateLga(personalInfoDto.state(), personalInfoDto.lga()) || this.stateLGAManager.validateStateLga(storeDetailDto.state(), storeDetailDto.lga())) {
+            throw new IllegalLGAException("LGA does not match state");
+        }
         this.stateLGAManager.validateStateLga(personalInfoDto.state(),personalInfoDto.lga());
         this.stateLGAManager.validateStateLga(storeDetailDto.state(),storeDetailDto.lga());
         final AgentEntity.PersonalInfoEmbeddable personalInfoEmbeddable = new AgentEntity.PersonalInfoEmbeddable(personalInfoDto.name(), personalInfoDto.state(), personalInfoDto.lga(), personalInfoDto.address());

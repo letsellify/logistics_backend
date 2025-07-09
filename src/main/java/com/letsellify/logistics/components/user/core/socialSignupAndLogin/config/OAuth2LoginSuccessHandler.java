@@ -71,7 +71,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             final String token = this.tokenManager.getAccessTokenForOAuth2(securityUser);
             response.sendRedirect("https://logistics.letsellify/join-as/SIGNUP?" + token);
         } else {
-            final String domain = ".letsellify";
+            final String domain = "logistics.letsellify.com";
             final LogisticsAppSecurityToken securityToken = this.tokenManager.getToken(securityUser);
             CookieUtil.addCookie(response, domain, "access_token", securityToken.getAccessToken(), 15 * 60);
             CookieUtil.addCookie(response, domain,"refresh_token", securityToken.getRefreshToken(), 7 * 24 * 60 * 60);
