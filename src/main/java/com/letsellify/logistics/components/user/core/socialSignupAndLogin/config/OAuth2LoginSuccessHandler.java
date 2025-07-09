@@ -69,7 +69,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         if (appUser.getRole() == null) {
             final String token = this.tokenManager.getAccessTokenForOAuth2(securityUser);
-            response.sendRedirect("https://logistics.letsellify/join-as/SIGNUP?" + token);
+            response.sendRedirect("https://logistics.letsellify.com/join-as/SIGNUP?" + token);
         } else {
             final String domain = "logistics.letsellify.com";
             final LogisticsAppSecurityToken securityToken = this.tokenManager.getToken(securityUser);
