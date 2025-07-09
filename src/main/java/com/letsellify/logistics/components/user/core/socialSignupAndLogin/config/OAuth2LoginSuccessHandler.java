@@ -76,7 +76,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             CookieUtil.addCookie(response, domain, "access_token", securityToken.getAccessToken(), 15 * 60);
             CookieUtil.addCookie(response, domain,"refresh_token", securityToken.getRefreshToken(), 7 * 24 * 60 * 60);
             this.addSecurityHeaders(response);
-            response.sendRedirect("https://logistics.letsellify/homepage");
+            response.sendRedirect("https://logistics.letsellify.com/homepage");
         }
     }
 
