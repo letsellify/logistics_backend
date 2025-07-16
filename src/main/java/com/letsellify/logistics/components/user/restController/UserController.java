@@ -13,6 +13,7 @@ import com.letsellify.logistics.components.user.core.logisticUser.rest.resource.
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,8 +47,9 @@ public class UserController {
       summary = "Provides the details of the currently authenticated user"
     )
     @GetMapping("/me")
-    public UserResource getMyself(final Authentication authentication) {
+    public UserResource getMyself(final Authentication authentication, final HttpServletRequest request) {
         log.info("User Details requested for: {} ", authentication.getName() );
+        log.info("Domain: {}", request.getServerName());
         return this.userDataService.getUser(authentication.getName());
     }
 

@@ -23,6 +23,8 @@ import com.letsellify.logistics.components.logistic.core.dispatcher.rest.resourc
 import com.letsellify.logistics.components.logistic.core.kyc.data.KycDocumentType;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +43,7 @@ public class DispatcherController {
     private final DispatcherDataService dispatcherDataService;
 
     @PostMapping("kyc-upload")
-    public String uploadKycDocument(final @NonNull Authentication authentication, @RequestParam final @NonNull KycDocumentType documentType, @RequestParam final  MultipartFile file) {
+    public String uploadKycDocument(final @NonNull Authentication authentication, @RequestParam final @NonNull KycDocumentType documentType, @RequestParam final  MultipartFile file, HttpServletRequest httpServletRequest) {
         if (file.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File cannot be empty.");
         }
@@ -49,6 +51,19 @@ public class DispatcherController {
         if (contentType == null || !List.of("image/jpeg", "image/png", "application/pdf").contains(contentType)) {
             throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Only JPEG, PNG, and PDF files are allowed.");
         }
+        System.out.println("File received: " + file.getOriginalFilename() + " with content type: " + contentType);
+        Cookie[] cookies = httpServletRequest.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("access_token".equals(cookie.getName())) { // replace with your actual cookie name
+                    String token = cookie.getValue();
+                    System.out.println("Access Token from Cookie: " + token);
+                }
+            }
+        } else {
+            System.out.println("No cookies found in request.");
+        }
+
         return this.dispatcherDataService.uploadKyc(authentication, documentType, file);
     }
 
