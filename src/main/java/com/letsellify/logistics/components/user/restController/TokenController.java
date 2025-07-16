@@ -25,6 +25,7 @@ import com.letsellify.logistics.components.user.util.CookieUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -56,31 +57,32 @@ public class TokenController {
                summary = "Validates user credentials and returns authorization tokens")
     @PostMapping("/login")
     public ResponseEntity<?> login(
-      @RequestHeader(value = "Origin", required = false) final String origin,
+      final HttpServletRequest httpServletRequest,
       @RequestHeader("X-Client-Type") final String clientType,
       @RequestBody final @Valid LoginDto loginDto,
       final HttpServletResponse httpServletResponse
     ) {
-        log.info("Origin: {}", origin);
         if (clientType == null || clientType.isEmpty() || (!clientType.equalsIgnoreCase("mobile") && !clientType.equalsIgnoreCase("web"))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid client type");
         }
         final Authentication authentication = this.daoAuthenticationProvider.authenticate(UsernamePasswordAuthenticationToken.unauthenticated(loginDto.getEmail(), loginDto.getPassword()));
         final TokenResource tokenResource = this.tokenDataService.getToken(authentication);
-        String domain = null;
         if ("web".equalsIgnoreCase(clientType)) {
-            if (origin != null && origin.contains("localhost")) {
+            final String serverName = httpServletRequest.getServerName();
+            final String domain;
+            if (serverName.contains("localhost")) {
                 domain = "localhost";
-            } else if (origin != null && origin.contains(".letsellify")) {
-                domain = ".letsellify";
             }
-
+            else if (serverName.contains(".letsellify")) {
+                domain = "logistics.letsellify.com";
+            }
+            else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Origin header not detected");
+            }
             log.info("Request comes from: {}", domain);
-            if (domain != null) {
-                CookieUtil.addCookie(httpServletResponse, domain, "access_token", tokenResource.getAccessToken(), 15 * 60);
-                CookieUtil.addCookie(httpServletResponse, domain, "refresh_token", tokenResource.getRefreshToken(), 7 * 24 * 60 * 60);
-                return ResponseEntity.ok(Map.of("message", "Login Successful"));
-            }
+            CookieUtil.addCookie(httpServletResponse, domain, "access_token", tokenResource.getAccessToken(), 15 * 60);
+            CookieUtil.addCookie(httpServletResponse, domain, "refresh_token", tokenResource.getRefreshToken(), 7 * 24 * 60 * 60);
+            return ResponseEntity.ok(Map.of("message", "Login Successful"));
         }
 
         return ResponseEntity.ok(Map.of(
@@ -88,6 +90,7 @@ public class TokenController {
           "access_token", tokenResource.getAccessToken(),
           "refresh_token", tokenResource.getRefreshToken()
         ));
+
     }
 
 
