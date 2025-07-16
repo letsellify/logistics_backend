@@ -69,14 +69,14 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         if (appUser.getRole() == null) {
             final String token = this.tokenManager.getAccessTokenForOAuth2(securityUser);
-            response.sendRedirect("http://localhost:5173/join-as/SIGNUP?" + token);
+            response.sendRedirect("https://logistics.letsellify.com/join-as/SIGNUP?" + token);
         } else {
             final String domain = "localhost";
             final LogisticsAppSecurityToken securityToken = this.tokenManager.getToken(securityUser);
             CookieUtil.addCookie(response, domain, "access_token", securityToken.getAccessToken(), 15 * 60);
             CookieUtil.addCookie(response, domain,"refresh_token", securityToken.getRefreshToken(), 7 * 24 * 60 * 60);
             this.addSecurityHeaders(response);
-            response.sendRedirect("http://localhost:5173/homepage");
+            response.sendRedirect("https://logistics.letsellify.com/homepage");
         }
     }
 
