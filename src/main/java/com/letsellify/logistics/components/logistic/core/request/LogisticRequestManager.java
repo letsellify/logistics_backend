@@ -32,6 +32,7 @@ import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.excepti
 import com.letsellify.logistics.components.logistic.core.request.data.Item;
 import com.letsellify.logistics.components.logistic.core.request.data.LogisticsItemImage;
 import com.letsellify.logistics.components.logistic.core.request.data.LogisticsRequest;
+import com.letsellify.logistics.components.logistic.core.request.data.LogisticsStatus;
 import com.letsellify.logistics.components.logistic.core.request.data.Receiver;
 import com.letsellify.logistics.components.logistic.core.request.data.Sender;
 import com.letsellify.logistics.components.logistic.core.request.database.entity.LogisticItemImageEntity;
@@ -264,7 +265,8 @@ public class LogisticRequestManager {
           event.getTotalSpendingAfterTax(),
           event.getDispatcherPickUpDate(),
           event.getDispatcherDeliveryDate(),
-          event.getRequestDate()
+          event.getRequestDate(),
+          LogisticsStatus.REQUESTED
         );
 
         this.logisticsRequestRepository.save(entity);

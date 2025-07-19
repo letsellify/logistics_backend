@@ -44,6 +44,7 @@ public class VendorController {
 
     @PostMapping(value = "logistics/image-upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public LogisticItemImageResource uploadLogisticsItemImage(final Authentication authentication, @RequestParam final MultipartFile file) {
+        System.out.println("Request comes from " + authentication.getName());
         return this.vendorDataService.uploadLogisticsItemImage(authentication,file);
     }
 

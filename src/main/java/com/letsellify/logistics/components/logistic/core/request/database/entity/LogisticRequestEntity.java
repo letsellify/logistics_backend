@@ -94,7 +94,8 @@ public class LogisticRequestEntity extends Auditable {
       final BigDecimal totalSpending,
       final LocalDate dispatcherPickUpDate,
       final LocalDate dispatcherDeliveryDate,
-      final LocalDateTime requestDate
+      final LocalDateTime requestDate,
+      final LogisticsStatus status
     ) {
         final LogisticRequestEntity entity = new LogisticRequestEntity();
         entity.id = UUID.randomUUID();
@@ -121,6 +122,8 @@ public class LogisticRequestEntity extends Auditable {
         entity.dispatcherPickUpDate = dispatcherPickUpDate;
         entity.dispatcherDeliveryDate = dispatcherDeliveryDate;
         entity.requestDate = requestDate;
+        entity.status = status;
+
         return entity;
     }
 }

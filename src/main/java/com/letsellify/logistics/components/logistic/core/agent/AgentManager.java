@@ -136,7 +136,7 @@ public class AgentManager {
         if (entity.isApproved()) {
             throw new AgentApprovedException("Agent with email " + userEmail + " all ready approved");
         }
-        return this.kycManager.uploadKyc(entity.getEmail(), LogisticAppRole.DISPATCHER, kycDocumentType, multipartFile);
+        return this.kycManager.uploadKyc(entity.getEmail(), LogisticAppRole.AGENT, kycDocumentType, multipartFile);
     }
 
     @Transactional
