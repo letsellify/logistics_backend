@@ -1,4 +1,4 @@
-package com.letsellify.logistics.components.logistic.core.request.exception;
+package com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception;
 
 import com.letsellify.logistics.common.exception.LogisticsException;
 

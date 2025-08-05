@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.letsellify.logistics.components.logistic.core.request.data.Item;
+import com.letsellify.logistics.components.logistic.core.request.database.entity.ItemEntity;
 
 /**
  * @author AHMAD BUBA
@@ -15,7 +15,7 @@ import com.letsellify.logistics.components.logistic.core.request.data.Item;
 
 public record LogisticRequestResource(
   String shippingRequestId,
-  Item item,
+  ItemEntity item,
   BigDecimal amountForShipping,
   BigDecimal amountForStorage,
   List<String> images,

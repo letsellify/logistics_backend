@@ -4,8 +4,11 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import com.letsellify.logistics.components.logistic.core.request.data.ItemCondition;
 import org.springframework.context.ApplicationEvent;
 
 import com.letsellify.logistics.components.logistic.core.request.data.LogisticsRequest;
@@ -27,6 +30,7 @@ public class LogisticRequestBroadcast extends ApplicationEvent {
     private final String itemDescription;
     private final String itemFragility;
     private final int itemWeight;
+    private final Set<String> condition;
     private final List<String> images;
     private final String receiverFullName;
     private final String receiverLocation;
@@ -49,10 +53,11 @@ public class LogisticRequestBroadcast extends ApplicationEvent {
         super(logisticsRequest);
         this.requestId = logisticsRequest.getShippingRequestId();
         this.senderId = logisticsRequest.getSenderId();
-        this.itemName = logisticsRequest.getItem().getName();
-        this.itemDescription = logisticsRequest.getItem().getDescription();
-        this.itemFragility = logisticsRequest.getItem().getFragility();
-        this.itemWeight = logisticsRequest.getItem().getWeight();
+        this.itemName = logisticsRequest.getItem().name();
+        this.itemDescription = logisticsRequest.getItem().description();
+        this.itemFragility = logisticsRequest.getItem().fragility();
+        this.itemWeight = logisticsRequest.getItem().weight();
+        this.condition = logisticsRequest.getItem().conditions().stream().map(ItemCondition::name).collect(Collectors.toSet());
         this.agentPay = logisticsRequest.getAgentPay();
         this.dispatcherPay = logisticsRequest.getDispatcherPay();
         this.receiverEmail = logisticsRequest.getReceiverEmail();

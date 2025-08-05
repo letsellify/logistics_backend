@@ -9,4 +9,4 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 
 @ConfigurationProperties(prefix = "paystack")
-public record PaystackConfig(String baseUrl, String secretKey) {}
+public record PaystackProps(String baseUrl, String secretKey) {}

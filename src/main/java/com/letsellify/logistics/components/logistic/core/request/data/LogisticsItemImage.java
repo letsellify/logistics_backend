@@ -6,6 +6,8 @@ import com.letsellify.logistics.components.logistic.core.request.rest.resource.L
 
 import lombok.Getter;
 
+import java.util.UUID;
+
 /**
  * @author AHMAD BUBA
  * Date:2/9/25
@@ -18,13 +20,13 @@ public final class LogisticsItemImage {
     private final LogisticItemImageEntity entity;
     private final String imageId;
     private final String imageFilePath;
-    private final String senderUsername;
+    private final UUID senderId;
 
     public LogisticsItemImage(final LogisticItemImageEntity entity) {
         this.entity = entity;
         this.imageId = entity.getId();
         this.imageFilePath = entity.getImageFilePath();
-        this.senderUsername = entity.getSenderUsername();
+        this.senderId = entity.getSenderId();
     }
 
     public LogisticItemImageResource getResource() {

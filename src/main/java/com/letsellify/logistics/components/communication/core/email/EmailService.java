@@ -186,7 +186,9 @@ public class EmailService {
             <table style="width: 100%%; border-collapse: collapse;">
                 <tr><td style="padding: 8px;"><strong>🆔 Request ID:</strong></td><td>%s</td></tr>
                 <tr><td style="padding: 8px;"><strong>📦 Item:</strong></td><td>%s</td></tr>
-                <tr><td style="padding: 8px;"><strong>🚚 Pickup Location:</strong></td><td>%s, %s</td></tr>
+               public VendorInformation(String vendorProfilePicture, VendorPersonalInformation vendorPersonalInformation, VendorContactInformation vendorContactInformation, VendorBusinessInformation vendorBusinessInformation) {
+        this(vendorProfilePicture, vendorPersonalInformation, vendorContactInformation, vendorBusinessInformation);
+    } <tr><td style="padding: 8px;"><strong>🚚 Pickup Location:</strong></td><td>%s, %s</td></tr>
                 <tr><td style="padding: 8px;"><strong>🎯 Destination:</strong></td><td>%s, %s</td></tr>
                 <tr><td style="padding: 8px;"><strong>💰 Shipping Fee:</strong></td><td>₦%,.2f</td></tr>
                 <tr><td style="padding: 8px;"><strong>💰 Storage Fee:</strong></td><td>₦%,.2f</td></tr>

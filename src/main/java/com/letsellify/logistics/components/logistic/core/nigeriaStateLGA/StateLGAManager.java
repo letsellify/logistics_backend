@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.config.StateLGAJsonFilePathConfig;
+import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.config.StateLGAProps;
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.data.NigerianStateLGA;
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.data.NigerianStates;
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.database.entity.LGAEntity;
@@ -40,11 +40,11 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@EnableConfigurationProperties(StateLGAJsonFilePathConfig.class)
+@EnableConfigurationProperties(StateLGAProps.class)
 public class StateLGAManager implements CommandLineRunner {
     private final StateRepository stateRepository;
     private final LGARepository lgaRepository;
-    private final StateLGAJsonFilePathConfig stateLGAJsonFilePathConfig;
+    private final StateLGAProps stateLGAProps;
     private final Map<String, Set<String>> stateLgaCache = new HashMap<>();
 
 
@@ -53,7 +53,7 @@ public class StateLGAManager implements CommandLineRunner {
     public void run(final String... args) throws Exception {
         if (this.stateRepository.count() <= 0) {
             log.info("Actually loading from file source since repository is empty");
-            final String jsonFilePath = this.stateLGAJsonFilePathConfig.jsonFilePath();
+            final String jsonFilePath = this.stateLGAProps.jsonFilePath();
             final InputStream jsonInputStream;
 
             if (jsonFilePath.startsWith("classpath:")) {

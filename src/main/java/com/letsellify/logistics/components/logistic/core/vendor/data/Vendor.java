@@ -20,17 +20,17 @@ public class Vendor {
     private UUID id;
     private String name;
     private String email;
-    private String phone;
-    private String whatsAppPhone;
+    private String phoneNumber;
+    private String whatsAppPhoneNumber;
     private BigDecimal balance;
 
     public Vendor(final VendorEntity entity) {
         this.entity = entity;
         this.id = entity.getId();
-        this.name = entity.getVendorName();
+        this.name = entity.getPersonalInformation().getName();
         this.email = entity.getEmail();
-        this.phone = entity.getPhone();
-        this.whatsAppPhone = entity.getWhatsAppPhone();
+        this.phoneNumber = entity.getContactInformation().getPhoneNumber();
+        this.whatsAppPhoneNumber = entity.getContactInformation().getWhatsAppPhoneNumber();
         this.balance = entity.getCurrentAccountBalance();
     }
 }

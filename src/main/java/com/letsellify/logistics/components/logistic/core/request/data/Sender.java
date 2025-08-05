@@ -19,6 +19,6 @@ public class Sender {
     private UUID senderId;
     private String email;
     private String fullName;
-    private String phone;
-    private String whatsAppPhone;
+    private String phoneNumber;
+    private String whatsAppPhoneNumber;
 }

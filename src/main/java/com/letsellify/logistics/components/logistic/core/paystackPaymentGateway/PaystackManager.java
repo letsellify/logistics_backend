@@ -2,6 +2,7 @@ package com.letsellify.logistics.components.logistic.core.paystackPaymentGateway
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -70,11 +71,11 @@ public class PaystackManager{
 
     // possibly do a validation to check that the provided string is all digit: amount(String)
     @Transactional
-    public PaystackInitiateTransactionResponse initializePayment(final @NonNull String email, final @NonNull LogisticAppRole userRole, final @NonNull BigDecimal amount) throws UserNotFoundException {
+    public PaystackInitiateTransactionResponse initializePayment(final @NonNull UUID userId, final @NonNull String userEmail, @NonNull LogisticAppRole userRole, final @NonNull BigDecimal amount) throws UserNotFoundException {
        final String totalAmount = amount.toString();
        log.info("Original amount received from frontend {}", totalAmount);
        final String totalAmountinKobo = amount.multiply(BigDecimal.valueOf(100)).toPlainString();
-       final PaystackInitiateTransactionRequest requestBody = new PaystackInitiateTransactionRequest(email, totalAmountinKobo);
+       final PaystackInitiateTransactionRequest requestBody = new PaystackInitiateTransactionRequest(userEmail, totalAmountinKobo);
        final PaystackInitiateTransactionResponse responseBody = this.restClient.post()
                                                                                .uri("/transaction/initialize")
                                                                                .body(requestBody)
@@ -82,7 +83,7 @@ public class PaystackManager{
                                                                                .body(PaystackInitiateTransactionResponse.class);
        assert responseBody != null;
        final PaystackPaymentEntity entity = PaystackPaymentEntity.create(
-             email,
+             userId,
              userRole,
              amount,
              responseBody.isStatus(),
@@ -109,7 +110,7 @@ public class PaystackManager{
         log.info("Payment status is {}, with the following data {}", paymentEntity.isSuccess(), paymentEntity.getChargeSuccessWebhookData().toString());
         try {
             // put it on a kafka, accountManager listens
-            this.accountManager.topUpAccount(paymentEntity.getUserEmail(), paymentEntity.getUserRole(), paymentEntity.getAmount());
+            this.accountManager.topUpAccount(paymentEntity.getUserId(), paymentEntity.getUserRole(), paymentEntity.getAmount());
         }
         catch (final Exception e) {
             throw new RuntimeException(e);

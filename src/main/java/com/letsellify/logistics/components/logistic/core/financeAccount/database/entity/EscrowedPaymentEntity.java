@@ -70,7 +70,7 @@ public class EscrowedPaymentEntity extends Auditable {
         return entity;
     }
 
-    protected void settle(final String userEmail, final LogisticAppRole userRole, final BigDecimal amount) {
+    protected void settle(final UUID userId, final LogisticAppRole userRole, final BigDecimal amount) {
         if (this.settlements.size() >= 2) {
             throw new IllegalStateException("Cannot have more than 2 settlements.");
         }
@@ -84,12 +84,14 @@ public class EscrowedPaymentEntity extends Auditable {
         }
 
         // Add the new settlement
-        final PaymentSettlementEntity settlement = PaymentSettlementEntity.getInstance(userEmail, userRole, amount);
+        final PaymentSettlementEntity settlement = PaymentSettlementEntity.getInstance(userId, userRole, amount);
         this.settlements.add(settlement);
 
         // Update the current balance
         this.currentBalance = this.currentBalance.subtract(amount);
 
+        // check if what we have remaining is the percent profit
+        // if so, we set status to settled
         // Update status if fully settled
         if (this.currentBalance.compareTo(BigDecimal.ZERO) == 0) {
             this.status = EscrowStatus.SETTLED;

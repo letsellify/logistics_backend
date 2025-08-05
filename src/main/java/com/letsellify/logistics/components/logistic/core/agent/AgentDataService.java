@@ -18,7 +18,7 @@ import com.letsellify.logistics.components.logistic.core.agent.rest.resource.Log
 import com.letsellify.logistics.components.logistic.core.agent.rest.resource.LogisticAgentResource;
 import com.letsellify.logistics.components.logistic.core.kyc.data.KycDocumentType;
 import com.letsellify.logistics.components.logistic.core.kyc.exception.NoKycRecordFoundException;
-import com.letsellify.logistics.components.logistic.core.request.exception.IllegalLGAException;
+import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.IllegalLGAException;
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.NoSuchStateException;
 
 import lombok.NonNull;

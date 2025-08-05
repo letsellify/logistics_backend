@@ -45,7 +45,7 @@ public class PaystackPaymentEntity extends Auditable {
 
     private String reference;
 
-    private String userEmail;
+    private UUID userId;
 
     @Enumerated(EnumType.STRING)
     private LogisticAppRole userRole;
@@ -60,13 +60,13 @@ public class PaystackPaymentEntity extends Auditable {
         super();
     }
 
-    public static PaystackPaymentEntity create(final String userEmail, final LogisticAppRole userRole, final BigDecimal amount, final boolean status, final String message, final String authorizationUrl, final String accessCode, final String reference) {
+    public static PaystackPaymentEntity create(final UUID userId, final LogisticAppRole userRole, final BigDecimal amount, final boolean status, final String message, final String authorizationUrl, final String accessCode, final String reference) {
         Objects.requireNonNull(amount, "Amount must not be null");
-        Objects.requireNonNull(userEmail, "UserEmail must not be null");
+        Objects.requireNonNull(userId, "UserEmail must not be null");
         Objects.requireNonNull(userRole, "UserRole must not be null");
         final PaystackPaymentEntity paymentEntity = new PaystackPaymentEntity();
         paymentEntity.id = UUID.randomUUID();
-        paymentEntity.userEmail = userEmail;
+        paymentEntity.userId = userId;
         paymentEntity.userRole = userRole;
         paymentEntity.amount = amount;
         paymentEntity.initializationStatus = status;

@@ -7,10 +7,7 @@ import java.util.UUID;
 import com.letsellify.logistics.common.entityAudit.entity.Auditable;
 import com.letsellify.logistics.common.data.LogisticAppRole;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -38,6 +35,7 @@ public class VerificationCodeEntity extends Auditable {
 
     private String userEmail;
 
+    @Enumerated(EnumType.STRING)
     private LogisticAppRole role;
 
     private boolean verified = false; // Indicates if the code was successfully used

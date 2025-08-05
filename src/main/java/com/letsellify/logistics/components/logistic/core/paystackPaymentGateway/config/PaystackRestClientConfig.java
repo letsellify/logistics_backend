@@ -15,18 +15,18 @@ import lombok.RequiredArgsConstructor;
  */
 
 @Configuration
-@EnableConfigurationProperties(PaystackConfig.class)
+@EnableConfigurationProperties(PaystackProps.class)
 @RequiredArgsConstructor
 public class PaystackRestClientConfig {
-    private final PaystackConfig config;
+    private final PaystackProps paystackProps;
 
     @Bean
     @Qualifier("PaystackRestClient")
     public RestClient payStackRestClient() {
         return RestClient.builder()
-                         .defaultHeader("Authorization", "Bearer " + this.config.secretKey())
+                         .defaultHeader("Authorization", "Bearer " + this.paystackProps.secretKey())
                          .defaultHeader("Content-Type", "application/json")
-                         .baseUrl(this.config.baseUrl())
+                         .baseUrl(this.paystackProps.baseUrl())
                          .build();
     }
 }

@@ -25,7 +25,7 @@ import lombok.EqualsAndHashCode;
 public class PaymentSettlementEntity extends Auditable {
     @Id
     private UUID settlementId;
-    private String userEmail;
+    private UUID userId;
     @Enumerated(EnumType.STRING)
     private LogisticAppRole appRole;
     private BigDecimal amount;
@@ -35,10 +35,10 @@ public class PaymentSettlementEntity extends Auditable {
         super();
     }
 
-    public static PaymentSettlementEntity getInstance(final String userEmail, final LogisticAppRole appRole, final BigDecimal amount) {
+    public static PaymentSettlementEntity getInstance(final UUID userId, final LogisticAppRole appRole, final BigDecimal amount) {
         final PaymentSettlementEntity paymentSettlement = new PaymentSettlementEntity();
         paymentSettlement.settlementId = UUID.randomUUID();
-        paymentSettlement.userEmail = userEmail;
+        paymentSettlement.userId = userId;
         paymentSettlement.appRole = appRole;
         paymentSettlement.amount = amount;
         return paymentSettlement;

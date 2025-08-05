@@ -15,6 +15,6 @@ import com.letsellify.logistics.components.logistic.core.financeAccount.database
  */
 
 public interface LogisticsAccountRepository extends JpaRepository<LogisticsAccountEntity, UUID> {
-    Optional<LogisticsAccountEntity> findByUserEmail(String email);
-    Optional<LogisticsAccountEntity> findByUserEmailAndAppRole(String email, LogisticAppRole appRole);
+    Optional<LogisticsAccountEntity> findByUserId(UUID userId);
+    Optional<LogisticsAccountEntity> findByUserIdAndAppRole(UUID userId, LogisticAppRole appRole);
 }

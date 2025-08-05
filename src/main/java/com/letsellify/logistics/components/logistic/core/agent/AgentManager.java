@@ -37,7 +37,7 @@ import com.letsellify.logistics.components.logistic.core.kyc.data.LogisticKycDoc
 import com.letsellify.logistics.components.logistic.core.kyc.data.LogisticKycs;
 import com.letsellify.logistics.components.logistic.core.kyc.exception.NoKycRecordFoundException;
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.StateLGAManager;
-import com.letsellify.logistics.components.logistic.core.request.exception.IllegalLGAException;
+import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.IllegalLGAException;
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.NoSuchStateException;
 import com.letsellify.logistics.components.logistic.core.request.event.LogisticRequestBroadcast;
 import com.letsellify.logistics.components.user.core.logisticUser.event.UserOfRoleAgentCreated;

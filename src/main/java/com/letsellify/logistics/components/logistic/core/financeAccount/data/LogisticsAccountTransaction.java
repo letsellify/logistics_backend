@@ -16,7 +16,7 @@ import lombok.Data;
 
 @Data
 public class LogisticsAccountTransaction {
-    private String userEmail;
+    private UUID userId;
     private LogisticAppRole appRole;
     private UUID transactionId;
     private LogisticsAccountTransactionType transactionType;
@@ -26,7 +26,7 @@ public class LogisticsAccountTransaction {
         this.transactionType = logisticsAccountTransactionEntity.getTransactionType();
         this.amount = logisticsAccountTransactionEntity.getAmount();
         this.transactionId = logisticsAccountTransactionEntity.getId();
-        this.userEmail = logisticsAccountTransactionEntity.getLogisticsAccount().getUserEmail();
+        this.userId = logisticsAccountTransactionEntity.getLogisticsAccount().getUserId();
         this.appRole = logisticsAccountTransactionEntity.getLogisticsAccount().getAppRole();
     }
 

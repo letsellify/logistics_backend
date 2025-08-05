@@ -40,7 +40,7 @@ import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.StateLG
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.NoSuchStateException;
 import com.letsellify.logistics.components.logistic.core.request.event.LogisticRequestBroadcast;
 import com.letsellify.logistics.components.logistic.core.request.eventStore.command.DispatchRequestAcceptedCommand;
-import com.letsellify.logistics.components.logistic.core.request.exception.IllegalLGAException;
+import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.IllegalLGAException;
 import com.letsellify.logistics.components.logistic.core.vendor.exception.VendorExistsException;
 import com.letsellify.logistics.components.user.core.logisticUser.event.UserOfRoleDispatcherCreated;
 

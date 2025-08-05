@@ -9,4 +9,5 @@ package com.letsellify.logistics.components.fileStorage.core.data;
 public enum StorageType {
     KYC,
     LOGISTICS,
+    VENDOR_PROFILE_PICTURE,
 }

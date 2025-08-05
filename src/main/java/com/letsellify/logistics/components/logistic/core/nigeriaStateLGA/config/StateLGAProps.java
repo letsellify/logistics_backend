@@ -9,4 +9,4 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 
 @ConfigurationProperties(prefix = "state-lga")
-public record StateLGAJsonFilePathConfig(String jsonFilePath) {}
+public record StateLGAProps(String jsonFilePath) {}

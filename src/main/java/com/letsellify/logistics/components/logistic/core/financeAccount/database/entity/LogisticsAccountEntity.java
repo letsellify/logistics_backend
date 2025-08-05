@@ -39,9 +39,7 @@ public class LogisticsAccountEntity extends Auditable {
 
     private BigDecimal balance;
 
-    @NaturalId
-    @Column(nullable = false, unique = true)
-    private String userEmail;
+    private UUID userId;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -63,10 +61,10 @@ public class LogisticsAccountEntity extends Auditable {
         super();
     }
 
-    public static LogisticsAccountEntity getInstance(final String userEmail, final LogisticAppRole appRole) {
+    public static LogisticsAccountEntity getInstance(final UUID userId, final LogisticAppRole appRole) {
         final LogisticsAccountEntity entity = new LogisticsAccountEntity();
         entity.id = UUID.randomUUID();
-        entity.userEmail = userEmail;
+        entity.userId = userId;
         entity.appRole = appRole;
         entity.balance = BigDecimal.ZERO;
         return entity;
@@ -115,9 +113,9 @@ public class LogisticsAccountEntity extends Auditable {
     // tricky, manager first gets escrowedPayment using repository by shippingId, from escrowedPayment gets the account
     // then tells the account settle
     // we could possibly make it get by id then us normal stream method to find it based on id since all transactions have allready been fetched
-    public LogisticsAccountTransactionEntity settle(final EscrowedPaymentEntity escrowedPaymentEntity,final String userEmail, final LogisticAppRole userRole, final BigDecimal amount) {
+    public LogisticsAccountTransactionEntity settle(final EscrowedPaymentEntity escrowedPaymentEntity,final UUID userId, final LogisticAppRole userRole, final BigDecimal amount) {
         try {
-              escrowedPaymentEntity.settle(userEmail, userRole, amount);
+              escrowedPaymentEntity.settle(userId, userRole, amount);
         }
         catch (IllegalStateException e) {
             throw new RuntimeException(e);

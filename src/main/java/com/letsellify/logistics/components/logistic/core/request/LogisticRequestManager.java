@@ -7,8 +7,12 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
+import com.letsellify.logistics.components.logistic.core.request.database.entity.ConditionEntity;
+import com.letsellify.logistics.components.logistic.core.request.database.repository.ConditionRepository;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.queryhandling.QueryHandler;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,7 +33,7 @@ import com.letsellify.logistics.components.logistic.core.financeAccount.exceptio
 import com.letsellify.logistics.components.logistic.core.financeAccount.exception.InsufficientFundsException;
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.StateLGAManager;
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.NoSuchStateException;
-import com.letsellify.logistics.components.logistic.core.request.data.Item;
+import com.letsellify.logistics.components.logistic.core.request.database.entity.ItemEntity;
 import com.letsellify.logistics.components.logistic.core.request.data.LogisticsItemImage;
 import com.letsellify.logistics.components.logistic.core.request.data.LogisticsRequest;
 import com.letsellify.logistics.components.logistic.core.request.data.LogisticsStatus;
@@ -45,7 +49,7 @@ import com.letsellify.logistics.components.logistic.core.request.eventStore.comm
 import com.letsellify.logistics.components.logistic.core.request.eventStore.event.InDispatcherPossessionEvent;
 import com.letsellify.logistics.components.logistic.core.request.eventStore.event.LogisticRequestedEvent;
 import com.letsellify.logistics.components.logistic.core.request.eventStore.query.CompleteLogisticQuery;
-import com.letsellify.logistics.components.logistic.core.request.exception.IllegalLGAException;
+import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.IllegalLGAException;
 import com.letsellify.logistics.components.logistic.core.request.exception.InvalidLogisticItemImageException;
 import com.letsellify.logistics.components.logistic.core.request.exception.LogisticFraudException;
 import com.letsellify.logistics.components.logistic.core.request.exception.NoSuchLogisticRequestException;
@@ -66,6 +70,7 @@ public class LogisticRequestManager {
     private final CommandGateway commandGateway;
     private final StateLGAManager stateLGAManager;
     private final DispatcherManager dispatcherManager;
+    private final ConditionRepository conditionRepository;
     private final RedisTemplate<String, LogisticRequestEntity> requestCache;
     private final ApplicationEventPublisher eventPublisher; // in the case we become a microservice, this becomes a queue, so other components listen
     private final FinanceAccountManager financeAccountManager;  // tight dependency
@@ -79,6 +84,7 @@ public class LogisticRequestManager {
       final CommandGateway commandGateway,
       final StateLGAManager stateLGAManager,
       final DispatcherManager dispatcherManager,
+      final ConditionRepository conditionRepository,
       @Qualifier("logisticRequestRedisTemplate")
       final RedisTemplate<String, LogisticRequestEntity> requestCache,
       final ApplicationEventPublisher eventPublisher,
@@ -90,6 +96,7 @@ public class LogisticRequestManager {
      this.commandGateway = commandGateway;
      this.stateLGAManager = stateLGAManager;
      this.dispatcherManager = dispatcherManager;
+     this.conditionRepository = conditionRepository;
      this.requestCache = requestCache;
      this.eventPublisher = eventPublisher;
      this.financeAccountManager = financeAccountManager;
@@ -97,9 +104,9 @@ public class LogisticRequestManager {
     }
 
     // consider caching here to improve speed
-    public LogisticsItemImage uploadLogisticsItemImage(final @NonNull String vendorUsername, final @NonNull MultipartFile image) throws IOException {
-        final String filePath = this.fileStorageManager.storeFile(StorageType.LOGISTICS, vendorUsername, image);
-        final LogisticItemImageEntity logisticsItemImageEntity = new LogisticItemImageEntity(vendorUsername, filePath);
+    public LogisticsItemImage uploadLogisticsItemImage(final @NonNull UUID senderId, final @NonNull String senderUsername, final @NonNull MultipartFile image) throws IOException {
+        final String filePath = this.fileStorageManager.storeFile(StorageType.LOGISTICS, senderUsername, image);
+        final LogisticItemImageEntity logisticsItemImageEntity = new LogisticItemImageEntity(senderId, filePath);
         this.logisticsItemImageRepository.save(logisticsItemImageEntity);
         return new LogisticsItemImage(logisticsItemImageEntity);
     }
@@ -141,7 +148,7 @@ public class LogisticRequestManager {
 
         for (final String image: images) {
             if (image != null && !image.isBlank()) {
-                final LogisticItemImageEntity imageEntity = this.logisticsItemImageRepository.findByIdAndSenderUsername(image, vendor.getEmail())
+                final LogisticItemImageEntity imageEntity = this.logisticsItemImageRepository.findByIdAndSenderId(image, vendor.getId())
                                                                                              .orElseThrow(() -> new InvalidLogisticItemImageException("Image " + image + " not found or associated with" + vendor.getEmail()));
                 itemImages.add(new LogisticsItemImage(imageEntity));
             }
@@ -159,7 +166,7 @@ public class LogisticRequestManager {
 
 
         final LogisticRequestCommand command = new LogisticRequestCommand(
-          new Sender(vendor.getId(), vendor.getEmail(), vendor.getName(),vendor.getPhone(), vendor.getWhatsAppPhone()),
+          new Sender(vendor.getId(), vendor.getEmail(), vendor.getName(),vendor.getPhoneNumber(), vendor.getWhatsAppPhoneNumber()),
           itemName,
           quantity,
           description,
@@ -186,10 +193,10 @@ public class LogisticRequestManager {
 
         // get current balance and update your balance
 
-        final List<String> imagesPreSignedUrl = itemImages
-                                                  .stream()
-                                                  .map(image -> this.fileStorageManager.generatePresignedUrl(image.getImageFilePath()))
-                                                  .toList();
+//        final List<String> imagesPreSignedUrl = itemImages
+//                                                  .stream()
+//                                                  .map(image -> this.fileStorageManager.generatePresignedUrl(image.getImageFilePath()))
+//                                                  .toList();
         return this.commandGateway.send(command);
 
     }
@@ -226,8 +233,9 @@ public class LogisticRequestManager {
     @Transactional
     public void writeLogisticRequestEvent(final LogisticRequestedEvent event) {
         try {
+            /* should be vendor ID instead of email */
                 this.financeAccountManager.escrowForLogistics(
-                    event.getSender().getEmail(),
+                    event.getSender().getSenderId(),
                     LogisticAppRole.VENDOR,
                     event.getRequestId(),
                     event.getDispatcherPay(),
@@ -255,10 +263,11 @@ public class LogisticRequestManager {
         final LogisticRequestEntity entity = LogisticRequestEntity.create(
           event.getRequestId(),
           event.getSender().getSenderId(),
-          new Item(event.getItemName(),event.getQuantity(),event.getDescription(),event.getFragility(),event.getCondition(),event.getWeight()),
+          createItemFromRequest(event),
           event.getImages(),
           event.getPickUpState(),
           event.getPickUpLga(),
+          event.getPickUpAddress(),
           new Receiver(event.getReceiverFullName(), event.getReceiverLocation(), event.getReceiverState(), event.getReceiverLga(), event.getReceiverEmail(), event.getReceiverCallNumber(), event.getReceiverWhatsAppNumber()),
           event.getAgentPay(),
           event.getDispatcherPay(),
@@ -310,6 +319,21 @@ public class LogisticRequestManager {
                                                        .map(itemImage -> this.fileStorageManager.generatePresignedUrl(itemImage.getImageFilePath()))
                                                        .toList();
         return new LogisticsRequest(entity,imagesPresignedUrls);
+    }
+
+
+    public ItemEntity createItemFromRequest(LogisticRequestedEvent request) {
+        Set<ConditionEntity> conditionEntities = request.getCondition().stream()
+                .map(this::getOrCreateCondition)
+                .collect(Collectors.toSet());
+
+        return new  ItemEntity(request.getItemName(),request.getQuantity(),request.getDescription(), request.getFragility(), request.getWeight(), conditionEntities);
+
+    }
+
+    private ConditionEntity getOrCreateCondition(String name) {
+        return conditionRepository.findByName(name)
+                .orElseGet(() -> conditionRepository.save(new ConditionEntity(name)));
     }
 
 }

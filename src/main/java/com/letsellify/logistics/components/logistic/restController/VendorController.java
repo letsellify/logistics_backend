@@ -2,20 +2,19 @@ package com.letsellify.logistics.components.logistic.restController;
 
 import java.util.concurrent.CompletableFuture;
 
+import com.letsellify.logistics.components.logistic.core.vendor.rest.dto.*;
+import com.letsellify.logistics.components.logistic.core.vendor.rest.resource.VendorBusinessInformationResource;
+import com.letsellify.logistics.components.logistic.core.vendor.rest.resource.VendorContactInformationResource;
+import com.letsellify.logistics.components.logistic.core.vendor.rest.resource.VendorInformationResource;
+import com.letsellify.logistics.components.logistic.core.vendor.rest.resource.VendorPersonalInformationResource;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.letsellify.logistics.components.logistic.core.paystackPaymentGateway.rest.resource.PaystackInitiateTransactionResponse;
 import com.letsellify.logistics.components.logistic.core.request.rest.resource.LogisticItemImageResource;
 import com.letsellify.logistics.components.logistic.core.vendor.VendorDataService;
-import com.letsellify.logistics.components.logistic.core.vendor.rest.dto.OrderDto;
-import com.letsellify.logistics.components.logistic.core.vendor.rest.dto.VendorTopUpDto;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -33,6 +32,31 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "Vendor API", description = "API's vendors")
 public class VendorController {
     private final VendorDataService vendorDataService;
+
+    @PostMapping("/personal-info")
+    public VendorPersonalInformationResource uploadPersonalInformation(final Authentication authentication, @Valid @RequestBody final PersonalInformationDto personalInformationDto) {
+        return this.vendorDataService.uploadPersonalInformation(authentication, personalInformationDto);
+    }
+
+    @PostMapping("/contact-info")
+    public VendorContactInformationResource uploadContactInformation(final Authentication authentication, @Valid @RequestBody final ContactInformationDto contactInformationDto) {
+        return this.vendorDataService.uploadContactInformation(authentication, contactInformationDto);
+    }
+
+    @PostMapping("/business-info")
+    public VendorBusinessInformationResource uploadBusinessInformation(final Authentication authentication, @Valid @RequestBody final BusinessInformationDto businessInformationDto) {
+        return this.vendorDataService.uploadBusinessInformation(authentication, businessInformationDto);
+    }
+
+    @PostMapping(value = "/profile-picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String uploadProfilePicture(final Authentication authentication, @RequestParam("file") MultipartFile file) {
+        return this.vendorDataService.uploadProfilePicture(authentication, file);
+    }
+
+    @GetMapping("/info")
+    public VendorInformationResource getInformation(final Authentication authentication) {
+        return this.vendorDataService.getVendorInformation(authentication);
+    }
 
     @PostMapping("/account/initialize-topUp")
     public PaystackInitiateTransactionResponse initializeTopUp(

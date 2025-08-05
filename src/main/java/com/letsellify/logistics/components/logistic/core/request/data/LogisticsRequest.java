@@ -1,18 +1,18 @@
 package com.letsellify.logistics.components.logistic.core.request.data;
 
+import com.letsellify.logistics.components.logistic.core.request.dataMapper.LogisticRequestDataMapper;
+import com.letsellify.logistics.components.logistic.core.request.database.entity.LogisticRequestEntity;
+import com.letsellify.logistics.components.logistic.core.request.rest.resource.LogisticRequestResource;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-
-import com.letsellify.logistics.components.logistic.core.request.dataMapper.LogisticRequestDataMapper;
-import com.letsellify.logistics.components.logistic.core.request.database.entity.LogisticRequestEntity;
-import com.letsellify.logistics.components.logistic.core.request.rest.resource.LogisticRequestResource;
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import java.util.stream.Collectors;
 
 /**
  * @author AHMAD BUBA
@@ -77,7 +77,7 @@ public final class LogisticsRequest {
         this.id = entity.getId();
         this.shippingRequestId = entity.getShippingRequestId();
         this.senderId = entity.getSenderId();
-        this.item = entity.getItem();
+        this.item = new Item(entity.getItem().getName(), entity.getItem().getQuantity(), entity.getItem().getDescription(), entity.getItem().getFragility(), entity.getItem().getWeight(), entity.getItem().getConditions().stream().map(conditionEntity -> new ItemCondition(conditionEntity.getName())).collect(Collectors.toSet()));
         this.images = imagesPresignedUrl;
         this.receiverFullName = entity.getReceiver().getReceiverFullName();
         this.receiverLocation = entity.getReceiver().getReceiverLocation();

@@ -8,19 +8,11 @@ import java.util.List;
 import java.util.UUID;
 
 import com.letsellify.logistics.common.entityAudit.entity.Auditable;
-import com.letsellify.logistics.components.logistic.core.request.data.Item;
 import com.letsellify.logistics.components.logistic.core.request.data.LogisticsItemImage;
 import com.letsellify.logistics.components.logistic.core.request.data.LogisticsStatus;
 import com.letsellify.logistics.components.logistic.core.request.data.Receiver;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -39,8 +31,9 @@ public class LogisticRequestEntity extends Auditable {
 
     private String shippingRequestId;
 
-    @Embedded
-    private Item item;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "item_id")
+    private ItemEntity item;
 
     private UUID senderId;
 
@@ -84,10 +77,11 @@ public class LogisticRequestEntity extends Auditable {
     public static LogisticRequestEntity create(
       final String requestId,
       final UUID senderId,
-      final Item item,
+      final ItemEntity item,
       final List<LogisticsItemImage> itemImages,
       final String pickUpState,
       final String pickUpLga,
+      final String pickUpAddress,
       final Receiver receiver,
       final BigDecimal agentPay,
       final BigDecimal dispatcherPay,
@@ -115,6 +109,7 @@ public class LogisticRequestEntity extends Auditable {
               );
         entity.pickUpState = pickUpState;
         entity.pickUpLga = pickUpLga;
+        entity.pickUpAddress = pickUpAddress;
         entity.receiver = receiver;
         entity.dispatcherPay = dispatcherPay;
         entity.agentPay = agentPay;

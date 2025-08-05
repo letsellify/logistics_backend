@@ -11,7 +11,8 @@ import jakarta.validation.constraints.NotNull;
 public record OrderDto(
   @NotNull
   GoodInformation goodInformation,
-  @NotNull ReceiverInformation receiverInformation,
+  @NotNull
+  ReceiverInformation receiverInformation,
   @NotNull
   OtherDetail otherDetails
 ) {

@@ -34,7 +34,7 @@ public class LogisticItemImageEntity extends Auditable {
     private String imageFilePath;
 
     @Column(nullable = false)
-    private String senderUsername;
+    private UUID senderId;
 
     @ManyToOne
     @JoinColumn(name = "logistics_request")
@@ -44,11 +44,11 @@ public class LogisticItemImageEntity extends Auditable {
         super();
     }
 
-    public LogisticItemImageEntity(final String userEmail, final String imageFilePath) {
+    public LogisticItemImageEntity(final UUID senderId, final String imageFilePath) {
         super();
         this.id = this.generateImageId(imageFilePath);
         this.imageFilePath = imageFilePath;
-        this.senderUsername = userEmail;
+        this.senderId = senderId;
     }
 
     private String generateImageId(final String filePath) {
