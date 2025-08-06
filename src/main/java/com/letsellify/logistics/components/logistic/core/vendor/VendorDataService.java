@@ -7,9 +7,13 @@ import com.letsellify.logistics.components.logistic.core.financeAccount.exceptio
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.NoSuchStateException;
 import com.letsellify.logistics.components.logistic.core.paystackPaymentGateway.rest.resource.PaystackInitiateTransactionResponse;
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.IllegalLGAException;
+import com.letsellify.logistics.components.logistic.core.request.data.LogisticRequest;
 import com.letsellify.logistics.components.logistic.core.request.exception.ImageConflictException;
 import com.letsellify.logistics.components.logistic.core.request.exception.InvalidLogisticItemImageException;
+import com.letsellify.logistics.components.logistic.core.request.exception.NoSuchLogisticRequestException;
 import com.letsellify.logistics.components.logistic.core.request.rest.resource.LogisticItemImageResource;
+import com.letsellify.logistics.components.logistic.core.request.rest.resource.VendorLogisticRequestResource;
+import com.letsellify.logistics.components.logistic.core.request.rest.resource.VendorLogisticRequestResources;
 import com.letsellify.logistics.components.logistic.core.vendor.exception.InCompleteVendorProfileException;
 import com.letsellify.logistics.components.logistic.core.vendor.exception.VendorNotFoundException;
 import com.letsellify.logistics.components.logistic.core.vendor.rest.dto.*;
@@ -26,7 +30,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  * @author AHMAD BUBA
@@ -162,6 +169,31 @@ public class VendorDataService {
             throw new LogisticsInternalServerErrorException(e.getMessage());
         } catch (InCompleteVendorProfileException | VendorNotFoundException e) {
             throw new LogisticsRestException(HttpStatus.UNAUTHORIZED, e.getMessage());
+        }
+    }
+
+    public VendorLogisticRequestResource getLogisticRequest(Authentication authentication, @NonNull final String logisticRequestId) {
+        try {
+            return this.vendorManager.getLogisticRequest(authentication.getName(), logisticRequestId).getVendorResource();
+        } catch (NoSuchLogisticRequestException | VendorNotFoundException e) {
+            throw new LogisticsBadRequestException(e.getMessage());
+        } catch (InCompleteVendorProfileException e) {
+            throw new LogisticsRestException(HttpStatus.FORBIDDEN, "403", e.getMessage());
+        }
+
+    }
+
+    public VendorLogisticRequestResources getLogisticRequests(final Authentication authentication) {
+        try {
+            List<VendorLogisticRequestResource> resources = this.vendorManager.getLogisticRequests(authentication.getName())
+                    .stream()
+                    .map(LogisticRequest::getVendorResource)
+                    .collect(Collectors.toList());
+            return new VendorLogisticRequestResources(resources);
+        } catch (VendorNotFoundException e) {
+            throw new LogisticsBadRequestException(e.getMessage());
+        } catch (InCompleteVendorProfileException e) {
+            throw new LogisticsRestException(HttpStatus.FORBIDDEN, "403", e.getMessage());
         }
     }
 }

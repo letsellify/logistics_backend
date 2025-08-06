@@ -37,7 +37,7 @@ import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.StateLG
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.NoSuchStateException;
 import com.letsellify.logistics.components.logistic.core.request.database.entity.ItemEntity;
 import com.letsellify.logistics.components.logistic.core.request.data.LogisticsItemImage;
-import com.letsellify.logistics.components.logistic.core.request.data.LogisticsRequest;
+import com.letsellify.logistics.components.logistic.core.request.data.LogisticRequest;
 import com.letsellify.logistics.components.logistic.core.request.data.LogisticsStatus;
 import com.letsellify.logistics.components.logistic.core.request.data.Receiver;
 import com.letsellify.logistics.components.logistic.core.request.data.Sender;
@@ -295,7 +295,7 @@ public class LogisticRequestManager {
                                                        .map(itemImage -> this.fileStorageManager.generatePresignedUrl(itemImage.getImageFilePath()))
                                                        .toList();
 
-        final LogisticsRequest request = new LogisticsRequest(entity, imagesPresignedUrls);
+        final LogisticRequest request = new LogisticRequest(entity, imagesPresignedUrls);
 
         this.eventPublisher.publishEvent(new LogisticRequestBroadcast(request));
     }
@@ -321,14 +321,14 @@ public class LogisticRequestManager {
     // whenever giving out a view to outside always poplute images list with
     // s3 presigned url instead
     @QueryHandler
-    public LogisticsRequest read(final @NonNull CompleteLogisticQuery query) throws NoSuchLogisticRequestException {
+    public LogisticRequest read(final @NonNull CompleteLogisticQuery query) throws NoSuchLogisticRequestException {
         final LogisticRequestEntity entity = this.logisticsRequestRepository.findByShippingRequestId(query.getRequestId())
                                                                             .orElseThrow(() -> new NoSuchLogisticRequestException("Wrong requestId, no record exists for: " + query.getRequestId()));
         final List<String> imagesPresignedUrls = entity.getItemImages()
                                                        .stream()
                                                        .map(itemImage -> this.fileStorageManager.generatePresignedUrl(itemImage.getImageFilePath()))
                                                        .toList();
-        return new LogisticsRequest(entity,imagesPresignedUrls);
+        return new LogisticRequest(entity,imagesPresignedUrls);
     }
 
 
@@ -337,7 +337,7 @@ public class LogisticRequestManager {
                 .map(this::getOrCreateCondition)
                 .collect(Collectors.toSet());
 
-        return new  ItemEntity(request.getItemName(),request.getQuantity(),request.getDescription(), request.getFragility(), request.getWeight(), conditionEntities);
+        return new ItemEntity(request.getItemName(),request.getQuantity(),request.getDescription(), request.getFragility(), request.getWeight(), conditionEntities);
 
     }
 
@@ -346,4 +346,29 @@ public class LogisticRequestManager {
                 .orElseGet(() -> conditionRepository.save(new ConditionEntity(name)));
     }
 
+    public LogisticRequest getVendorLogisticRequest(final @NonNull UUID senderId, final @NonNull String logisticRequestId) throws NoSuchLogisticRequestException {
+        LogisticRequestEntity entity = this.logisticsRequestRepository.findByShippingRequestIdAndSenderId(logisticRequestId,senderId)
+                .orElseThrow(() -> new NoSuchLogisticRequestException("No such request with id: " + logisticRequestId + " found for this sender"));
+        return new LogisticRequest(entity, entity.getItemImages().stream().map(itemImage -> this.fileStorageManager.generatePresignedUrl(itemImage.getImageFilePath())).collect(Collectors.toList()));
+    }
+
+    public List<LogisticRequest> getVendorLogisticRequests(final @NonNull UUID senderId) {
+        List<LogisticRequestEntity> entityList = this.logisticsRequestRepository.findBySenderId(senderId);
+        return entityList.stream().map(entity -> {
+            List<String> imagesPresignedUrls = entity
+                    .getItemImages()
+                    .stream()
+                    .map(logisticItemImageEntity -> this.fileStorageManager.generatePresignedUrl(logisticItemImageEntity.getImageFilePath()))
+                    .toList();
+            return new LogisticRequest(entity, imagesPresignedUrls);
+        }).toList();
+    }
+
+    public LogisticRequest getDispatcherLogisticRequest(final @NonNull UUID dispatcherId, final @NonNull String logisticRequestId) {
+        return null;
+    }
+
+    public LogisticRequest getAgentLogisticRequest(final @NonNull UUID agentId, final @NonNull String logisticRequestId) {
+        return null;
+    }
 }

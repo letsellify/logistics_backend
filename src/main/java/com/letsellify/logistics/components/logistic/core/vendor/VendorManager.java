@@ -3,13 +3,16 @@ package com.letsellify.logistics.components.logistic.core.vendor;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import com.letsellify.logistics.components.fileStorage.core.FileStorageManager;
 import com.letsellify.logistics.components.fileStorage.core.data.StorageType;
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.StateLGAManager;
+import com.letsellify.logistics.components.logistic.core.request.data.LogisticRequest;
 import com.letsellify.logistics.components.logistic.core.request.exception.ImageConflictException;
+import com.letsellify.logistics.components.logistic.core.request.exception.NoSuchLogisticRequestException;
 import com.letsellify.logistics.components.logistic.core.vendor.data.*;
 import com.letsellify.logistics.components.logistic.core.vendor.exception.InCompleteVendorProfileException;
 import org.springframework.context.event.EventListener;
@@ -229,6 +232,20 @@ public class VendorManager {
         if (entity.getPersonalInformation() == null) {
             throw new InCompleteVendorProfileException("Personal information missing");
         }
+    }
+
+    public LogisticRequest getLogisticRequest(final @NonNull String vendorEmail, final @NonNull String logisticRequestId) throws VendorNotFoundException, InCompleteVendorProfileException, NoSuchLogisticRequestException {
+        final VendorEntity entity = this.vendorRepository.findByEmail(vendorEmail)
+                .orElseThrow(() -> new VendorNotFoundException("Vendor with username " + vendorEmail + " not found."));
+        this.validateVendor(entity);
+        return this.logisticRequestManager.getVendorLogisticRequest(entity.getId(), logisticRequestId);
+    }
+
+    public List<LogisticRequest> getLogisticRequests(final @NonNull String vendorEmail) throws VendorNotFoundException, InCompleteVendorProfileException {
+        final VendorEntity entity = this.vendorRepository.findByEmail(vendorEmail)
+                .orElseThrow(() -> new VendorNotFoundException("Vendor with username " + vendorEmail + " not found."));
+        this.validateVendor(entity);
+        return this.logisticRequestManager.getVendorLogisticRequests(entity.getId());
     }
 
     private VendorInformation buildVendorInformation(VendorEntity entity) {

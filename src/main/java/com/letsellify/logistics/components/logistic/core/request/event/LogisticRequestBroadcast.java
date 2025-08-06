@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import com.letsellify.logistics.components.logistic.core.request.data.ItemCondition;
 import org.springframework.context.ApplicationEvent;
 
-import com.letsellify.logistics.components.logistic.core.request.data.LogisticsRequest;
+import com.letsellify.logistics.components.logistic.core.request.data.LogisticRequest;
 
 import lombok.Getter;
 
@@ -49,7 +49,7 @@ public class LogisticRequestBroadcast extends ApplicationEvent {
     private final String pickUpAddress;
     private final LocalDateTime requestDate;
 
-    public LogisticRequestBroadcast(final LogisticsRequest logisticsRequest) {
+    public LogisticRequestBroadcast(final LogisticRequest logisticsRequest) {
         super(logisticsRequest);
         this.requestId = logisticsRequest.getShippingRequestId();
         this.senderId = logisticsRequest.getSenderId();

@@ -1,9 +1,10 @@
 package com.letsellify.logistics.components.logistic.core.request;
 
 import org.axonframework.queryhandling.QueryGateway;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import com.letsellify.logistics.components.logistic.core.request.data.LogisticsRequest;
+import com.letsellify.logistics.components.logistic.core.request.data.LogisticRequest;
 import com.letsellify.logistics.components.logistic.core.request.eventStore.query.CompleteLogisticQuery;
 import com.letsellify.logistics.components.logistic.core.request.rest.dto.LogisticRequestDto;
 import com.letsellify.logistics.components.logistic.core.request.rest.resource.LogisticRequestResource;
@@ -25,8 +26,16 @@ public class LogisticRequestDataService {
 
     public LogisticRequestResource getLogistics(final @NonNull LogisticRequestDto requestDto) {
         final CompleteLogisticQuery query = new CompleteLogisticQuery(requestDto.getShippingRequestId());
-        final LogisticsRequest logisticsRequest = this.queryGateway.query(query, LogisticsRequest.class).join();
+        final LogisticRequest logisticsRequest = this.queryGateway.query(query, LogisticRequest.class).join();
         return logisticsRequest.getResource();
     }
 
+//    public LogisticRequestResource getLogisticRequests(Authentication authentication) {
+//        try {
+//            return this.logisticRequestManager.getLogisticRequest();
+//        }
+//        catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 }

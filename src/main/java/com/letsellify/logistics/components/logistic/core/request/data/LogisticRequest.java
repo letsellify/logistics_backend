@@ -3,6 +3,7 @@ package com.letsellify.logistics.components.logistic.core.request.data;
 import com.letsellify.logistics.components.logistic.core.request.dataMapper.LogisticRequestDataMapper;
 import com.letsellify.logistics.components.logistic.core.request.database.entity.LogisticRequestEntity;
 import com.letsellify.logistics.components.logistic.core.request.rest.resource.LogisticRequestResource;
+import com.letsellify.logistics.components.logistic.core.request.rest.resource.VendorLogisticRequestResource;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Builder
 @Getter
-public final class LogisticsRequest {
+public final class LogisticRequest {
 
     private final UUID id;
 
@@ -67,17 +68,19 @@ public final class LogisticsRequest {
 
     private final LocalDateTime requestDate;
 
+    private final LogisticsStatus status;
+
 //    public LogisticsRequest(final LogisticRequestEntity entity) {
 //        this.id = entity.getId();
 //        this.shippingRequestId = entity.getShippingRequestId();
 //        this.item = entity.getItem();
 //    }
 
-    public LogisticsRequest(final LogisticRequestEntity entity, final List<String> imagesPresignedUrl) {
+    public LogisticRequest(final LogisticRequestEntity entity, final List<String> imagesPresignedUrl) {
         this.id = entity.getId();
         this.shippingRequestId = entity.getShippingRequestId();
         this.senderId = entity.getSenderId();
-        this.item = new Item(entity.getItem().getName(), entity.getItem().getQuantity(), entity.getItem().getDescription(), entity.getItem().getFragility(), entity.getItem().getWeight(), entity.getItem().getConditions().stream().map(conditionEntity -> new ItemCondition(conditionEntity.getName())).collect(Collectors.toSet()));
+        this.item = new Item(entity.getItemEntity().getName(), entity.getItemEntity().getQuantity(), entity.getItemEntity().getDescription(), entity.getItemEntity().getFragility(), entity.getItemEntity().getWeight(), entity.getItemEntity().getConditions().stream().map(conditionEntity -> new ItemCondition(conditionEntity.getName())).collect(Collectors.toSet()));
         this.images = imagesPresignedUrl;
         this.receiverFullName = entity.getReceiver().getReceiverFullName();
         this.receiverLocation = entity.getReceiver().getReceiverLocation();
@@ -95,10 +98,15 @@ public final class LogisticsRequest {
         this.pickUpLga = entity.getPickUpLga();
         this.pickUpAddress = entity.getPickUpAddress();
         this.requestDate = entity.getRequestDate();
+        this.status = entity.getStatus();
     }
 
     public LogisticRequestResource getResource() {
         return LogisticRequestDataMapper.INSTANCE.dataToResource(this);
+    }
+
+    public VendorLogisticRequestResource getVendorResource() {
+        return LogisticRequestDataMapper.INSTANCE.dataToVendorResource(this);
     }
 
 }

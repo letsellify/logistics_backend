@@ -33,7 +33,7 @@ public class LogisticRequestEntity extends Auditable {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "item_id")
-    private ItemEntity item;
+    private ItemEntity itemEntity;
 
     private UUID senderId;
 
@@ -77,7 +77,7 @@ public class LogisticRequestEntity extends Auditable {
     public static LogisticRequestEntity create(
       final String requestId,
       final UUID senderId,
-      final ItemEntity item,
+      final ItemEntity itemEntity,
       final List<LogisticsItemImage> itemImages,
       final String pickUpState,
       final String pickUpLga,
@@ -95,7 +95,7 @@ public class LogisticRequestEntity extends Auditable {
         entity.id = UUID.randomUUID();
         entity.shippingRequestId = requestId;
         entity.senderId = senderId;
-        entity.item = item;
+        entity.itemEntity = itemEntity;
         entity.getItemImages()
               .addAll(
                 itemImages

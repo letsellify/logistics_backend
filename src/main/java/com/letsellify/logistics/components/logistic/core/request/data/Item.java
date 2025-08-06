@@ -1,6 +1,9 @@
 package com.letsellify.logistics.components.logistic.core.request.data;
 
 
+import com.letsellify.logistics.components.logistic.core.request.dataMapper.LogisticRequestDataMapper;
+import com.letsellify.logistics.components.logistic.core.request.rest.resource.LogisticItemResource;
+
 import java.util.Set;
 
 /**
@@ -17,4 +20,7 @@ public record Item(
      int weight,
      Set<ItemCondition> conditions
 ) {
+    public LogisticItemResource getResource() {
+        return LogisticRequestDataMapper.INSTANCE.dataToResource(this);
+    }
 }
