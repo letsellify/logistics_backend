@@ -9,6 +9,7 @@ import java.util.concurrent.CompletableFuture;
 import com.letsellify.logistics.components.fileStorage.core.FileStorageManager;
 import com.letsellify.logistics.components.fileStorage.core.data.StorageType;
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.StateLGAManager;
+import com.letsellify.logistics.components.logistic.core.request.exception.ImageConflictException;
 import com.letsellify.logistics.components.logistic.core.vendor.data.*;
 import com.letsellify.logistics.components.logistic.core.vendor.exception.InCompleteVendorProfileException;
 import org.springframework.context.event.EventListener;
@@ -183,7 +184,7 @@ public class VendorManager {
       final @NonNull String pickUpState,
       final @NonNull String pickUpLga,
       final @NonNull String pickUpAddress
-    ) throws VendorNotFoundException, InvalidLogisticItemImageException, InsufficientFundsException, NoSuchStateException, IllegalLGAException, InCompleteVendorProfileException {
+    ) throws VendorNotFoundException, InvalidLogisticItemImageException, InsufficientFundsException, NoSuchStateException, IllegalLGAException, InCompleteVendorProfileException, ImageConflictException {
         final VendorEntity entity = this.vendorRepository.findByEmail(vendorEmail)
                                                          .orElseThrow(() -> new VendorNotFoundException("Vendor with username " + vendorEmail + " not found."));
         this.validateVendor(entity);

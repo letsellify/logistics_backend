@@ -86,12 +86,46 @@ public class FinanceAccountManager {
                 .orElseThrow(() -> new FinanceAccountNotFoundException("Account not found"));
 
         BigDecimal totalSpending = accountEntity.debitForEscrow(amountForShipping, amountForStorage);
+        log.info("total spending {}", totalSpending);
         // make account Entity set the reference instead: maning just amount, shipping requestId for the constructor
         // so that once account entity is passed the escrow, it sets the reference, then we just persist accountEntity
         // orphan removal will be useful here. in the case of settling after logistics complete
         final EscrowedPaymentEntity escrowedPaymentEntity = EscrowedPaymentEntity.getInstance(accountEntity, totalSpending, shippingRequestId);
         accountEntity.addEscrowPayment(escrowedPaymentEntity);
+        log.info("escrow for {} whose balance is currently {}", accountEntity.getUserId(), accountEntity.getBalance());
         this.accountRepository.save(accountEntity);
+        // Publish relevant events based on the user's role
+        switch (accountEntity.getAppRole()) {
+            case VENDOR:
+                // Currently, VendorTopUpAccountEvent is the only practical use case
+                // as only vendors are the source of money.
+                this.eventPublisher.publishEvent(
+                        new VendorTopUpAccountEvent(
+                                accountEntity.getUserId(),
+                                accountEntity.getBalance()
+                        )
+                );
+                break;
+            case AGENT:
+                this.eventPublisher.publishEvent(
+                        new AgentTopUpAccountEvent(
+                                accountEntity.getUserId(),
+                                accountEntity.getBalance()
+                        )
+                );
+                break;
+            case DISPATCHER:
+                this.eventPublisher.publishEvent(
+                        new DispatcherTopUpAccountEvent(
+                                accountEntity.getUserId(),
+                                accountEntity.getBalance()
+                        )
+                );
+                break;
+            default:
+                // Add log here. this is sensitive
+                break;
+        }
     }
 
 //    @Transactional

@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 
 import com.letsellify.logistics.components.logistic.core.request.database.entity.ConditionEntity;
 import com.letsellify.logistics.components.logistic.core.request.database.repository.ConditionRepository;
+import com.letsellify.logistics.components.logistic.core.request.exception.ImageConflictException;
+import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.queryhandling.QueryHandler;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -64,6 +66,7 @@ import lombok.NonNull;
  */
 
 @Component
+@Slf4j
 public class LogisticRequestManager {
     private final LogisticRequestRepository logisticsRequestRepository;
     private final LogisticItemImageRepository logisticsItemImageRepository;
@@ -136,8 +139,7 @@ public class LogisticRequestManager {
       final @NonNull String pickUpState,
       final @NonNull String pickUpLga,
       final @NonNull String pickUpAddress
-    ) throws NoSuchStateException, IllegalLGAException, InsufficientFundsException, InvalidLogisticItemImageException
-    {
+    ) throws NoSuchStateException, IllegalLGAException, InsufficientFundsException, InvalidLogisticItemImageException, ImageConflictException {
 
         if (!this.stateLGAManager.validateStateAndLgaForLogistics(pickUpState, pickUpLga, state, lga)) {
             throw new IllegalLGAException("LGA does not belong to state");
@@ -150,6 +152,9 @@ public class LogisticRequestManager {
             if (image != null && !image.isBlank()) {
                 final LogisticItemImageEntity imageEntity = this.logisticsItemImageRepository.findByIdAndSenderId(image, vendor.getId())
                                                                                              .orElseThrow(() -> new InvalidLogisticItemImageException("Image " + image + " not found or associated with" + vendor.getEmail()));
+                if (imageEntity.getLogisticsRequest() != null) {
+                    throw new ImageConflictException("This image belongs to another request");
+                }
                 itemImages.add(new LogisticsItemImage(imageEntity));
             }
         }
@@ -159,8 +164,13 @@ public class LogisticRequestManager {
         final BigDecimal totalSpendingAfterTax = totalOrderAmount
                                                    .multiply(PROFIT_PERCENT)
                                                    .divide(HUNDRED, 2, RoundingMode.HALF_UP);
+        final BigDecimal totalSpending = totalOrderAmount.add(totalSpendingAfterTax);
 
-        if (vendor.getBalance().compareTo(totalSpendingAfterTax) < 0) {
+        log.info("Total order amount " + totalOrderAmount);
+        log.info("tax " + totalSpendingAfterTax);
+        log.info("total spending after tax " + totalSpending);
+
+        if (vendor.getBalance().compareTo(totalSpending) < 0) {
             throw new InsufficientFundsException("Insufficient balance to perform the transaction.");
         }
 
@@ -183,7 +193,7 @@ public class LogisticRequestManager {
           whatsAppPhoneNumber,
           agentPay,
           dispatcherPay,
-          totalSpendingAfterTax,
+          totalSpending,
           dispatcherPickUpDate,
           dispatcherDeliveryDate,
           pickUpState,

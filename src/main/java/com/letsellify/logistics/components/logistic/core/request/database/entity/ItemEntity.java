@@ -30,11 +30,12 @@ public class ItemEntity {
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE, CascadeType.PERSIST })
     @JoinTable(
-            name = "item_conditions",
+            name = "item_condition",
             joinColumns = @JoinColumn(name = "item_id"),
             inverseJoinColumns = @JoinColumn(name = "condition_id")
     )
     private Set<ConditionEntity> conditions = new HashSet<>();
+
 
     protected ItemEntity() {}
 

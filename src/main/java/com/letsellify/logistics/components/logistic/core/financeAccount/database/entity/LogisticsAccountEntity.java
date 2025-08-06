@@ -72,14 +72,19 @@ public class LogisticsAccountEntity extends Auditable {
 
     public BigDecimal debitForEscrow(final BigDecimal amountForShipping, final BigDecimal amountForStorage) throws InsufficientFundsException {
         final BigDecimal totalSpending = amountForShipping.add(amountForStorage);
-        final BigDecimal totalSpendingAfterTax = totalSpending
+        System.out.println("totalSpending = " + totalSpending);
+        final BigDecimal tax = totalSpending
                                                    .multiply(PROFIT_PERCENT)
                                                    .divide(HUNDRED, 2, RoundingMode.HALF_UP);
-        if (this.balance.compareTo(totalSpendingAfterTax) < 0) {
+        System.out.println("Amount for shipping is " + amountForShipping);
+        System.out.println("Amount for storage is " + amountForStorage);
+        System.out.println("totalSpendingAfterTax = " + tax);
+        BigDecimal netSpending = totalSpending.add(tax);
+        if (this.balance.compareTo(netSpending) < 0) {
             throw new InsufficientFundsException("Insufficient funds, could not escrow this payment");
         }
-        this.balance = this.balance.subtract(totalSpendingAfterTax);
-        return totalSpendingAfterTax;
+        this.balance = this.balance.subtract(netSpending);
+        return netSpending;
     }
 
     public void addEscrowPayment(final EscrowedPaymentEntity escrowedPayment) {

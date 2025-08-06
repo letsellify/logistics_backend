@@ -7,6 +7,7 @@ import com.letsellify.logistics.components.logistic.core.financeAccount.exceptio
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.NoSuchStateException;
 import com.letsellify.logistics.components.logistic.core.paystackPaymentGateway.rest.resource.PaystackInitiateTransactionResponse;
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.IllegalLGAException;
+import com.letsellify.logistics.components.logistic.core.request.exception.ImageConflictException;
 import com.letsellify.logistics.components.logistic.core.request.exception.InvalidLogisticItemImageException;
 import com.letsellify.logistics.components.logistic.core.request.rest.resource.LogisticItemImageResource;
 import com.letsellify.logistics.components.logistic.core.vendor.exception.InCompleteVendorProfileException;
@@ -147,7 +148,8 @@ public class VendorDataService {
                     orderDto.otherDetails().pickUpAddress()
             );
         } catch (final VendorNotFoundException | InvalidLogisticItemImageException | InsufficientFundsException |
-                       NoSuchStateException | IllegalLGAException | InCompleteVendorProfileException e) {
+                       NoSuchStateException | IllegalLGAException | InCompleteVendorProfileException |
+                       ImageConflictException e) {
             throw new LogisticsBadRequestException(e.getMessage());
         }
     }
