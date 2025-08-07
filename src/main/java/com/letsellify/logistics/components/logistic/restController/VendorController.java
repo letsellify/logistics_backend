@@ -85,7 +85,7 @@ public class VendorController {
 //    }
 
     @GetMapping("logistics/order-request/{id}")
-    public VendorLogisticRequestResource getLogisticRequest(final Authentication authentication, @PathVariable final String logisticRequestId) {
+    public VendorLogisticRequestResource getLogisticRequest(final Authentication authentication, @PathVariable("id") final String logisticRequestId) {
         return this.vendorDataService.getLogisticRequest(authentication, logisticRequestId);
     }
 
