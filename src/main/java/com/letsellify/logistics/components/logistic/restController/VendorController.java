@@ -13,6 +13,9 @@ import com.letsellify.logistics.components.logistic.core.vendor.rest.resource.Ve
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -90,8 +93,16 @@ public class VendorController {
     }
 
     @GetMapping("logistics/order-request")
-    public VendorLogisticRequestResources getLogisticRequests(final Authentication authentication) {
-        return this.vendorDataService.getLogisticRequests(authentication);
+    public VendorLogisticRequestResources getLogisticRequests(
+            final Authentication authentication,
+            @RequestParam(defaultValue = "0") final int page,
+            @RequestParam(defaultValue = "5") final int size,
+            @RequestParam(defaultValue = "creationDate") final String sortBy,
+            @RequestParam(defaultValue = "true") final boolean descending
+    ) {
+        final Sort sort = descending? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        final Pageable pageable = PageRequest.of(page, size, sort);
+        return this.vendorDataService.getLogisticRequests(authentication, pageable);
     }
 
 }

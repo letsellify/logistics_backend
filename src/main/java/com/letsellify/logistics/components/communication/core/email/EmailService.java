@@ -186,10 +186,11 @@ public class EmailService {
             <table style="width: 100%%; border-collapse: collapse;">
                 <tr><td style="padding: 8px;"><strong>🆔 Request ID:</strong></td><td>%s</td></tr>
                 <tr><td style="padding: 8px;"><strong>📦 Item:</strong></td><td>%s</td></tr>
-               public VendorInformation(String vendorProfilePicture, VendorPersonalInformation vendorPersonalInformation, VendorContactInformation vendorContactInformation, VendorBusinessInformation vendorBusinessInformation) {
-        this(vendorProfilePicture, vendorPersonalInformation, vendorContactInformation, vendorBusinessInformation);
-    } <tr><td style="padding: 8px;"><strong>🚚 Pickup Location:</strong></td><td>%s, %s</td></tr>
+                <tr><td style="padding: 8px;"><strong>🚚 Pickup Location:</strong></td><td>%s, %s</td></tr>
+                <tr><td style="padding: 8px;"><strong>🏠 Pickup Address:</strong></td><td>%s</td></tr>
                 <tr><td style="padding: 8px;"><strong>🎯 Destination:</strong></td><td>%s, %s</td></tr>
+                <tr><td style="padding: 8px;"><strong>📥 Agent Receiving Date:</strong></td><td>%s</td></tr>
+                <tr><td style="padding: 8px;"><strong>📤 Agent Delivery Date:</strong></td><td>%s</td></tr>
                 <tr><td style="padding: 8px;"><strong>💰 Shipping Fee:</strong></td><td>₦%,.2f</td></tr>
                 <tr><td style="padding: 8px;"><strong>💰 Storage Fee:</strong></td><td>₦%,.2f</td></tr>
                 <tr><td style="padding: 8px;"><strong>🕒 PickUp Date:</strong></td><td>%s</td></tr>
@@ -208,16 +209,19 @@ public class EmailService {
         </body>
         </html>
         """.formatted(
-              name,
-              broadcast.getRequestId(),
-              broadcast.getItemName(),
-              broadcast.getPickUpLga(), broadcast.getPickUpState(),
-              broadcast.getReceiverLga(), broadcast.getReceiverState(),
-              broadcast.getDispatcherPay(),
-              broadcast.getAgentPay(),
-              broadcast.getDispatcherPickUpDate(),
-              broadcast.getDispatcherDeliveryDate(),
-              dashboardUrl
+                    name,
+                    broadcast.getRequestId(),
+                    broadcast.getItemName(),
+                    broadcast.getPickUpLga(), broadcast.getPickUpState(),
+                    broadcast.getPickUpAddress(),
+                    broadcast.getReceiverLga(), broadcast.getReceiverState(),
+                    broadcast.getAgentReceivingDate(),
+                    broadcast.getAgentDeliveringDate(),
+                    broadcast.getDispatcherPay(),
+                    broadcast.getAgentPay(),
+                    broadcast.getDispatcherPickUpDate(),
+                    broadcast.getDispatcherDeliveryDate(),
+                    dashboardUrl
             );
 
             helper.setText(emailContent, true); // Enable HTML format
@@ -228,4 +232,5 @@ public class EmailService {
             log.error("Failed to send logistics request email to: {}", email, e);
         }
     }
+
 }

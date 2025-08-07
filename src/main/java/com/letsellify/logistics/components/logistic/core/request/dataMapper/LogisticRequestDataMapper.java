@@ -1,16 +1,9 @@
 package com.letsellify.logistics.components.logistic.core.request.dataMapper;
 
-import com.letsellify.logistics.components.logistic.core.request.data.Item;
-import com.letsellify.logistics.components.logistic.core.request.data.ItemCondition;
-import com.letsellify.logistics.components.logistic.core.request.rest.resource.LogisticItemResource;
-import com.letsellify.logistics.components.logistic.core.request.rest.resource.VendorLogisticRequestResource;
+import com.letsellify.logistics.components.logistic.core.request.data.*;
+import com.letsellify.logistics.components.logistic.core.request.rest.resource.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
-
-import com.letsellify.logistics.components.logistic.core.request.data.LogisticsItemImage;
-import com.letsellify.logistics.components.logistic.core.request.data.LogisticRequest;
-import com.letsellify.logistics.components.logistic.core.request.rest.resource.LogisticItemImageResource;
-import com.letsellify.logistics.components.logistic.core.request.rest.resource.LogisticRequestResource;
 
 /**
  * @author AHMAD BUBA
@@ -29,6 +22,10 @@ public interface LogisticRequestDataMapper {
     LogisticItemImageResource dataToResource(LogisticsItemImage logisticsItemImage);
 
     LogisticItemResource dataToResource(Item item);
+
+    VendorLogisticRequestResources dataToVendorResources(LogisticRequests logisticRequests);
+
+    LogisticRequestResources dataToResources(LogisticRequests logisticsRequests);
 
     /* Custom mapping method to extract the name */
     default String map(ItemCondition condition) {

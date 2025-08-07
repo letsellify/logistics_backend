@@ -10,6 +10,10 @@ import java.util.List;
 
 
 public record LogisticItemConditionResources(
-        List<String> condition
+        List<String> conditions,
+        int totalConditions
 ) {
+    public LogisticItemConditionResources(List<String> condition) {
+        this(condition, condition.size());
+    }
 }

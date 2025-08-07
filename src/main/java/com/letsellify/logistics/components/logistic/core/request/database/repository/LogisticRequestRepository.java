@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.letsellify.logistics.components.logistic.core.request.data.LogisticRequest;
-import lombok.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -22,5 +22,5 @@ public interface LogisticRequestRepository extends JpaRepository<LogisticRequest
     Optional<LogisticRequestEntity> findByShippingRequestId(String shippingRequestId);
     Optional<LogisticRequestEntity> findByShippingRequestIdAndSenderId(String shippingRequestId, UUID senderId);
 
-    List<LogisticRequestEntity> findBySenderId(UUID senderId);
+    Page<LogisticRequestEntity> findAllBySenderId(UUID senderId, Pageable pageable);
 }

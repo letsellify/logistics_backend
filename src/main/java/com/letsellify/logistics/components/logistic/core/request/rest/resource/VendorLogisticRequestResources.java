@@ -1,6 +1,8 @@
 package com.letsellify.logistics.components.logistic.core.request.rest.resource;
 
 
+import com.letsellify.logistics.components.logistic.core.request.data.LogisticRequests;
+
 import java.util.List;
 
 /**
@@ -11,9 +13,16 @@ import java.util.List;
 
 public record VendorLogisticRequestResources(
         List<VendorLogisticRequestResource> requests,
-        int totalRequests
+        int currentPage,
+        int totalPages,
+        long totalElements,
+        boolean isPageFirst,
+        boolean isPageLast,
+        boolean isPageEmpty,
+        boolean hasNext,
+        int nextPage
 ) {
-    public VendorLogisticRequestResources(List<VendorLogisticRequestResource> requestResources) {
-        this(requestResources, requestResources.size());
+    public VendorLogisticRequestResources(LogisticRequests logisticRequests) {
+        this(logisticRequests.getVendorResource().requests(), logisticRequests.currentPage(), logisticRequests.totalPages(),logisticRequests.totalElements(),logisticRequests.isPageFirst(), logisticRequests.isPageLast(), logisticRequests.isPageEmpty(), logisticRequests.hasNext(), logisticRequests.nextPage());
     }
 }

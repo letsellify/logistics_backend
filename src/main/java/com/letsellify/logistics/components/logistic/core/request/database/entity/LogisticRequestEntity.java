@@ -60,6 +60,10 @@ public class LogisticRequestEntity extends Auditable {
 
     private LocalDate dispatcherDeliveryDate;
 
+    private LocalDate agentReceivingDate;
+
+    private LocalDate agentDeliveringDate;
+
     private LocalDateTime requestDate;
 
     @Enumerated(EnumType.STRING)
@@ -88,6 +92,8 @@ public class LogisticRequestEntity extends Auditable {
       final BigDecimal totalSpending,
       final LocalDate dispatcherPickUpDate,
       final LocalDate dispatcherDeliveryDate,
+      final LocalDate agentReceivingDate,
+      final LocalDate agentDeliveringDate,
       final LocalDateTime requestDate,
       final LogisticsStatus status
     ) {
@@ -116,6 +122,8 @@ public class LogisticRequestEntity extends Auditable {
         entity.totalSpending = totalSpending;
         entity.dispatcherPickUpDate = dispatcherPickUpDate;
         entity.dispatcherDeliveryDate = dispatcherDeliveryDate;
+        entity.agentReceivingDate = agentReceivingDate;
+        entity.agentDeliveringDate = agentDeliveringDate;
         entity.requestDate = requestDate;
         entity.status = status;
 

@@ -60,6 +60,10 @@ public final class LogisticRequest {
 
     private final LocalDate dispatcherDeliveryDate;
 
+    private final LocalDate agentReceivingDate;
+
+    private final LocalDate agentDeliveringDate;
+
     private final String pickUpState;
 
     private final String pickUpLga;
@@ -94,6 +98,8 @@ public final class LogisticRequest {
         this.totalSpendingAfterTax = entity.getTotalSpending();
         this.dispatcherPickUpDate = entity.getDispatcherPickUpDate();
         this.dispatcherDeliveryDate = entity.getDispatcherDeliveryDate();
+        this.agentReceivingDate = entity.getAgentReceivingDate();
+        this.agentDeliveringDate = entity.getAgentDeliveringDate();
         this.pickUpState = entity.getPickUpState();
         this.pickUpLga = entity.getPickUpLga();
         this.pickUpAddress = entity.getPickUpAddress();

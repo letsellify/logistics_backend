@@ -11,6 +11,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import com.letsellify.logistics.components.logistic.core.request.data.*;
 import com.letsellify.logistics.components.logistic.core.request.database.entity.ConditionEntity;
 import com.letsellify.logistics.components.logistic.core.request.database.repository.ConditionRepository;
 import com.letsellify.logistics.components.logistic.core.request.exception.ImageConflictException;
@@ -19,6 +20,8 @@ import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.queryhandling.QueryHandler;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,11 +39,6 @@ import com.letsellify.logistics.components.logistic.core.financeAccount.exceptio
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.StateLGAManager;
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.NoSuchStateException;
 import com.letsellify.logistics.components.logistic.core.request.database.entity.ItemEntity;
-import com.letsellify.logistics.components.logistic.core.request.data.LogisticsItemImage;
-import com.letsellify.logistics.components.logistic.core.request.data.LogisticRequest;
-import com.letsellify.logistics.components.logistic.core.request.data.LogisticsStatus;
-import com.letsellify.logistics.components.logistic.core.request.data.Receiver;
-import com.letsellify.logistics.components.logistic.core.request.data.Sender;
 import com.letsellify.logistics.components.logistic.core.request.database.entity.LogisticItemImageEntity;
 import com.letsellify.logistics.components.logistic.core.request.database.entity.LogisticRequestEntity;
 import com.letsellify.logistics.components.logistic.core.request.database.repository.LogisticItemImageRepository;
@@ -196,6 +194,8 @@ public class LogisticRequestManager {
           totalSpending,
           dispatcherPickUpDate,
           dispatcherDeliveryDate,
+          dispatcherDeliveryDate,
+          dispatcherDeliveryDate.plusDays(2),
           pickUpState,
           pickUpLga,
           pickUpAddress
@@ -284,6 +284,8 @@ public class LogisticRequestManager {
           event.getTotalSpendingAfterTax(),
           event.getDispatcherPickUpDate(),
           event.getDispatcherDeliveryDate(),
+          event.getAgentReceivingDate(),
+          event.getAgentDeliveringDate(),
           event.getRequestDate(),
           LogisticsStatus.REQUESTED
         );
@@ -352,9 +354,10 @@ public class LogisticRequestManager {
         return new LogisticRequest(entity, entity.getItemImages().stream().map(itemImage -> this.fileStorageManager.generatePresignedUrl(itemImage.getImageFilePath())).collect(Collectors.toList()));
     }
 
-    public List<LogisticRequest> getVendorLogisticRequests(final @NonNull UUID senderId) {
-        List<LogisticRequestEntity> entityList = this.logisticsRequestRepository.findBySenderId(senderId);
-        return entityList.stream().map(entity -> {
+    public LogisticRequests getVendorLogisticRequests(final @NonNull UUID senderId, final @NonNull Pageable pageable) {
+        Page<LogisticRequestEntity> entityPage = this.logisticsRequestRepository.findAllBySenderId(senderId, pageable);
+        List<LogisticRequestEntity> entityList = entityPage.getContent();
+        List<LogisticRequest> dataList = entityList.stream().map(entity -> {
             List<String> imagesPresignedUrls = entity
                     .getItemImages()
                     .stream()
@@ -362,6 +365,7 @@ public class LogisticRequestManager {
                     .toList();
             return new LogisticRequest(entity, imagesPresignedUrls);
         }).toList();
+        return new LogisticRequests(dataList,entityPage);
     }
 
     public LogisticRequest getDispatcherLogisticRequest(final @NonNull UUID dispatcherId, final @NonNull String logisticRequestId) {

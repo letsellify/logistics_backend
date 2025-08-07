@@ -12,11 +12,13 @@ import com.letsellify.logistics.components.fileStorage.core.FileStorageManager;
 import com.letsellify.logistics.components.fileStorage.core.data.StorageType;
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.StateLGAManager;
 import com.letsellify.logistics.components.logistic.core.request.data.LogisticRequest;
+import com.letsellify.logistics.components.logistic.core.request.data.LogisticRequests;
 import com.letsellify.logistics.components.logistic.core.request.exception.ImageConflictException;
 import com.letsellify.logistics.components.logistic.core.request.exception.NoSuchLogisticRequestException;
 import com.letsellify.logistics.components.logistic.core.vendor.data.*;
 import com.letsellify.logistics.components.logistic.core.vendor.exception.InCompleteVendorProfileException;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -248,11 +250,11 @@ public class VendorManager {
         return this.logisticRequestManager.getVendorLogisticRequest(entity.getId(), logisticRequestId);
     }
 
-    public List<LogisticRequest> getLogisticRequests(final @NonNull String vendorEmail) throws VendorNotFoundException, InCompleteVendorProfileException {
+    public LogisticRequests getLogisticRequests(final @NonNull String vendorEmail, final @NonNull Pageable pageable) throws VendorNotFoundException, InCompleteVendorProfileException {
         final VendorEntity entity = this.vendorRepository.findByEmail(vendorEmail)
                 .orElseThrow(() -> new VendorNotFoundException("Vendor with username " + vendorEmail + " not found."));
         this.validateVendor(entity);
-        return this.logisticRequestManager.getVendorLogisticRequests(entity.getId());
+        return this.logisticRequestManager.getVendorLogisticRequests(entity.getId(), pageable);
     }
 
     private VendorInformation buildVendorInformation(VendorEntity entity) {

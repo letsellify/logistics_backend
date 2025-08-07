@@ -44,6 +44,8 @@ public class LogisticRequestBroadcast extends ApplicationEvent {
     private final BigDecimal totalSpendingAfterTax;
     private final LocalDate dispatcherPickUpDate;
     private final LocalDate dispatcherDeliveryDate;
+    private final LocalDate agentReceivingDate;
+    private final LocalDate agentDeliveringDate;
     private final String pickUpState;
     private final String pickUpLga;
     private final String pickUpAddress;
@@ -71,6 +73,8 @@ public class LogisticRequestBroadcast extends ApplicationEvent {
         this.totalSpendingAfterTax = logisticsRequest.getTotalSpendingAfterTax();
         this.dispatcherPickUpDate = logisticsRequest.getDispatcherPickUpDate();
         this.dispatcherDeliveryDate = logisticsRequest.getDispatcherDeliveryDate();
+        this.agentReceivingDate = logisticsRequest.getAgentReceivingDate();
+        this.agentDeliveringDate = logisticsRequest.getAgentDeliveringDate();
         this.pickUpState = logisticsRequest.getPickUpState();
         this.pickUpLga = logisticsRequest.getPickUpLga();
         this.pickUpAddress = logisticsRequest.getPickUpAddress();

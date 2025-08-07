@@ -66,6 +66,10 @@ public final class LogisticRequestedEvent {
 
     private final LocalDate dispatcherDeliveryDate;
 
+    private final LocalDate agentReceivingDate;
+
+    private final LocalDate agentDeliveringDate;
+
     private final String pickUpState;
 
     private final String pickUpLga;

@@ -45,6 +45,8 @@ public class LogisticRequestCommand {
     private final BigDecimal totalSpendingAfterTax;
     private final LocalDate dispatcherPickUpDate;
     private final LocalDate dispatcherDeliveryDate;
+    private final LocalDate agentReceivingDate;
+    private final LocalDate agentDeliveryDate;
     private final String pickUpState;
     private final String pickUpLga;
     private final String pickUpAddress;
@@ -71,6 +73,8 @@ public class LogisticRequestCommand {
       final BigDecimal totalSpendingAfterTax,
       final LocalDate dispatcherPickUpDate,
       final LocalDate dispatcherDeliveryDate,
+      final LocalDate agentReceivingDate,
+      final LocalDate agentDeliveryDate,
       final String pickUpState,
       final String pickUpLga,
       final String pickUpAddress
@@ -96,6 +100,8 @@ public class LogisticRequestCommand {
         this.totalSpendingAfterTax = totalSpendingAfterTax;
         this.dispatcherPickUpDate = dispatcherPickUpDate;
         this.dispatcherDeliveryDate = dispatcherDeliveryDate;
+        this.agentReceivingDate = agentReceivingDate;
+        this.agentDeliveryDate = agentDeliveryDate;
         this.pickUpState = pickUpState;
         this.pickUpLga = pickUpLga;
         this.pickUpAddress = pickUpAddress;

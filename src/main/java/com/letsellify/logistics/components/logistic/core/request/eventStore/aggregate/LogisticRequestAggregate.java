@@ -48,6 +48,10 @@ public class LogisticRequestAggregate {
 
     private LocalDate dispatcherDeliveryDate;
 
+    private LocalDate agentReceivingDate;
+
+    private LocalDate agentDeliveryDate;
+
     private String pickUpState;
 
     private String pickUpLga;
@@ -115,6 +119,8 @@ public class LogisticRequestAggregate {
                         command.getTotalSpendingAfterTax(),
                         command.getDispatcherPickUpDate(),
                         command.getDispatcherDeliveryDate(),
+                        command.getAgentReceivingDate(),
+                        command.getAgentDeliveryDate(),
                         command.getPickUpState(),
                         command.getPickUpLga(),
                         command.getPickUpAddress(),
@@ -136,6 +142,8 @@ public class LogisticRequestAggregate {
         this.totalSpendingAfterTax = event.getTotalSpendingAfterTax();
         this.dispatcherPickUpDate = event.getDispatcherPickUpDate();
         this.dispatcherDeliveryDate = event.getDispatcherDeliveryDate();
+        this.agentReceivingDate = event.getAgentReceivingDate();
+        this.agentDeliveryDate = event.getAgentDeliveringDate();
         this.pickUpState = event.getPickUpState();
         this.pickUpLga = event.getPickUpLga();
         this.pickUpAddress = event.getPickUpAddress();

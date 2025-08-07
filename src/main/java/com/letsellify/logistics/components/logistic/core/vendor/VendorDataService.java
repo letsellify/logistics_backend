@@ -4,10 +4,9 @@ import com.letsellify.logistics.common.restException.LogisticsBadRequestExceptio
 import com.letsellify.logistics.common.restException.LogisticsInternalServerErrorException;
 import com.letsellify.logistics.common.restException.LogisticsRestException;
 import com.letsellify.logistics.components.logistic.core.financeAccount.exception.InsufficientFundsException;
+import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.IllegalLGAException;
 import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.NoSuchStateException;
 import com.letsellify.logistics.components.logistic.core.paystackPaymentGateway.rest.resource.PaystackInitiateTransactionResponse;
-import com.letsellify.logistics.components.logistic.core.nigeriaStateLGA.exception.IllegalLGAException;
-import com.letsellify.logistics.components.logistic.core.request.data.LogisticRequest;
 import com.letsellify.logistics.components.logistic.core.request.exception.ImageConflictException;
 import com.letsellify.logistics.components.logistic.core.request.exception.InvalidLogisticItemImageException;
 import com.letsellify.logistics.components.logistic.core.request.exception.NoSuchLogisticRequestException;
@@ -24,16 +23,14 @@ import com.letsellify.logistics.components.logistic.core.vendor.rest.resource.Ve
 import com.letsellify.logistics.components.user.core.logisticUser.exception.UserNotFoundException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 /**
  * @author AHMAD BUBA
@@ -183,13 +180,9 @@ public class VendorDataService {
 
     }
 
-    public VendorLogisticRequestResources getLogisticRequests(final Authentication authentication) {
+    public VendorLogisticRequestResources getLogisticRequests(final @NonNull Authentication authentication, final @NonNull Pageable pageable) {
         try {
-            List<VendorLogisticRequestResource> resources = this.vendorManager.getLogisticRequests(authentication.getName())
-                    .stream()
-                    .map(LogisticRequest::getVendorResource)
-                    .collect(Collectors.toList());
-            return new VendorLogisticRequestResources(resources);
+            return this.vendorManager.getLogisticRequests(authentication.getName(), pageable).getVendorResource();
         } catch (VendorNotFoundException e) {
             throw new LogisticsBadRequestException(e.getMessage());
         } catch (InCompleteVendorProfileException e) {

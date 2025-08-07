@@ -31,11 +31,12 @@ public record VendorLogisticRequestResource(
         BigDecimal totalSpendingAfterTax,
         LocalDate dispatcherPickUpDate,
         LocalDate dispatcherDeliveryDate,
+        LocalDate agentReceivingDate,
+        LocalDate agentDeliveryDate,
         String pickUpState,
         String pickUpLga,
         String pickUpAddress,
         LocalDateTime requestDate,
-        LogisticsStatus status,
-        int totalLogisticRequests
+        LogisticsStatus status
 ) {
 }
