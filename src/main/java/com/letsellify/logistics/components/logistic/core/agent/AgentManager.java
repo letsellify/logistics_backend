@@ -1,12 +1,10 @@
 package com.letsellify.logistics.components.logistic.core.agent;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.letsellify.logistics.components.logistic.core.dispatcher.exception.NoSuchDispatcherException;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -178,6 +176,12 @@ public class AgentManager {
         }
         this.agentRepository.save(entity);
         return new AgentInfo(entity);
+    }
+
+    public UUID getAgentId(final @NonNull String agentEmail) throws NoSuchAgentException {
+        AgentEntity entity = this.agentRepository.findByEmail(agentEmail)
+                .orElseThrow(() -> new NoSuchAgentException("No such agent with email " + agentEmail + " found"));
+        return entity.getId();
     }
 
     @Transactional

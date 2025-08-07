@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import com.letsellify.logistics.components.fileStorage.core.FileStorageManager;
@@ -161,6 +162,12 @@ public class VendorManager {
         final VendorEntity entity = this.vendorRepository.findByEmail(vendorEmail)
                 .orElseThrow(() -> new VendorNotFoundException("Vendor with username " + vendorEmail + " not found."));
         return this.buildVendorInformation(entity);
+    }
+
+    public UUID getVendorId(final @NonNull String vendorEmail) throws VendorNotFoundException {
+        VendorEntity entity = this.vendorRepository.findByEmail(vendorEmail)
+                .orElseThrow(() -> new VendorNotFoundException("Vendor with username " + vendorEmail + " not found."));
+        return entity.getId();
     }
 
     public CompletableFuture<String> order(

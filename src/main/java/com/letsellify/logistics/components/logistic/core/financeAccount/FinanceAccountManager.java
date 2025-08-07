@@ -1,6 +1,10 @@
 package com.letsellify.logistics.components.logistic.core.financeAccount;
 
 import com.letsellify.logistics.common.data.LogisticAppRole;
+import com.letsellify.logistics.components.logistic.core.agent.AgentManager;
+import com.letsellify.logistics.components.logistic.core.agent.exception.NoSuchAgentException;
+import com.letsellify.logistics.components.logistic.core.dispatcher.DispatcherManager;
+import com.letsellify.logistics.components.logistic.core.dispatcher.exception.NoSuchDispatcherException;
 import com.letsellify.logistics.components.logistic.core.financeAccount.data.LogisticsAccount;
 import com.letsellify.logistics.components.logistic.core.financeAccount.database.entity.EscrowedPaymentEntity;
 import com.letsellify.logistics.components.logistic.core.financeAccount.database.entity.LogisticsAccountEntity;
@@ -12,14 +16,20 @@ import com.letsellify.logistics.components.logistic.core.financeAccount.event.Di
 import com.letsellify.logistics.components.logistic.core.financeAccount.event.VendorTopUpAccountEvent;
 import com.letsellify.logistics.components.logistic.core.financeAccount.exception.FinanceAccountNotFoundException;
 import com.letsellify.logistics.components.logistic.core.financeAccount.exception.InsufficientFundsException;
+import com.letsellify.logistics.components.logistic.core.financeAccount.exception.UnableToDetermineAccountException;
+import com.letsellify.logistics.components.logistic.core.vendor.VendorManager;
+import com.letsellify.logistics.components.logistic.core.vendor.exception.VendorNotFoundException;
+import com.letsellify.logistics.components.user.core.authorizationToken.AuthorizationTokenManager;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -35,6 +45,9 @@ public class FinanceAccountManager {
     private final LogisticsAccountRepository accountRepository;
     private final EscrowedPaymentRepository escrowedPaymentRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final ObjectProvider<VendorManager> vendorManagerProvider;
+    private final DispatcherManager dispatcherManager;
+    private final AgentManager agentManager;
 
 
     @Transactional
@@ -164,9 +177,28 @@ public class FinanceAccountManager {
     }
 
 
-    public BigDecimal getBalance(final UUID userId, final LogisticAppRole userRole) {
+    public BigDecimal getBalance(final @NonNull String userName, final @NonNull LogisticAppRole userRole) throws VendorNotFoundException, NoSuchAgentException, NoSuchDispatcherException, UnableToDetermineAccountException, FinanceAccountNotFoundException {
+        UUID userId = null;
+        switch (userRole) {
+            case VENDOR:
+                userId = Objects.requireNonNull(this.vendorManagerProvider.getIfAvailable())
+                        .getVendorId(userName);
+                break;
+            case AGENT:
+                userId = this.agentManager.getAgentId(userName);
+                break;
+            case DISPATCHER:
+                userId = this.dispatcherManager.getDispatcherId(userName);
+                break;
+            default:
+                // Add log here. this is sensitive
+                break;
+        }
+        if (userId == null) {
+            throw new UnableToDetermineAccountException("User role not visible, hence cant determine account type");
+        }
         final LogisticsAccountEntity entity = this.accountRepository.findByUserIdAndAppRole(userId, userRole)
-                .orElseThrow();
+                .orElseThrow(() -> new FinanceAccountNotFoundException("Account not found for user " + userName));
         return entity.getBalance();
     }
 

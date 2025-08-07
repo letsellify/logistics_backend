@@ -1,10 +1,7 @@
 package com.letsellify.logistics.components.logistic.core.dispatcher;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.context.ApplicationEventPublisher;
@@ -206,6 +203,12 @@ public class DispatcherManager {
         final LogisticDispatcherInfo dispatcherInfo = new LogisticDispatcherInfo(entity, kycs);
         this.eventPublisher.publishEvent(new DispatcherAwaitApproval(dispatcherInfo));
         return dispatcherInfo;
+    }
+
+    public UUID getDispatcherId(final @NonNull String dispatcherEmail) throws NoSuchDispatcherException {
+        DispatcherEntity entity = this.dispatcherRepository.findByEmail(dispatcherEmail)
+                .orElseThrow(() -> new NoSuchDispatcherException("No dispatcher with email " + dispatcherEmail + " found"));
+        return entity.getId();
     }
 
 
