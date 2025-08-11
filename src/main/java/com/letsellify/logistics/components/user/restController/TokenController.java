@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.letsellify.logistics.components.user.core.authorizationToken.AuthorizationTokenDataService;
-import com.letsellify.logistics.components.user.core.authorizationToken.rest.dto.LoginDto;
-import com.letsellify.logistics.components.user.core.authorizationToken.rest.resource.TokenResource;
-import com.letsellify.logistics.components.user.util.CookieUtil;
+import com.letsellify.logistics.components.user.core.authorizationTokenManagement.AuthorizationTokenDataService;
+import com.letsellify.logistics.components.user.core.authorizationTokenManagement.rest.dto.LoginDto;
+import com.letsellify.logistics.components.user.core.authorizationTokenManagement.rest.resource.TokenResource;
+import com.letsellify.logistics.common.util.CookieHandler;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -80,8 +80,8 @@ public class TokenController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Origin header not detected");
             }
             log.info("Request comes from: {}", domain);
-            CookieUtil.addCookie(httpServletResponse, domain, "access_token", tokenResource.getAccessToken(), 15 * 60);
-            CookieUtil.addCookie(httpServletResponse, domain, "refresh_token", tokenResource.getRefreshToken(), 7 * 24 * 60 * 60);
+            CookieHandler.addCookie(httpServletResponse, domain, "access_token", tokenResource.getAccessToken(), 15 * 60);
+            CookieHandler.addCookie(httpServletResponse, domain, "refresh_token", tokenResource.getRefreshToken(), 7 * 24 * 60 * 60);
             return ResponseEntity.ok(Map.of("message", "Login Successful"));
         }
 
@@ -138,8 +138,8 @@ public class TokenController {
             if (domain == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Origin header not detected");
             }
-            CookieUtil.addCookie(httpServletResponse, domain, "access_token", tokenResource.getAccessToken(), 15 * 60);
-            CookieUtil.addCookie(httpServletResponse, domain, "refresh_token",tokenResource.getRefreshToken(),7 * 24 * 60 * 60);
+            CookieHandler.addCookie(httpServletResponse, domain, "access_token", tokenResource.getAccessToken(), 15 * 60);
+            CookieHandler.addCookie(httpServletResponse, domain, "refresh_token",tokenResource.getRefreshToken(),7 * 24 * 60 * 60);
             return ResponseEntity.ok(Map.of("message", "Token successfully refreshed"));
 
         }

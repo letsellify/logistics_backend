@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.letsellify.logistics.components.user.core.socialSignupAndLogin.SocialLoginAndSignUpDataService;
-import com.letsellify.logistics.components.user.core.socialSignupAndLogin.rest.dto.RoleSelectionDto;
+import com.letsellify.logistics.components.user.core.socialSignupAndLoginManagement.SocialLoginAndSignUpDataService;
+import com.letsellify.logistics.components.user.core.socialSignupAndLoginManagement.rest.dto.RoleSelectionDto;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;

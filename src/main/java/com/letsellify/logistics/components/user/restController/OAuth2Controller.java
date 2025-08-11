@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.letsellify.logistics.common.data.LogisticAppRole;
-import com.letsellify.logistics.components.user.core.authorizationToken.AuthorizationTokenManager;
-import com.letsellify.logistics.components.user.core.logisticUser.UserManager;
-import com.letsellify.logistics.components.user.core.logisticUser.data.LogisticsAppUser;
-import com.letsellify.logistics.components.user.core.logisticUser.exception.UserNotFoundException;
+import com.letsellify.logistics.components.user.core.authorizationTokenManagement.AuthorizationTokenManager;
+import com.letsellify.logistics.components.user.core.userManagement.UserManager;
+import com.letsellify.logistics.components.user.core.userManagement.data.LogisticsAppUser;
+import com.letsellify.logistics.components.user.core.userManagement.exception.UserNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 

@@ -8,7 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.letsellify.logistics.components.user.core.logisticUser.data.LogisticsAppUser;
+import com.letsellify.logistics.components.user.core.userManagement.data.LogisticsAppUser;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

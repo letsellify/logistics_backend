@@ -5,9 +5,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.letsellify.logistics.components.user.core.verificationCode.VerificationCodeDataService;
-import com.letsellify.logistics.components.user.core.verificationCode.rest.dto.ResendVerificationCodeDto;
-import com.letsellify.logistics.components.user.core.verificationCode.rest.dto.VerificationCodeDto;
+import com.letsellify.logistics.components.user.core.verificationCodeManagement.VerificationCodeDataService;
+import com.letsellify.logistics.components.user.core.verificationCodeManagement.rest.dto.ResendVerificationCodeDto;
+import com.letsellify.logistics.components.user.core.verificationCodeManagement.rest.dto.VerificationCodeDto;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

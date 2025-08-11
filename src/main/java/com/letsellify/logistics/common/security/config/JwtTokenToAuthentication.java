@@ -12,7 +12,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import com.letsellify.logistics.common.security.data.LogisticsAppSecurityUser;
-import com.letsellify.logistics.components.user.core.logisticUser.UserManager;
+import com.letsellify.logistics.components.user.core.userManagement.UserManager;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;

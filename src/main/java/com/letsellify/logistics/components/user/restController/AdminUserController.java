@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.letsellify.logistics.components.logistic.core.agent.rest.resource.LogisticAgentInfoResource;
-import com.letsellify.logistics.components.logistic.core.agent.rest.resource.LogisticAgentResource;
-import com.letsellify.logistics.components.logistic.core.dispatcher.rest.resource.LogisticDispatcherInfoResource;
-import com.letsellify.logistics.components.logistic.core.dispatcher.rest.resource.LogisticDispatcherResource;
-import com.letsellify.logistics.components.user.core.logisticUser.AdminUserDataService;
-import com.letsellify.logistics.components.user.core.logisticUser.rest.resource.UserResource;
-import com.letsellify.logistics.components.user.core.logisticUser.rest.resource.UserResources;
+import com.letsellify.logistics.components.logistics.core.agentManagement.rest.resource.AgentInfoResource;
+import com.letsellify.logistics.components.logistics.core.agentManagement.rest.resource.AgentResource;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.resource.LogisticDispatcherInfoResource;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.resource.DispatcherResource;
+import com.letsellify.logistics.components.user.core.userManagement.AdminUserDataService;
+import com.letsellify.logistics.components.user.core.userManagement.rest.resource.UserResource;
+import com.letsellify.logistics.components.user.core.userManagement.rest.resource.UserResources;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -68,17 +68,17 @@ public class AdminUserController {
     }
 
     @PutMapping("/dispatchers/approve")
-    public LogisticDispatcherResource approveDispatcher(@RequestParam final String email) {
+    public DispatcherResource approveDispatcher(@RequestParam final String email) {
         return this.dataService.approveDispatcher(email);
     }
 
     @GetMapping("/agents/info")
-    public LogisticAgentInfoResource viewAgentPersonalInfo(@RequestParam final String email) {
+    public AgentInfoResource viewAgentPersonalInfo(@RequestParam final String email) {
         return this.dataService.viewAgentPersonalInfo(email);
     }
 
     @PutMapping("/agents/approve")
-    public LogisticAgentResource approveAgent(@RequestParam final String email) {
+    public AgentResource approveAgent(@RequestParam final String email) {
         return this.dataService.approveAgent(email);
     }
 
