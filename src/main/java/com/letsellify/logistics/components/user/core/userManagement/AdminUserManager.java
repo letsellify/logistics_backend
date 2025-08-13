@@ -1,6 +1,8 @@
 package com.letsellify.logistics.components.user.core.userManagement;
 
 import com.letsellify.logistics.components.logistics.core.agentManagement.data.AgentInfo;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.DispatchersInfo;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.exception.InCompleteDispatcherProfileException;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.event.EventListener;
@@ -81,8 +83,16 @@ public class AdminUserManager implements CommandLineRunner {
         return this.dispatcherManager.viewDispatcherPersonalInfo(dispatcherEmail);
     }
 
-    Dispatcher approveDispatcher(final @NonNull String dispatcherEmail) throws NoSuchDispatcherException, DispatcherApprovedException, NoKycRecordFoundException {
+//    Dispatcher approveDispatcher(final @NonNull String dispatcherEmail) throws NoSuchDispatcherException, DispatcherApprovedException, NoKycRecordFoundException {
+//        return this.dispatcherManager.approveDispatcher(dispatcherEmail);
+//    }
+
+    Dispatcher approveDispatcher(final @NonNull String dispatcherEmail) throws NoSuchDispatcherException, InCompleteDispatcherProfileException, DispatcherApprovedException {
         return this.dispatcherManager.approveDispatcher(dispatcherEmail);
+    }
+
+    DispatchersInfo getAllDispatchersAwaitingApproval(final @NonNull Pageable pageable)  {
+        return this.dispatcherManager.getAllAwaitingApproval(pageable);
     }
 
     AgentInfo viewAgentPersonalInfo(final @NonNull String agentEmail) throws NoSuchAgentException, NoKycRecordFoundException {

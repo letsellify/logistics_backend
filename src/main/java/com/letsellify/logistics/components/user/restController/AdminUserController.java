@@ -1,13 +1,10 @@
 package com.letsellify.logistics.components.user.restController;
 
+import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.rest.resource.DispatcherProfileInfoResources;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.letsellify.logistics.components.logistics.core.agentManagement.rest.resource.AgentInfoResource;
 import com.letsellify.logistics.components.logistics.core.agentManagement.rest.resource.AgentResource;
@@ -67,8 +64,20 @@ public class AdminUserController {
         return this.dataService.viewDispatcherPersonalInfo(email);
     }
 
-    @PutMapping("/dispatchers/approve")
-    public DispatcherResource approveDispatcher(@RequestParam final String email) {
+    @GetMapping("/dispatchers/unapproved")
+    public DispatcherProfileInfoResources getAllDispatcherAwaitingApproval(
+            @RequestParam(defaultValue = "0") final int page,
+            @RequestParam(defaultValue = "5") final int size,
+            @RequestParam(defaultValue = "creationDate") final String sortBy,
+            @RequestParam(defaultValue = "true") final boolean descending
+    ) {
+        final Sort sort = descending ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        final Pageable pageable = PageRequest.of(page, size, sort);
+        return this.dataService.getAllDispatcherAwaitingApproval(pageable);
+    }
+
+    @PatchMapping("/dispatchers/{email}/approve")
+    public DispatcherResource approveDispatcher(@PathVariable final String email) {
         return this.dataService.approveDispatcher(email);
     }
 

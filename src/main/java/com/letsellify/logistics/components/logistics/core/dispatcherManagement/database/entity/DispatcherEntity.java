@@ -1,10 +1,8 @@
 package com.letsellify.logistics.components.logistics.core.dispatcherManagement.database.entity;
 
 import com.letsellify.logistics.common.entityAudit.entity.Auditable;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.KycType;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.NaturalId;
 
@@ -33,9 +31,20 @@ public class DispatcherEntity extends Auditable {
     private ContactInfoEmbeddable contactInfo;
     @Setter
     private DispatchDetailEmbeddable dispatchDetail;
-    private UUID kycId;
+
+    @Setter
+    private DispatcherGuarantorEmbeddable guarantor;
+
+    @Setter
+    @Enumerated(EnumType.STRING)
+    private KycType kycType;
+
+    @Setter
+    private String kycNumber;
+//    private UUID kycId;
     private boolean currentlyAcceptingDelivery;
     private boolean approve;
+    private boolean profileComplete;
 
 
     protected DispatcherEntity() {
@@ -61,12 +70,13 @@ public class DispatcherEntity extends Auditable {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    @Setter
     @Getter
     public static class PersonalInfoEmbeddable {
         private String name;
-        private String homeState;
-        private String homeLga;
-        private String homeAddress;
+        private String state;
+        private String lga;
+        private String address;
 
         public PersonalInfoEmbeddable(final String name) {
             this.name = name;
@@ -90,8 +100,34 @@ public class DispatcherEntity extends Auditable {
     @Builder
     @Getter
     public static class DispatchDetailEmbeddable {
-        private String identificationNumber;
-        private String stateOfDispatch;
-        private String stateOfLga;
+        private String businessName;
+        private String businessOfficeAddress;
+        private String businessState;
+        private String businessLga;
+    }
+
+    @Embeddable
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    @Getter
+    public static class DispatcherGuarantorEmbeddable {
+        @Column(name = "guarantor_fullName")
+        private String fullName;
+        @Column(name = "guarantor_state")
+        private String state;
+        @Column(name = "guarantor_lga")
+        private String lga;
+        @Column(name = "guarantor_address")
+        private String address;
+        private String relationship;
+        @Column(name = "guarantor_phoneNumber")
+        private String phoneNumber;
+        @Column(name = "guarantor_whatsAppNumber")
+        private String whatsAppNumber;
+        @Column(name = "guarantor_email")
+        private String email;
+        @Column(name = "guarantor_career")
+        private String career;
     }
 }

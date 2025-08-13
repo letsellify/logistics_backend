@@ -1,24 +1,14 @@
 package com.letsellify.logistics.components.logistics.restController;
 
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.DispatcherDataService;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto.DispatcherInfoDto;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.resource.DispatcherPersonalInfoResource;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.resource.DispatcherResource;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.resource.LogisticDispatcherInfoResource;
-import com.letsellify.logistics.components.logistics.core.kycManagement.data.KycDocumentType;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto.DispatcherProfileDto;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.resource.DispatcherProfileInfoResource;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
 
 /**
  * @author AHMAD BUBA
@@ -33,54 +23,60 @@ import java.util.List;
 public class DispatcherController {
     private final DispatcherDataService dispatcherDataService;
 
-    @PostMapping("kyc-upload")
-    public String uploadKycDocument(final @NonNull Authentication authentication, @RequestParam final @NonNull KycDocumentType documentType, @RequestParam final MultipartFile file, HttpServletRequest httpServletRequest) {
-        if (file.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File cannot be empty.");
-        }
-        final String contentType = file.getContentType();
-        if (contentType == null || !List.of("image/jpeg", "image/png", "application/pdf").contains(contentType)) {
-            throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Only JPEG, PNG, and PDF files are allowed.");
-        }
-        System.out.println("File received: " + file.getOriginalFilename() + " with content type: " + contentType);
-        Cookie[] cookies = httpServletRequest.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("access_token".equals(cookie.getName())) { // replace with your actual cookie name
-                    String token = cookie.getValue();
-                    System.out.println("Access Token from Cookie: " + token);
-                }
-            }
-        } else {
-            System.out.println("No cookies found in request.");
-        }
+//    @PostMapping("kyc-upload")
+//    public String uploadKycDocument(final @NonNull Authentication authentication, @RequestParam final @NonNull KycDocumentType documentType, @RequestParam final MultipartFile file, HttpServletRequest httpServletRequest) {
+//        if (file.isEmpty()) {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File cannot be empty.");
+//        }
+//        final String contentType = file.getContentType();
+//        if (contentType == null || !List.of("image/jpeg", "image/png", "application/pdf").contains(contentType)) {
+//            throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Only JPEG, PNG, and PDF files are allowed.");
+//        }
+//        System.out.println("File received: " + file.getOriginalFilename() + " with content type: " + contentType);
+//        Cookie[] cookies = httpServletRequest.getCookies();
+//        if (cookies != null) {
+//            for (Cookie cookie : cookies) {
+//                if ("access_token".equals(cookie.getName())) { // replace with your actual cookie name
+//                    String token = cookie.getValue();
+//                    System.out.println("Access Token from Cookie: " + token);
+//                }
+//            }
+//        } else {
+//            System.out.println("No cookies found in request.");
+//        }
+//
+//        return this.dispatcherDataService.uploadKyc(authentication, documentType, file);
+//    }
 
-        return this.dispatcherDataService.uploadKyc(authentication, documentType, file);
+//    @DeleteMapping("kyc-upload")
+//    public void deleteKyc(final @NonNull Authentication authentication, @RequestParam final @NonNull String kycIdentification) {
+//        this.dispatcherDataService.deleteKyc(authentication, kycIdentification);
+//    }
+
+    @PostMapping("profile")
+    public DispatcherProfileInfoResource setProfile(final @NonNull Authentication authentication, final @Valid @RequestBody DispatcherProfileDto infoDto) {
+        return this.dispatcherDataService.setProfile(authentication, infoDto);
     }
 
-    @DeleteMapping("kyc-upload")
-    public void deleteKyc(final @NonNull Authentication authentication, @RequestParam final @NonNull String kycIdentification) {
-        this.dispatcherDataService.deleteKyc(authentication, kycIdentification);
+    @GetMapping("profile")
+    public DispatcherProfileInfoResource getProfile(final @NonNull Authentication authentication) {
+        return this.dispatcherDataService.getProfile(authentication);
     }
 
-    @PostMapping("personal-info")
-    public DispatcherPersonalInfoResource setPersonalInfo(final @NonNull Authentication authentication, final @Valid @RequestBody DispatcherInfoDto infoDto) {
-        return this.dispatcherDataService.setPersonalInfo(authentication, infoDto);
-    }
 
-    @PostMapping("confirm-info")
-    public LogisticDispatcherInfoResource confirmInfoSubmissionForApproval(final @NonNull Authentication authentication) {
-        return this.dispatcherDataService.confirmInfoSubmissionForApproval(authentication);
-    }
+//    @PostMapping("confirm-info")
+//    public LogisticDispatcherInfoResource confirmInfoSubmissionForApproval(final @NonNull Authentication authentication) {
+//        return this.dispatcherDataService.confirmInfoSubmissionForApproval(authentication);
+//    }
+//
+//    @GetMapping("view-info")
+//    public LogisticDispatcherInfoResource viewPersonalInfoAfterApproval(final @NonNull Authentication authentication) {
+//        return this.dispatcherDataService.viewPersonalInfoAfterApproval(authentication);
+//    }
 
-    @GetMapping("view-info")
-    public LogisticDispatcherInfoResource viewPersonalInfoAfterApproval(final @NonNull Authentication authentication) {
-        return this.dispatcherDataService.viewPersonalInfoAfterApproval(authentication);
-    }
-
-    @PatchMapping("delivery-status")
-    public DispatcherResource setCurrentlyAcceptingDelivery(final @NonNull Authentication authentication, @RequestParam(name = "accepting") final boolean acceptingDelivery) {
-        return this.dispatcherDataService.setCurrentlyAcceptingDelivery(authentication, acceptingDelivery);
-    }
+//    @PatchMapping("delivery-status")
+//    public DispatcherResource setCurrentlyAcceptingDelivery(final @NonNull Authentication authentication, @RequestParam(name = "accepting") final boolean acceptingDelivery) {
+//        return this.dispatcherDataService.setCurrentlyAcceptingDelivery(authentication, acceptingDelivery);
+//    }
 
 }

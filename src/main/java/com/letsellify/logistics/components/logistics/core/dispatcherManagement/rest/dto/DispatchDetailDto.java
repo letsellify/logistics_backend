@@ -1,6 +1,7 @@
 package com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * @author AHMAD BUBA
@@ -9,8 +10,10 @@ import jakarta.validation.constraints.NotBlank;
  */
 
 public record DispatchDetailDto(
-        @NotBlank(message = "Please provide plate number of dispatch")
-        String identificationNumber,
+        @NotNull
+        String name,
+        @NotNull
+        String address,
         @NotBlank(message = "State cannot be empty.")
         String state,
         @NotBlank(message = "LGA cannot be empty.")

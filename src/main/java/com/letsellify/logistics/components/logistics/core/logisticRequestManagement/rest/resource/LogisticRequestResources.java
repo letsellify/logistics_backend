@@ -19,10 +19,9 @@ public record LogisticRequestResources(
         boolean isPageFirst,
         boolean isPageLast,
         boolean isPageEmpty,
-        boolean hasNext,
-        int nextPage
+        boolean hasNext
 ) {
     public LogisticRequestResources(LogisticRequests logisticRequests) {
-        this(logisticRequests.getVendorResource().requests(), logisticRequests.currentPage(), logisticRequests.totalPages(), logisticRequests.totalElements(), logisticRequests.isPageFirst(), logisticRequests.isPageLast(), logisticRequests.isPageEmpty(), logisticRequests.hasNext(), logisticRequests.nextPage());
+        this(logisticRequests.getVendorResource().requests(), logisticRequests.currentPage(), logisticRequests.totalPages(), logisticRequests.totalElements(), logisticRequests.isPageFirst(), logisticRequests.isPageLast(), logisticRequests.isPageEmpty(), logisticRequests.hasNext());
     }
 }

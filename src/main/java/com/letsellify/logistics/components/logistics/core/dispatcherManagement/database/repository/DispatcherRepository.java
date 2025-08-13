@@ -1,6 +1,8 @@
 package com.letsellify.logistics.components.logistics.core.dispatcherManagement.database.repository;
 
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.database.entity.DispatcherEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -21,5 +23,7 @@ public interface DispatcherRepository extends JpaRepository<DispatcherEntity, UU
     List<DispatcherEntity> findByCurrentlyAcceptingDeliveryAndApprove(boolean currentlyAcceptingDelivery, boolean approve);
 
     boolean existsByEmail(String dispatcherEmail);
+
+    Page<DispatcherEntity> findByProfileCompleteTrueAndApproveFalse(Pageable pageable);
 
 }

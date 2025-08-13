@@ -8,6 +8,7 @@ import com.letsellify.logistics.components.logistics.core.agentManagement.data.A
 import com.letsellify.logistics.components.logistics.core.agentManagement.exception.NoSuchAgentException;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.DispatcherManager;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.Dispatcher;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.exception.InCompleteDispatcherProfileException;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.exception.NoSuchDispatcherException;
 import com.letsellify.logistics.components.logistics.core.financeAccountManagement.FinanceAccountManager;
 import com.letsellify.logistics.components.logistics.core.financeAccountManagement.exception.FinanceAccountNotFoundException;
@@ -37,6 +38,8 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -63,6 +66,7 @@ import java.util.stream.Collectors;
  */
 
 @Component
+@CacheConfig(cacheNames = "logistic_requests")
 @Slf4j
 public class LogisticRequestManager {
     private final LogisticRequestRepository logisticsRequestRepository;
@@ -307,6 +311,7 @@ public class LogisticRequestManager {
     }
 
 
+
     @Transactional
     public void writeLogisticRequestEvent(final LogisticRequestedEvent event) {
         try {
@@ -414,16 +419,17 @@ public class LogisticRequestManager {
                 .orElseGet(() -> conditionRepository.save(new ConditionEntity(name)));
     }
 
+    @Cacheable(value = "logistic_requests", key = "#shippingRequestId")
     public LogisticRequest getLogisticRequest(
             final @NonNull String userName,
             final @NonNull LogisticAppRole userRole,
-            final @NonNull String logisticRequestId
+            final @NonNull String shippingRequestId
     ) throws NoSuchLogisticRequestException, VendorNotFoundException, NoSuchAgentException,
             NoSuchDispatcherException, LogisticRequestAccessDeniedException, InvalidRoleException {
 
         LogisticRequestEntity entity = this.logisticsRequestRepository
-                .findByShippingRequestId(logisticRequestId)
-                .orElseThrow(() -> new NoSuchLogisticRequestException("No logistic request found with id: " + logisticRequestId));
+                .findByShippingRequestId(shippingRequestId)
+                .orElseThrow(() -> new NoSuchLogisticRequestException("No logistic request found with id: " + shippingRequestId));
 
         // Optional role-based access control
         switch (userRole) {
@@ -477,7 +483,7 @@ public class LogisticRequestManager {
             final @NonNull String userName,
             final @NonNull LogisticAppRole userRole,
             final @NonNull Pageable pageable
-    ) throws VendorNotFoundException, InCompleteVendorProfileException, InvalidRoleException, NoSuchAgentException, NoSuchDispatcherException {
+    ) throws VendorNotFoundException, InCompleteVendorProfileException, InvalidRoleException, NoSuchAgentException, NoSuchDispatcherException, InCompleteDispatcherProfileException {
         Page<LogisticRequestEntity> page;
 
         switch (userRole) {

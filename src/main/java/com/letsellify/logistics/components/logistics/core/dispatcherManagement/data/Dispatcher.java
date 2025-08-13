@@ -32,9 +32,9 @@ public record Dispatcher(
                 dispatcherEntity.getEmail(),
                 dispatcherEntity.getContactInfo().getWhatsAppPhone(),
                 dispatcherEntity.getContactInfo().getPhone(),
-                dispatcherEntity.getPersonalInfo().getHomeState(),
-                dispatcherEntity.getPersonalInfo().getHomeLga(),
-                dispatcherEntity.getPersonalInfo().getHomeAddress()
+                dispatcherEntity.getPersonalInfo().getState(),
+                dispatcherEntity.getPersonalInfo().getLga(),
+                dispatcherEntity.getPersonalInfo().getAddress()
         );
     }
 

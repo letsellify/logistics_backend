@@ -22,11 +22,10 @@ public record LogisticRequests(
         boolean isPageFirst,
         boolean isPageLast,
         boolean isPageEmpty,
-        boolean hasNext,
-        int nextPage
+        boolean hasNext
 ) {
     public LogisticRequests(List<LogisticRequest> requests, Page<LogisticRequestEntity> entityPage) {
-        this(requests, entityPage.getNumber(), entityPage.getTotalPages(), entityPage.getTotalElements(), entityPage.isFirst(), entityPage.isLast(), entityPage.isEmpty(), entityPage.hasNext(), entityPage.hasNext() ? entityPage.getNumber() + 1 : entityPage.getNumber());
+        this(requests, entityPage.getNumber(), entityPage.getTotalPages(), entityPage.getTotalElements(), entityPage.isFirst(), entityPage.isLast(), entityPage.isEmpty(), entityPage.hasNext());
     }
 
     public LogisticRequestResources getResource() {

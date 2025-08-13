@@ -17,26 +17,22 @@ import java.util.UUID;
 public record LogisticDispatcherInfo(
         String email,
         String name,
-        UUID kycId,
         String whatsAppPhone,
         String phone,
         String homeState,
         String homeLga,
-        String homeAddress,
-        Map<KycDocumentType, String> kycs
+        String homeAddress
 ) {
 
     public LogisticDispatcherInfo(final DispatcherEntity entity, final Map<KycDocumentType, String> kycs) {
         this(
                 entity.getEmail(),
                 entity.getPersonalInfo().getName(),
-                entity.getKycId(),
                 entity.getContactInfo().getWhatsAppPhone(),
                 entity.getContactInfo().getPhone(),
-                entity.getPersonalInfo().getHomeState(),
-                entity.getPersonalInfo().getHomeLga(),
-                entity.getPersonalInfo().getHomeAddress(),
-                kycs
+                entity.getPersonalInfo().getState(),
+                entity.getPersonalInfo().getLga(),
+                entity.getPersonalInfo().getAddress()
         );
     }
 

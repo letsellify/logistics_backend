@@ -3,6 +3,7 @@ package com.letsellify.logistics.components.logistics.core.logisticRequestManage
 import com.letsellify.logistics.common.restException.LogisticsBadRequestException;
 import com.letsellify.logistics.common.restException.LogisticsRestException;
 import com.letsellify.logistics.components.logistics.core.agentManagement.exception.NoSuchAgentException;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.exception.InCompleteDispatcherProfileException;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.exception.NoSuchDispatcherException;
 import com.letsellify.logistics.components.logistics.core.financeAccountManagement.exception.InsufficientFundsException;
 import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.exception.IllegalLGAException;
@@ -154,6 +155,8 @@ public class LogisticRequestDataService {
         } catch (InvalidRoleException e) {
             throw new RuntimeException(e);
         } catch (NoSuchDispatcherException e) {
+            throw new RuntimeException(e);
+        } catch (InCompleteDispatcherProfileException e) {
             throw new RuntimeException(e);
         }
     }
