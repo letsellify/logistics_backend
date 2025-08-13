@@ -12,9 +12,7 @@ import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway
 import com.letsellify.logistics.components.logistics.core.vendorManagement.data.*;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.database.entity.VendorEntity;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.database.repository.VendorRepository;
-import com.letsellify.logistics.components.logistics.core.vendorManagement.exception.InCompleteVendorProfileException;
-import com.letsellify.logistics.components.logistics.core.vendorManagement.exception.VendorExistsException;
-import com.letsellify.logistics.components.logistics.core.vendorManagement.exception.VendorNotFoundException;
+import com.letsellify.logistics.components.logistics.core.vendorManagement.exception.*;
 import com.letsellify.logistics.components.user.core.userManagement.event.UserOfRoleVendorCreated;
 import com.letsellify.logistics.components.user.core.userManagement.exception.UserNotFoundException;
 import lombok.NonNull;
@@ -103,6 +101,51 @@ public class VendorManager {
 //                .uploadLogisticsItemImage(entity.getId(), entity.getEmail(), image);
 //    }
 
+    public VendorInfo setProfile(
+            final @NonNull String vendorEmail,
+            final String vendorName,
+            final @NonNull String homeAddress,
+            final @NonNull String homeState,
+            final @NonNull String homeLg,
+            final @NonNull String phoneNumber,
+            final String whatsAppPhoneNumber,
+            final String businessName,
+            final String businessOfficeAddress,
+            final String state,
+            final String lg
+    ) throws VendorNotFoundException, NoSuchStateException, IllegalLGAException, CompleteVendorProfileException {
+        if (!this.nigeriaStatesManager.validateStateLga(homeState, homeLg)) {
+            throw new IllegalLGAException(homeLg + "does not belong to " + homeState);
+        }
+        if (!this.nigeriaStatesManager.validateStateLga(state,lg)) {
+            throw new IllegalLGAException(lg + "does not belong to " + state);
+        }
+        final VendorEntity entity = this.vendorRepository.findByEmail(vendorEmail)
+                .orElseThrow(() -> new VendorNotFoundException("Vendor with username " + vendorEmail + " not found."));
+        if (entity.isProfileComplete()) {
+            throw new CompleteVendorProfileException("Vendor profile is all ready filled");
+        }
+        final VendorEntity.PersonalInformationEmbeddable personalInformationEmbeddable = new VendorEntity.PersonalInformationEmbeddable(vendorName, homeAddress, homeState, homeLg);
+        final VendorEntity.ContactInformationEmbeddable contactInformationEmbeddable = new VendorEntity.ContactInformationEmbeddable(phoneNumber, whatsAppPhoneNumber);
+        final VendorEntity.BusinessInformationEmbeddable businessInformationEmbeddable = new VendorEntity.BusinessInformationEmbeddable(businessName, businessOfficeAddress, state, lg);
+        entity.setPersonalInformation(personalInformationEmbeddable);
+        entity.setContactInformation(contactInformationEmbeddable);
+        entity.setBusinessInformation(businessInformationEmbeddable);
+        this.vendorRepository.save(entity);
+        String profilePicturePresignedUrl = null;
+        if (entity.getProfilePicture() != null) {
+            profilePicturePresignedUrl = this.fileStorageManager.generatePresignedUrl(entity.getProfilePicture());
+            entity.setProfileComplete(true);
+        }
+        return new VendorInfo(profilePicturePresignedUrl, entity);
+    }
+
+    public VendorInfo getProfile(final @NonNull String vendorUsername) throws VendorNotFoundException {
+        final VendorEntity entity = this.vendorRepository.findByEmail(vendorUsername)
+                .orElseThrow(() -> new VendorNotFoundException("Vendor with username " + vendorUsername + " not found."));
+        return new VendorInfo(this.fileStorageManager.generatePresignedUrl(entity.getProfilePicture()), entity);
+    }
+
     public VendorPersonalInformation uploadPersonalInformation(final @NonNull String vendorEmail, final @NonNull String name, final @NonNull String homeAddress, final @NonNull String state, final @NonNull String lg) throws VendorNotFoundException, NoSuchStateException, IllegalLGAException {
         final VendorEntity entity = this.vendorRepository.findByEmail(vendorEmail)
                 .orElseThrow(() -> new VendorNotFoundException("Vendor with username " + vendorEmail + " not found."));
@@ -136,22 +179,35 @@ public class VendorManager {
         return new VendorBusinessInformation(entity.getBusinessInformation());
     }
 
-    public String uploadProfilePicture(final @NonNull String vendorEmail, final @NonNull MultipartFile image) throws IOException, VendorNotFoundException {
+    public String uploadProfilePicture(final @NonNull String vendorEmail, final @NonNull MultipartFile image) throws IOException, VendorNotFoundException, VendorProfilePictureExistsException, CompleteVendorProfileException {
         this.fileStorageManager.validateImageFile(image);
         final VendorEntity entity = this.vendorRepository.findByEmail(vendorEmail)
                 .orElseThrow(() -> new VendorNotFoundException("Vendor with username " + vendorEmail + " not found."));
 
+        if (entity.isProfileComplete()) {
+            throw new CompleteVendorProfileException("Vendor profile has all ready been filled out");
+        }
+
         if (entity.getProfilePicture() != null) {
-            this.fileStorageManager.deleteFile(entity.getProfilePicture());
+            throw new VendorProfilePictureExistsException("you cannot update profile picture");
         }
 
         final String fileKey = this.fileStorageManager.storeFile(StorageType.VENDOR_PROFILE_PICTURE, vendorEmail, image);
         entity.setProfilePicture(fileKey);
+        if (entity.getPersonalInformation() != null && entity.getContactInformation() != null && entity.getBusinessInformation() != null) {
+            entity.setProfileComplete(true);
+        }
         this.vendorRepository.save(entity);
         return fileStorageManager.generatePresignedUrl(fileKey);
     }
 
-    public VendorInformation getVendorInformation(final @NonNull String vendorEmail) throws VendorNotFoundException {
+//    private void validateVendorProfile(VendorEntity entity) {
+//        if (entity.getPersonalInformation() == null) {
+//            throw new InCompleteVendorProfileException("Vendor contact ")
+//        }
+//    }
+
+    public VendorInfo getVendorInformation(final @NonNull String vendorEmail) throws VendorNotFoundException {
         final VendorEntity entity = this.vendorRepository.findByEmail(vendorEmail)
                 .orElseThrow(() -> new VendorNotFoundException("Vendor with username " + vendorEmail + " not found."));
         return this.buildVendorInformation(entity);
@@ -232,6 +288,9 @@ public class VendorManager {
         if (entity.getPersonalInformation() == null) {
             throw new InCompleteVendorProfileException("Personal information missing");
         }
+        if (entity.getBusinessInformation() == null) {
+            throw new InCompleteVendorProfileException("Business information missing");
+        }
     }
 
 //    public LogisticRequest getLogisticRequest(final @NonNull String vendorEmail, final @NonNull String logisticRequestId) throws VendorNotFoundException, InCompleteVendorProfileException, NoSuchLogisticRequestException {
@@ -248,8 +307,8 @@ public class VendorManager {
 //        return this.logisticRequestManager.getVendorLogisticRequests(entity.getId(), pageable);
 //    }
 
-    private VendorInformation buildVendorInformation(VendorEntity entity) {
-        return new VendorInformation(
+    private VendorInfo buildVendorInformation(VendorEntity entity) {
+        return new VendorInfo(
                 fileStorageManager.generatePresignedUrl(entity.getProfilePicture()),
                 wrapPersonalInfo(entity),
                 wrapContactInfo(entity),

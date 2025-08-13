@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class DispatcherController {
     private final DispatcherDataService dispatcherDataService;
 
-//    @PostMapping("kyc-upload")
+//    @PostMapping("type-upload")
 //    public String uploadKycDocument(final @NonNull Authentication authentication, @RequestParam final @NonNull KycDocumentType documentType, @RequestParam final MultipartFile file, HttpServletRequest httpServletRequest) {
 //        if (file.isEmpty()) {
 //            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File cannot be empty.");
@@ -48,13 +48,13 @@ public class DispatcherController {
 //        return this.dispatcherDataService.uploadKyc(authentication, documentType, file);
 //    }
 
-//    @DeleteMapping("kyc-upload")
+//    @DeleteMapping("type-upload")
 //    public void deleteKyc(final @NonNull Authentication authentication, @RequestParam final @NonNull String kycIdentification) {
 //        this.dispatcherDataService.deleteKyc(authentication, kycIdentification);
 //    }
 
     @PostMapping("profile")
-    public DispatcherProfileInfoResource setProfile(final @NonNull Authentication authentication, final @Valid @RequestBody DispatcherProfileDto infoDto) {
+    public DispatcherProfileInfoResource setProfile(final @NonNull Authentication authentication, @RequestBody final  @Valid DispatcherProfileDto infoDto) {
         return this.dispatcherDataService.setProfile(authentication, infoDto);
     }
 

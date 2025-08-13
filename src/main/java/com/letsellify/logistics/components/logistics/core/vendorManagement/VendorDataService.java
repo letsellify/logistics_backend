@@ -6,14 +6,17 @@ import com.letsellify.logistics.common.restException.LogisticsRestException;
 import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.exception.IllegalLGAException;
 import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.exception.NoSuchStateException;
 import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.rest.resource.PaystackInitiateTransactionResponse;
+import com.letsellify.logistics.components.logistics.core.vendorManagement.exception.CompleteVendorProfileException;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.exception.InCompleteVendorProfileException;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.exception.VendorNotFoundException;
+import com.letsellify.logistics.components.logistics.core.vendorManagement.exception.VendorProfilePictureExistsException;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.rest.dto.*;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.rest.resource.VendorBusinessInformationResource;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.rest.resource.VendorContactInformationResource;
-import com.letsellify.logistics.components.logistics.core.vendorManagement.rest.resource.VendorInformationResource;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.rest.resource.VendorPersonalInformationResource;
+import com.letsellify.logistics.components.logistics.core.vendorManagement.rest.resource.VendorProfileInfoResource;
 import com.letsellify.logistics.components.user.core.userManagement.exception.UserNotFoundException;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -33,49 +36,30 @@ import java.io.IOException;
 public class VendorDataService {
     private final VendorManager vendorManager;
 
-    public VendorPersonalInformationResource uploadPersonalInformation(final Authentication authentication, final PersonalInformationDto personalInformationDto) {
+    public VendorProfileInfoResource setProfile(final @NonNull Authentication authentication, final @NonNull VendorProfileInfoDto vendorProfileInfoDto) {
         try {
-            return this.vendorManager.uploadPersonalInformation(
+            return this.vendorManager.setProfile(
                             authentication.getName(),
-                            personalInformationDto.name(),
-                            personalInformationDto.homeAddress(),
-                            personalInformationDto.state(),
-                            personalInformationDto.lg()
+                            vendorProfileInfoDto.personalInformation().name(),
+                            vendorProfileInfoDto.personalInformation().address(),
+                            vendorProfileInfoDto.personalInformation().state(),
+                            vendorProfileInfoDto.personalInformation().lg(),
+                            vendorProfileInfoDto.contactInformation().phoneNumber(),
+                            vendorProfileInfoDto.contactInformation().whatsAppPhoneNumber(),
+                            vendorProfileInfoDto.businessInformation().businessName(),
+                            vendorProfileInfoDto.businessInformation().businessOfficeAddress(),
+                            vendorProfileInfoDto.businessInformation().state(),
+                            vendorProfileInfoDto.businessInformation().lg()
                     )
                     .getResource();
         } catch (VendorNotFoundException e) {
-            throw new LogisticsRestException(HttpStatus.UNAUTHORIZED, e.getMessage());
-        } catch (NoSuchStateException | IllegalLGAException e) {
-            throw new LogisticsBadRequestException(e.getMessage());
-        }
-    }
-
-    public VendorContactInformationResource uploadContactInformation(final Authentication authentication, final ContactInformationDto contactInformationDto) {
-        try {
-            return this.vendorManager.uploadContactInformation(
-                    authentication.getName(),
-                    contactInformationDto.phoneNumber(),
-                    contactInformationDto.whatsAppPhoneNumber()
-            ).getResource();
-        } catch (VendorNotFoundException e) {
-            throw new LogisticsRestException(HttpStatus.UNAUTHORIZED, e.getMessage());
-        }
-    }
-
-    public VendorBusinessInformationResource uploadBusinessInformation(final Authentication authentication, final BusinessInformationDto businessInformationDto) {
-        try {
-            return this.vendorManager.uploadBusinessInformation(
-                            authentication.getName(),
-                            businessInformationDto.businessName(),
-                            businessInformationDto.businessOfficeAddress(),
-                            businessInformationDto.state(),
-                            businessInformationDto.lg()
-                    )
-                    .getResource();
-        } catch (VendorNotFoundException e) {
-            throw new LogisticsRestException(HttpStatus.UNAUTHORIZED, e.getMessage());
-        } catch (NoSuchStateException | IllegalLGAException e) {
-            throw new LogisticsBadRequestException(e.getMessage());
+            throw new RuntimeException(e);
+        } catch (CompleteVendorProfileException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchStateException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalLGAException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -86,18 +70,81 @@ public class VendorDataService {
             throw new LogisticsRestException(HttpStatus.UNAUTHORIZED, e.getMessage());
         } catch (IOException e) {
             throw new LogisticsInternalServerErrorException(e.getMessage());
+        } catch (CompleteVendorProfileException e) {
+            throw new RuntimeException(e);
+        } catch (VendorProfilePictureExistsException e) {
+            throw new RuntimeException(e);
         }
 
     }
 
-    public VendorInformationResource getVendorInformation(final Authentication authentication) {
+    public VendorProfileInfoResource getProfile(final Authentication authentication) {
         try {
-            return this.vendorManager.getVendorInformation(authentication.getName()).getResource();
+            return this.vendorManager.getProfile(authentication.getName())
+                    .getResource();
         } catch (VendorNotFoundException e) {
-            throw new LogisticsRestException(HttpStatus.UNAUTHORIZED, e.getMessage());
+            throw new RuntimeException(e);
         }
-
     }
+
+
+//    public VendorPersonalInformationResource uploadPersonalInformation(final Authentication authentication, final VendorPersonalInfoDto personalInformationDto) {
+//        try {
+//            return this.vendorManager.uploadPersonalInformation(
+//                            authentication.getName(),
+//                            personalInformationDto.name(),
+//                            personalInformationDto.address(),
+//                            personalInformationDto.state(),
+//                            personalInformationDto.lg()
+//                    )
+//                    .getResource();
+//        } catch (VendorNotFoundException e) {
+//            throw new LogisticsRestException(HttpStatus.UNAUTHORIZED, e.getMessage());
+//        } catch (NoSuchStateException | IllegalLGAException e) {
+//            throw new LogisticsBadRequestException(e.getMessage());
+//        }
+//    }
+//
+//    public VendorContactInformationResource uploadContactInformation(final Authentication authentication, final VendorContactInfoDto contactInformationDto) {
+//        try {
+//            return this.vendorManager.uploadContactInformation(
+//                    authentication.getName(),
+//                    contactInformationDto.phoneNumber(),
+//                    contactInformationDto.whatsAppPhoneNumber()
+//            ).getResource();
+//        } catch (VendorNotFoundException e) {
+//            throw new LogisticsRestException(HttpStatus.UNAUTHORIZED, e.getMessage());
+//        }
+//    }
+//
+//    public VendorBusinessInformationResource uploadBusinessInformation(final Authentication authentication, final VendorBusinessInfoDto businessInformationDto) {
+//        try {
+//            return this.vendorManager.uploadBusinessInformation(
+//                            authentication.getName(),
+//                            businessInformationDto.businessName(),
+//                            businessInformationDto.businessOfficeAddress(),
+//                            businessInformationDto.state(),
+//                            businessInformationDto.lg()
+//                    )
+//                    .getResource();
+//        } catch (VendorNotFoundException e) {
+//            throw new LogisticsRestException(HttpStatus.UNAUTHORIZED, e.getMessage());
+//        } catch (NoSuchStateException | IllegalLGAException e) {
+//            throw new LogisticsBadRequestException(e.getMessage());
+//        }
+//    }
+//
+//
+//
+//    public VendorProfileInfoResource getVendorInformation(final Authentication authentication) {
+//        try {
+//            return this.vendorManager.getVendorInformation(authentication.getName())
+//                    .getResource();
+//        } catch (VendorNotFoundException e) {
+//            throw new LogisticsRestException(HttpStatus.UNAUTHORIZED, e.getMessage());
+//        }
+//
+//    }
 
     public PaystackInitiateTransactionResponse initializeTopUp(final Authentication authentication, final VendorTopUpDto topUp) {
         System.out.println("Amount received " + topUp.amount());

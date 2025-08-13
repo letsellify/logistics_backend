@@ -11,11 +11,11 @@ import jakarta.validation.constraints.Size;
  */
 
 
-public record ContactInformationDto(
+public record VendorContactInfoDto(
         @NotBlank
-        @Size(min = 11, max = 14)
+        @Size(min = 11, max = 14, message = "Invalid phonenumber length")
         String phoneNumber,
-        @NotNull
+        @NotNull(message = "Vendor whatsapp number must be present in payload")
         String whatsAppPhoneNumber
 ) {
 }

@@ -419,7 +419,7 @@ public class LogisticRequestManager {
                 .orElseGet(() -> conditionRepository.save(new ConditionEntity(name)));
     }
 
-    @Cacheable(value = "logistic_requests", key = "#shippingRequestId")
+
     public LogisticRequest getLogisticRequest(
             final @NonNull String userName,
             final @NonNull LogisticAppRole userRole,

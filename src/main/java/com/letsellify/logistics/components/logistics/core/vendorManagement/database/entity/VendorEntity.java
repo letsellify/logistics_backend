@@ -35,6 +35,7 @@ public class VendorEntity extends Auditable {
     @Embedded
     private BusinessInformationEmbeddable businessInformation;
 
+    private boolean profileComplete;
 
     private BigDecimal currentAccountBalance;
 
@@ -47,6 +48,7 @@ public class VendorEntity extends Auditable {
         entity.id = UUID.randomUUID();
         entity.email = email;
         entity.currentAccountBalance = BigDecimal.ZERO;
+        entity.profileComplete = false;
         return entity;
     }
 

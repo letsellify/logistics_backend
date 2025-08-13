@@ -7,7 +7,7 @@ package com.letsellify.logistics.components.logistics.core.vendorManagement.rest
  */
 
 
-public record VendorInformationResource(
+public record VendorProfileInfoResource(
         String profilePicture,
         VendorPersonalInformationResource personalInformation,
         VendorContactInformationResource contactInformation,

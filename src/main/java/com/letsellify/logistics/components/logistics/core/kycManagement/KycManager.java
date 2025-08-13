@@ -28,7 +28,7 @@ import java.util.UUID;
  */
 
 
-// holds all kyc rules for various user types you upload it determines, wrong role or already approved kyc results in exception
+// holds all type rules for various user types you upload it determines, wrong role or already approved type results in exception
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -57,8 +57,8 @@ public class KycManager {
 //    }
 
 
-    // get user kyc(username)
-    // check for kyc using username: if exist, it should contain userName, userId, and s3Path;
+    // get user type(username)
+    // check for type using username: if exist, it should contain userName, userId, and s3Path;
     // ask s3 manager to getFile or preSignedUrl using s3 path: should return the file or url
     // wrap into Kyc(email, kycDocument, file) and return
 
@@ -84,7 +84,7 @@ public class KycManager {
 //        return new LogisticsKyc(entity);
 //    }
 
-    // enforce kyc rules based on user type here
+    // enforce type rules based on user type here
     @Transactional
     public LogisticKycDocument uploadKyc(final @NonNull String userEmail, final @NonNull LogisticAppRole userType, final @NonNull KycDocumentType kycDocument, final @NonNull MultipartFile multipartFile) throws IOException {
         final UserKycCollectionEntity kycCollectionEntity = this.userKycCollectionRepository
@@ -101,7 +101,7 @@ public class KycManager {
     @Transactional
     public void deleteKyc(final @NonNull String userEmail, final @NonNull String kycIdentifier) throws NoKycRecordFoundException {
         final KycEntity kycEntity = this.kycRepository.findById(kycIdentifier)
-                .orElseThrow(() -> new NoKycRecordFoundException("No such kyc record exists"));
+                .orElseThrow(() -> new NoKycRecordFoundException("No such type record exists"));
 
         final UserKycCollectionEntity userKycCollection = kycEntity.getUserKycCollection();
 
@@ -119,7 +119,7 @@ public class KycManager {
 
     public String viewKyc(final @NonNull String kycIdentifier) throws NoKycRecordFoundException {
         final KycEntity kycEntity = this.kycRepository.findById(kycIdentifier)
-                .orElseThrow(() -> new NoKycRecordFoundException("No such kyc record exists"));
+                .orElseThrow(() -> new NoKycRecordFoundException("No such type record exists"));
         return this.fileStorageManager.generatePresignedUrl(kycEntity.getFilePath());
     }
 
@@ -132,20 +132,20 @@ public class KycManager {
 
     public LogisticKycs findDispatcherKyc(final @NonNull String email) throws NoKycRecordFoundException {
         final UserKycCollectionEntity kycCollectionEntity = this.userKycCollectionRepository.findByUserEmailAndUserType(email, LogisticAppRole.DISPATCHER)
-                .orElseThrow(() -> new NoKycRecordFoundException("No kyc record found for this user " + email));
+                .orElseThrow(() -> new NoKycRecordFoundException("No type record found for this user " + email));
         return new LogisticKycs(kycCollectionEntity);
     }
 
     @Transactional(readOnly = true)
     public LogisticKycs findKyc(final @NonNull UUID id) throws NoKycRecordFoundException {
         final UserKycCollectionEntity kycCollectionEntity = this.userKycCollectionRepository.findById(id)
-                .orElseThrow(() -> new NoKycRecordFoundException("No kyc record found with this Id"));
+                .orElseThrow(() -> new NoKycRecordFoundException("No type record found with this Id"));
         return new LogisticKycs(kycCollectionEntity);
     }
 
     public void approveKyc(final @NonNull UUID id) throws NoKycRecordFoundException {
         final UserKycCollectionEntity kycCollectionEntity = this.userKycCollectionRepository.findById(id)
-                .orElseThrow(() -> new NoKycRecordFoundException("No kyc record found with this Id"));
+                .orElseThrow(() -> new NoKycRecordFoundException("No type record found with this Id"));
         if (!kycCollectionEntity.isApproved()) {
             kycCollectionEntity.setApproved(true);
         }
@@ -154,7 +154,7 @@ public class KycManager {
 
     public LogisticKycs findAgentKyc(final @NonNull String email) throws NoKycRecordFoundException {
         final UserKycCollectionEntity kycCollectionEntity = this.userKycCollectionRepository.findByUserEmailAndUserType(email, LogisticAppRole.AGENT)
-                .orElseThrow(() -> new NoKycRecordFoundException("No kyc record found for this user " + email));
+                .orElseThrow(() -> new NoKycRecordFoundException("No type record found for this user " + email));
         return new LogisticKycs(kycCollectionEntity);
     }
 

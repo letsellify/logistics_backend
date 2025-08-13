@@ -12,6 +12,6 @@ import jakarta.validation.constraints.Size;
 
 
 public record KycDto(
-        @NotNull(message = "Kyc type must be specified") KycType kyc, @Size(min = 11, max = 11, message = "Number must be 11") String number
+        @NotNull(message = "Kyc type must be specified") KycType type, @Size(min = 11, max = 11, message = "Number must be 11") String number
 ) {
 }

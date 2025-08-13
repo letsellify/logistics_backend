@@ -9,7 +9,6 @@ import com.letsellify.logistics.components.logistics.core.dispatcherManagement.d
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.LogisticDispatcherInfo;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.database.entity.DispatcherEntity;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.database.repository.DispatcherRepository;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.event.DispatcherAwaitApproval;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.event.DispatcherNameUpdateEvent;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.exception.*;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto.*;
@@ -142,8 +141,8 @@ public class DispatcherManager {
 //        if (!entity.isApprove()) {
 //            throw new UnapprovedDispatcherException("You have not been approved");
 //        }
-//        final LogisticKycs kyc = this.kycManager.findKyc(entity.getKycId());
-//        return new LogisticDispatcherInfo(entity, this.getKycsPresignedUrl(kyc.getKycs()));
+//        final LogisticKycs type = this.kycManager.findKyc(entity.getKycId());
+//        return new LogisticDispatcherInfo(entity, this.getKycsPresignedUrl(type.getKycs()));
 //    }
 
     @Transactional
@@ -231,7 +230,7 @@ public class DispatcherManager {
         entity.setContactInfo(contactInfoEmbeddable);
         entity.setDispatchDetail(dispatchDetailEmbeddable);
         entity.setGuarantor(guarantorEmbeddable);
-        entity.setKycType(kycDto.kyc());
+        entity.setKycType(kycDto.type());
         entity.setKycNumber(kycDto.number());
 
         entity.setProfileComplete(true);
@@ -281,10 +280,10 @@ public class DispatcherManager {
 //        if (entity.isApprove()) {
 //            throw new DispatcherApprovedException("Dispatcher with email " + email + " all ready approved");
 //        }
-//        final LogisticKycs kyc = this.kycManager.findDispatcherKyc(email);
-//        entity.setKycId(kyc.getKycId());
+//        final LogisticKycs type = this.kycManager.findDispatcherKyc(email);
+//        entity.setKycId(type.getKycId());
 //        this.dispatcherRepository.save(entity);
-//        final Map<KycDocumentType, String> kycs = this.getKycsPresignedUrl(kyc.getKycs());
+//        final Map<KycDocumentType, String> kycs = this.getKycsPresignedUrl(type.getKycs());
 //        final LogisticDispatcherInfo dispatcherInfo = new LogisticDispatcherInfo(entity, kycs);
 //        this.eventPublisher.publishEvent(new DispatcherAwaitApproval(dispatcherInfo));
 //        return dispatcherInfo;

@@ -2,7 +2,7 @@ package com.letsellify.logistics.components.logistics.core.logisticRequestManage
 
 import com.letsellify.logistics.components.logistics.core.vendorManagement.rest.dto.GoodInformation;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.rest.dto.OtherDetail;
-import com.letsellify.logistics.components.logistics.core.vendorManagement.rest.dto.ReceiverInformation;
+import com.letsellify.logistics.components.logistics.core.vendorManagement.rest.dto.ReceiverInfoDto;
 import jakarta.validation.constraints.NotNull;
 
 /**
@@ -15,7 +15,7 @@ public record OrderDto(
         @NotNull
         GoodInformation goodInformation,
         @NotNull
-        ReceiverInformation receiverInformation,
+        ReceiverInfoDto receiverInformation,
         @NotNull
         OtherDetail otherDetails
 ) {

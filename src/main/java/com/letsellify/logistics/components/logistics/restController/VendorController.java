@@ -5,7 +5,7 @@ import com.letsellify.logistics.components.logistics.core.vendorManagement.Vendo
 import com.letsellify.logistics.components.logistics.core.vendorManagement.rest.dto.*;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.rest.resource.VendorBusinessInformationResource;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.rest.resource.VendorContactInformationResource;
-import com.letsellify.logistics.components.logistics.core.vendorManagement.rest.resource.VendorInformationResource;
+import com.letsellify.logistics.components.logistics.core.vendorManagement.rest.resource.VendorProfileInfoResource;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.rest.resource.VendorPersonalInformationResource;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -28,19 +28,29 @@ import org.springframework.web.multipart.MultipartFile;
 public class VendorController {
     private final VendorDataService vendorDataService;
 
-    @PostMapping("/personal-info")
-    public VendorPersonalInformationResource uploadPersonalInformation(final Authentication authentication, @Valid @RequestBody final PersonalInformationDto personalInformationDto) {
-        return this.vendorDataService.uploadPersonalInformation(authentication, personalInformationDto);
+//    @PostMapping("/personal-info")
+//    public VendorPersonalInformationResource uploadPersonalInformation(final Authentication authentication, @Valid @RequestBody final VendorPersonalInfoDto personalInformationDto) {
+//        return this.vendorDataService.uploadPersonalInformation(authentication, personalInformationDto);
+//    }
+//
+//    @PostMapping("/contact-info")
+//    public VendorContactInformationResource uploadContactInformation(final Authentication authentication, @Valid @RequestBody final VendorContactInfoDto contactInformationDto) {
+//        return this.vendorDataService.uploadContactInformation(authentication, contactInformationDto);
+//    }
+//
+//    @PostMapping("/business-info")
+//    public VendorBusinessInformationResource uploadBusinessInformation(final Authentication authentication, @Valid @RequestBody final VendorBusinessInfoDto businessInformationDto) {
+//        return this.vendorDataService.uploadBusinessInformation(authentication, businessInformationDto);
+//    }
+
+    @PostMapping("/profile")
+    public VendorProfileInfoResource setProfile(final Authentication authentication, final @Valid @RequestBody VendorProfileInfoDto vendorProfileInfoDto) {
+        return this.vendorDataService.setProfile(authentication, vendorProfileInfoDto);
     }
 
-    @PostMapping("/contact-info")
-    public VendorContactInformationResource uploadContactInformation(final Authentication authentication, @Valid @RequestBody final ContactInformationDto contactInformationDto) {
-        return this.vendorDataService.uploadContactInformation(authentication, contactInformationDto);
-    }
-
-    @PostMapping("/business-info")
-    public VendorBusinessInformationResource uploadBusinessInformation(final Authentication authentication, @Valid @RequestBody final BusinessInformationDto businessInformationDto) {
-        return this.vendorDataService.uploadBusinessInformation(authentication, businessInformationDto);
+    @GetMapping("/profile")
+    public VendorProfileInfoResource getProfile(final Authentication authentication) {
+        return this.vendorDataService.getProfile(authentication);
     }
 
     @PostMapping(value = "/profile-picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -48,10 +58,10 @@ public class VendorController {
         return this.vendorDataService.uploadProfilePicture(authentication, file);
     }
 
-    @GetMapping("/info")
-    public VendorInformationResource getInformation(final Authentication authentication) {
-        return this.vendorDataService.getVendorInformation(authentication);
-    }
+//    @GetMapping("/info")
+//    public VendorProfileInfoResource getInformation(final Authentication authentication) {
+//        return this.vendorDataService.getVendorInformation(authentication);
+//    }
 
     @PostMapping("/account/initialize-topUp")
     public PaystackInitiateTransactionResponse initializeTopUp(

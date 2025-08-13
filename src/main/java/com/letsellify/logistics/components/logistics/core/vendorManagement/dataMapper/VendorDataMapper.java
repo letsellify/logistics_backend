@@ -2,11 +2,11 @@ package com.letsellify.logistics.components.logistics.core.vendorManagement.data
 
 import com.letsellify.logistics.components.logistics.core.vendorManagement.data.VendorBusinessInformation;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.data.VendorContactInformation;
-import com.letsellify.logistics.components.logistics.core.vendorManagement.data.VendorInformation;
+import com.letsellify.logistics.components.logistics.core.vendorManagement.data.VendorInfo;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.data.VendorPersonalInformation;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.rest.resource.VendorBusinessInformationResource;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.rest.resource.VendorContactInformationResource;
-import com.letsellify.logistics.components.logistics.core.vendorManagement.rest.resource.VendorInformationResource;
+import com.letsellify.logistics.components.logistics.core.vendorManagement.rest.resource.VendorProfileInfoResource;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.rest.resource.VendorPersonalInformationResource;
 import org.mapstruct.Mapper;
 import org.mapstruct.NullValuePropertyMappingStrategy;
@@ -30,5 +30,5 @@ public interface VendorDataMapper {
 
     VendorBusinessInformationResource toResource(VendorBusinessInformation vendorBusinessInformation);
 
-    VendorInformationResource toResource(VendorInformation vendorInformation);
+    VendorProfileInfoResource toResource(VendorInfo vendorInformation);
 }

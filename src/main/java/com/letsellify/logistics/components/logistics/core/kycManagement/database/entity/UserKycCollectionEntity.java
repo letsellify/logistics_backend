@@ -50,7 +50,7 @@ public class UserKycCollectionEntity extends Auditable {
     }
 
 
-    // this class should enforce kyc rules based on userType
+    // this class should enforce type rules based on userType
 
     public void addKyc(final KycEntity kyc) {
         if (LogisticAppRole.VENDOR.equals(this.userType)) {

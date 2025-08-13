@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotNull;
  * Time:17:54
  */
 
-public record ReceiverInformation(
+public record ReceiverInfoDto(
         @NotBlank
         String fullName,
         @NotBlank

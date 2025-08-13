@@ -1,5 +1,6 @@
 package com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto;
 
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.validator.annotation.ValidKyc;
 import jakarta.validation.constraints.NotNull;
 
 /**
@@ -8,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
  * Time:21:36
  */
 
+@ValidKyc
 public record DispatcherProfileDto(
         @NotNull
         DispatcherPersonalInfoDto personalInfo,

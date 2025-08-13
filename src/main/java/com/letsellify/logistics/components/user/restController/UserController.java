@@ -58,7 +58,7 @@ public class UserController {
 //      description = "Set Kyc document type",
 //      summary = "Set's the Kyc document type for the user, so upload of the document could occur"
 //    )
-//    @PostMapping("/kyc/document-type")
+//    @PostMapping("/type/document-type")
 //    public KycResource setKycDocumentType(final Authentication authentication, @RequestBody final @Valid KycDocumentTypeDto kycDocumentTypeDto) {
 //        return this.userDataService.setKycDocumentType(authentication,kycDocumentTypeDto);
 //    }
@@ -66,7 +66,7 @@ public class UserController {
 //    @Operation(
 //      description = "Upload Kyc document"
 //    )
-//    @PostMapping("/kyc/document-upload")
+//    @PostMapping("/type/document-upload")
 //    public KycDocumentUploadResource uploadKycDocument(final Authentication authentication, final MultipartFile multipartFile) {
 //        return this.userDataService.uploadKycDocument(authentication,multipartFile);
 //    }
