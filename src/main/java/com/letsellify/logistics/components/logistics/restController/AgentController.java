@@ -6,6 +6,7 @@ import com.letsellify.logistics.components.logistics.core.agentManagement.rest.r
 import com.letsellify.logistics.components.logistics.core.agentManagement.rest.resource.AgentProfileInfoResource;
 import com.letsellify.logistics.components.logistics.core.agentManagement.rest.resource.AgentResource;
 import com.letsellify.logistics.components.logistics.core.kycManagement.data.KycDocumentType;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.NonNull;
@@ -28,6 +29,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/agent/")
 @Tag(name = "Agents API", description = "API's for agents")
+@Hidden
 public class AgentController {
     private final AgentDataService agentDataService;
 

@@ -1,6 +1,10 @@
 package com.letsellify.logistics.components.user.restController;
 
 import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.rest.resource.DispatcherProfileInfoResources;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -29,66 +33,103 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/admin")
-@Tag(name = "Admin API", description = "API's for Admin User")
+@Tag(name = "Admin API", description = "Admin operations for managing users, vendors, dispatchers and agents")
 public class AdminUserController {
+
     private final AdminUserDataService dataService;
 
+    // ==============================
+    // USERS
+    // ==============================
+
     @Operation(
-      description = "Get a user",
-      summary = "Gets a user by using the provided email to search"
+            summary = "Get user by email",
+            description = "Retrieves details of a specific user using their email address.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "User retrieved successfully",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = UserResource.class)
+                            )
+                    ),
+                    @ApiResponse(responseCode = "404", description = "User not found")
+            }
     )
     @GetMapping("/users")
-    public UserResource getUser(@RequestParam final @NonNull String email) {
+    public UserResource getUser(@RequestParam @NonNull String email) {
         return this.dataService.getUser(email);
     }
 
     @Operation(
-      description = "Get users"
+            summary = "Get all users",
+            description = "Retrieves a paginated list of all users.",
+            parameters = {
+                    @Parameter(name = "page", description = "Page number (0-based index)", example = "0"),
+                    @Parameter(name = "size", description = "Number of items per page", example = "5"),
+                    @Parameter(name = "sortBy", description = "Field to sort by", example = "creationDate"),
+                    @Parameter(name = "ascending", description = "Sort ascending if true, descending if false", example = "true")
+            }
     )
     @GetMapping("/users/all")
     public UserResources getAllUsers(
-      @RequestParam(defaultValue = "0") final int page,
-      @RequestParam(defaultValue = "5") final int size,
-      @RequestParam(defaultValue = "creationDate") final String sortBy,
-      @RequestParam(defaultValue = "true") final boolean ascending
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "creationDate") String sortBy,
+            @RequestParam(defaultValue = "true") boolean ascending
     ) {
-
-        final Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        final Pageable pageable = PageRequest.of(page, size, sort);
+        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
         return this.dataService.getAllUsers(pageable);
     }
 
+    // ==============================
+    // DISPATCHERS
+    // ==============================
 
-    @GetMapping("/dispatchers/info")
-    public LogisticDispatcherInfoResource viewDispatcherPersonalInfo(@RequestParam final String email) {
-        return this.dataService.viewDispatcherPersonalInfo(email);
-    }
-
+    @Operation(
+            summary = "Get unapproved dispatchers",
+            description = "Retrieves a paginated list of all dispatchers awaiting approval.",
+            parameters = {
+                    @Parameter(name = "page", description = "Page number (0-based index)", example = "0"),
+                    @Parameter(name = "size", description = "Number of items per page", example = "5"),
+                    @Parameter(name = "sortBy", description = "Field to sort by", example = "creationDate"),
+                    @Parameter(name = "descending", description = "Sort descending if true, ascending if false", example = "true")
+            }
+    )
     @GetMapping("/dispatchers/unapproved")
     public DispatcherProfileInfoResources getAllDispatcherAwaitingApproval(
-            @RequestParam(defaultValue = "0") final int page,
-            @RequestParam(defaultValue = "5") final int size,
-            @RequestParam(defaultValue = "creationDate") final String sortBy,
-            @RequestParam(defaultValue = "true") final boolean descending
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "creationDate") String sortBy,
+            @RequestParam(defaultValue = "true") boolean descending
     ) {
-        final Sort sort = descending ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-        final Pageable pageable = PageRequest.of(page, size, sort);
+        Sort sort = descending ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
         return this.dataService.getAllDispatcherAwaitingApproval(pageable);
     }
 
+    @Operation(
+            summary = "Approve dispatcher",
+            description = "Approves a dispatcher account by their email address.",
+            parameters = {
+                    @Parameter(name = "email", description = "Email address of the dispatcher to approve", example = "dispatcher@example.com")
+            },
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Dispatcher approved successfully",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = DispatcherResource.class)
+                            )
+                    ),
+                    @ApiResponse(responseCode = "404", description = "Dispatcher not found")
+            }
+    )
     @PatchMapping("/dispatchers/{email}/approve")
-    public DispatcherResource approveDispatcher(@PathVariable final String email) {
+    public DispatcherResource approveDispatcher(@PathVariable String email) {
         return this.dataService.approveDispatcher(email);
     }
-
-    @GetMapping("/agents/info")
-    public AgentInfoResource viewAgentPersonalInfo(@RequestParam final String email) {
-        return this.dataService.viewAgentPersonalInfo(email);
-    }
-
-    @PutMapping("/agents/approve")
-    public AgentResource approveAgent(@RequestParam final String email) {
-        return this.dataService.approveAgent(email);
-    }
-
 }

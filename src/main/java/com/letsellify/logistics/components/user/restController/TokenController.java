@@ -1,9 +1,23 @@
 package com.letsellify.logistics.components.user.restController;
 
-import java.util.Map;
-
+import com.letsellify.logistics.common.util.CookieHandler;
+import com.letsellify.logistics.components.user.core.authorizationTokenManagement.AuthorizationTokenDataService;
+import com.letsellify.logistics.components.user.core.authorizationTokenManagement.rest.dto.LoginDto;
+import com.letsellify.logistics.components.user.core.authorizationTokenManagement.rest.resource.TokenResource;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -11,24 +25,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.letsellify.logistics.components.user.core.authorizationTokenManagement.AuthorizationTokenDataService;
-import com.letsellify.logistics.components.user.core.authorizationTokenManagement.rest.dto.LoginDto;
-import com.letsellify.logistics.components.user.core.authorizationTokenManagement.rest.resource.TokenResource;
-import com.letsellify.logistics.common.util.CookieHandler;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Map;
 
 /**
  * @author AHMAD BUBA
@@ -38,8 +37,10 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/v1/authorize")
-@Tag(name = "Authorization API",
-     description = "API's for obtaining authorization tokens")
+@Tag(
+        name = "Authorization API",
+        description = "API endpoints for authenticating users and obtaining JWT authorization tokens"
+)
 @Slf4j
 public class TokenController {
 
@@ -53,14 +54,44 @@ public class TokenController {
         this.tokenDataService = tokenDataService;
     }
 
-    @Operation(description = "Login a user",
-               summary = "Validates user credentials and returns authorization tokens")
+    @Operation(
+            summary = "Login a user",
+            description = """
+                        Validates user credentials and returns authorization tokens.
+                    
+                        **Behavior:**
+                        - For **web clients** (`X-Client-Type: web`):  
+                          Tokens are returned as `HttpOnly` cookies (`access_token` and `refresh_token`).  
+                          Requires the request to come from a recognized domain.
+                        - For **mobile clients** (`X-Client-Type: mobile`):  
+                          Tokens are returned in the JSON response body.
+                    
+                        **Client Type Rules:**  
+                        The `X-Client-Type` header must be either `mobile` or `web`.
+                    """,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "User login credentials",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = LoginDto.class)
+                    )
+            ),
+            parameters = {
+                    @Parameter(name = "X-Client-Type", description = "Specifies client type (mobile or web)", required = true, example = "mobile")
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Login successful. Tokens issued."),
+                    @ApiResponse(responseCode = "401", description = "Invalid client type or credentials"),
+                    @ApiResponse(responseCode = "400", description = "Bad request")
+            }
+    )
     @PostMapping("/login")
     public ResponseEntity<?> login(
-      final HttpServletRequest httpServletRequest,
-      @RequestHeader("X-Client-Type") final String clientType,
-      @RequestBody final @Valid LoginDto loginDto,
-      final HttpServletResponse httpServletResponse
+            final HttpServletRequest httpServletRequest,
+            @RequestHeader("X-Client-Type") final String clientType,
+            @RequestBody final @Valid LoginDto loginDto,
+            final HttpServletResponse httpServletResponse
     ) {
         if (clientType == null || clientType.isEmpty() || (!clientType.equalsIgnoreCase("mobile") && !clientType.equalsIgnoreCase("web"))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid client type");
@@ -72,11 +103,9 @@ public class TokenController {
             final String domain;
             if (serverName.contains("localhost")) {
                 domain = "localhost";
-            }
-            else if (serverName.contains(".letsellify")) {
+            } else if (serverName.contains(".letsellify")) {
                 domain = "logistics.letsellify.com";
-            }
-            else {
+            } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Origin header not detected");
             }
             log.info("Request comes from: {}", domain);
@@ -86,23 +115,58 @@ public class TokenController {
         }
 
         return ResponseEntity.ok(Map.of(
-          "issuer", tokenResource.getIssuer(),
-          "access_token", tokenResource.getAccessToken(),
-          "refresh_token", tokenResource.getRefreshToken()
+                "issuer", tokenResource.getIssuer(),
+                "access_token", tokenResource.getAccessToken(),
+                "refresh_token", tokenResource.getRefreshToken()
         ));
 
     }
 
 
-    @Operation(description = "Get new access token",
-               summary = "Using refresh token, obtains new set of authorization tokens")
+    @Operation(
+            summary = "Refresh access token",
+            description = """
+                        Obtains a new set of access and refresh tokens using an existing refresh token.
+                    
+                        **Behavior:**
+                        - **Mobile clients** must provide `refresh_token` in the request body.
+                        - **Web clients** must have `refresh_token` in an `HttpOnly` cookie.
+                    
+                        **Client Type Rules:**  
+                        The `X-Client-Type` header must be either `mobile` or `web`.
+                    """,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = false,
+                    description = "Refresh token (mobile clients only)",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(
+                                    example = """
+                                            {
+                                              "refresh_token": "your-refresh-token"
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            parameters = {
+                    @Parameter(name = "X-Client-Type", description = "Specifies client type (mobile or web)", required = true, example = "mobile"),
+                    @Parameter(name = "Origin", description = "Origin header (web clients only)", required = false),
+                    @Parameter(name = "refresh_token", in = ParameterIn.COOKIE, description = "Refresh token (web clients only)", required = false)
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Tokens successfully refreshed"),
+                    @ApiResponse(responseCode = "401", description = "Invalid client type or missing/invalid refresh token"),
+                    @ApiResponse(responseCode = "400", description = "Bad request")
+            }
+    )
     @PostMapping("/token")
     public ResponseEntity<?> getNewTokens(
-      @RequestHeader(value = "Origin", required = false) final String origin,
-      @RequestHeader("X-Client-Type") final String clientType,
-      @CookieValue(value = "refresh_token", required = false) final String refreshTokenCookie,
-      @RequestBody(required = false) final Map<String, String> requestBody,
-      final HttpServletResponse httpServletResponse
+            @RequestHeader(value = "Origin", required = false) final String origin,
+            @RequestHeader("X-Client-Type") final String clientType,
+            @CookieValue(value = "refresh_token", required = false) final String refreshTokenCookie,
+            @RequestBody(required = false) final Map<String, String> requestBody,
+            final HttpServletResponse httpServletResponse
     ) {
         if (clientType == null || clientType.isEmpty() || (!clientType.equalsIgnoreCase("mobile") && !clientType.equalsIgnoreCase("web"))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid client type");
@@ -113,13 +177,12 @@ public class TokenController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing refresh token");
             }
             refreshToken = requestBody.get("refresh_token");
-        }
-        else {
+        } else {
             refreshToken = refreshTokenCookie;
         }
 
         if (refreshToken == null) {
-           return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing refresh token");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing refresh token");
         }
         final Authentication authentication = this.refreshTokenAuthProvider.authenticate(new BearerTokenAuthenticationToken(refreshToken));
         final Jwt jwt = (Jwt) authentication.getCredentials();
@@ -131,22 +194,21 @@ public class TokenController {
             String domain = null;
             if (origin != null && origin.contains("localhost")) {
                 domain = "localhost";
-            }
-            else if (origin != null && origin.contains(".letsellify")) {
+            } else if (origin != null && origin.contains(".letsellify")) {
                 domain = ".letsellify";
             }
             if (domain == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Origin header not detected");
             }
             CookieHandler.addCookie(httpServletResponse, domain, "access_token", tokenResource.getAccessToken(), 15 * 60);
-            CookieHandler.addCookie(httpServletResponse, domain, "refresh_token",tokenResource.getRefreshToken(),7 * 24 * 60 * 60);
+            CookieHandler.addCookie(httpServletResponse, domain, "refresh_token", tokenResource.getRefreshToken(), 7 * 24 * 60 * 60);
             return ResponseEntity.ok(Map.of("message", "Token successfully refreshed"));
 
         }
         return ResponseEntity.ok(Map.of(
-          "issuer", tokenResource.getIssuer(),
-          "access_token", tokenResource.getAccessToken(),
-          "refresh_token", tokenResource.getRefreshToken()
+                "issuer", tokenResource.getIssuer(),
+                "access_token", tokenResource.getAccessToken(),
+                "refresh_token", tokenResource.getRefreshToken()
         ));
     }
 

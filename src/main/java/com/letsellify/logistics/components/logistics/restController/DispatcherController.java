@@ -3,6 +3,11 @@ package com.letsellify.logistics.components.logistics.restController;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.DispatcherDataService;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto.DispatcherProfileDto;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.resource.DispatcherProfileInfoResource;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.NonNull;
@@ -18,65 +23,80 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/dispatcher/")
-@Tag(name = "Dispatchers API", description = "API's for dispatchers")
+@RequestMapping("/api/v1/dispatcher")
+@Tag(
+        name = "Dispatchers API",
+        description = """
+        API endpoints for managing dispatcher profiles.
+        You must be authenticated to use these endpoints.
+        Once you have posted content as a dispatcher, your profile and profile picture cannot be updated without notifying an administrator.
+        """
+)
 public class DispatcherController {
+
     private final DispatcherDataService dispatcherDataService;
 
-//    @PostMapping("type-upload")
-//    public String uploadKycDocument(final @NonNull Authentication authentication, @RequestParam final @NonNull KycDocumentType documentType, @RequestParam final MultipartFile file, HttpServletRequest httpServletRequest) {
-//        if (file.isEmpty()) {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File cannot be empty.");
-//        }
-//        final String contentType = file.getContentType();
-//        if (contentType == null || !List.of("image/jpeg", "image/png", "application/pdf").contains(contentType)) {
-//            throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Only JPEG, PNG, and PDF files are allowed.");
-//        }
-//        System.out.println("File received: " + file.getOriginalFilename() + " with content type: " + contentType);
-//        Cookie[] cookies = httpServletRequest.getCookies();
-//        if (cookies != null) {
-//            for (Cookie cookie : cookies) {
-//                if ("access_token".equals(cookie.getName())) { // replace with your actual cookie name
-//                    String token = cookie.getValue();
-//                    System.out.println("Access Token from Cookie: " + token);
-//                }
-//            }
-//        } else {
-//            System.out.println("No cookies found in request.");
-//        }
-//
-//        return this.dispatcherDataService.uploadKyc(authentication, documentType, file);
-//    }
-
-//    @DeleteMapping("type-upload")
-//    public void deleteKyc(final @NonNull Authentication authentication, @RequestParam final @NonNull String kycIdentification) {
-//        this.dispatcherDataService.deleteKyc(authentication, kycIdentification);
-//    }
-
-    @PostMapping("profile")
-    public DispatcherProfileInfoResource setProfile(final @NonNull Authentication authentication, @RequestBody final  @Valid DispatcherProfileDto infoDto) {
+    @Operation(
+            summary = "Set dispatcher profile",
+            description = """
+            Creates or updates the dispatcher profile for the authenticated user.
+            Once you have posted content, profile updates (including profile picture changes) must be approved by an administrator.
+            """,
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Profile successfully created or updated",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = DispatcherProfileInfoResource.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Invalid request body"
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Unauthorized - User is not authenticated"
+                    )
+            },
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @PostMapping("/profile")
+    public DispatcherProfileInfoResource setProfile(
+            final @NonNull Authentication authentication,
+            @Valid @RequestBody final DispatcherProfileDto infoDto
+    ) {
         return this.dispatcherDataService.setProfile(authentication, infoDto);
     }
 
-    @GetMapping("profile")
-    public DispatcherProfileInfoResource getProfile(final @NonNull Authentication authentication) {
+    @Operation(
+            summary = "Get dispatcher profile",
+            description = "Retrieves the dispatcher profile for the authenticated user.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Dispatcher profile retrieved successfully",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = DispatcherProfileInfoResource.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Unauthorized - User is not authenticated"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Profile not found"
+                    )
+            },
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @GetMapping("/profile")
+    public DispatcherProfileInfoResource getProfile(
+            final @NonNull Authentication authentication
+    ) {
         return this.dispatcherDataService.getProfile(authentication);
     }
-
-
-//    @PostMapping("confirm-info")
-//    public LogisticDispatcherInfoResource confirmInfoSubmissionForApproval(final @NonNull Authentication authentication) {
-//        return this.dispatcherDataService.confirmInfoSubmissionForApproval(authentication);
-//    }
-//
-//    @GetMapping("view-info")
-//    public LogisticDispatcherInfoResource viewPersonalInfoAfterApproval(final @NonNull Authentication authentication) {
-//        return this.dispatcherDataService.viewPersonalInfoAfterApproval(authentication);
-//    }
-
-//    @PatchMapping("delivery-status")
-//    public DispatcherResource setCurrentlyAcceptingDelivery(final @NonNull Authentication authentication, @RequestParam(name = "accepting") final boolean acceptingDelivery) {
-//        return this.dispatcherDataService.setCurrentlyAcceptingDelivery(authentication, acceptingDelivery);
-//    }
-
 }

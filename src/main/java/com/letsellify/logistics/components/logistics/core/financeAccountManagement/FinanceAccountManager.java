@@ -112,8 +112,8 @@ public class FinanceAccountManager {
         } catch (FinanceAccountNotFoundException e) {
             throw new RuntimeException(e);
         }
-        BigDecimal amountToTopUp = event.getAmount();
-        BigDecimal currentBalance = entity.getBalance();
+        final BigDecimal amountToTopUp = event.getAmount();
+        final BigDecimal currentBalance = entity.getBalance();
         entity.setBalance(currentBalance.add(amountToTopUp));
         this.accountRepository.save(entity);
     }
@@ -123,7 +123,7 @@ public class FinanceAccountManager {
         if (userRole != LogisticAppRole.VENDOR) {
             throw new FinanceAccountNotFoundException("Only vendors can top up thier account");
         }
-        Vendor vendor  = Objects.requireNonNull(this.vendorManagerProvider
+        final Vendor vendor  = Objects.requireNonNull(this.vendorManagerProvider
                         .getIfAvailable())
                 .findAndValidateVendor(userName);
         return this.paystackManager.initializePayment(vendor.getId(), vendor.getEmail(), LogisticAppRole.VENDOR, amount);
@@ -134,7 +134,7 @@ public class FinanceAccountManager {
         final LogisticsAccountEntity accountEntity = this.accountRepository.findByUserIdAndAppRole(userId, userRole)
                 .orElseThrow(() -> new FinanceAccountNotFoundException("Account not found"));
 
-        BigDecimal totalSpending = accountEntity.debitForEscrow(amountForShipping, amountForStorage);
+        final BigDecimal totalSpending = accountEntity.debitForEscrow(amountForShipping, amountForStorage);
         log.info("total spending {}", totalSpending);
         // make account Entity set the reference instead: maning just amount, shipping requestId for the constructor
         // so that once account entity is passed the escrow, it sets the reference, then we just persist accountEntity

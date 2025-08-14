@@ -8,43 +8,42 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.servers.Server;
+import org.springframework.context.annotation.Configuration;
 
-/**
- * @author AHMAD BUBA
- * Date:1/5/25
- * Time:17:32
- */
-
+@Configuration
 @OpenAPIDefinition(
         info = @Info(
+                title = "Letsellify Logistics API",
+                version = "1.0.0",
+                description = """
+                        API documentation for Letsellify Logistics service.
+                        All secured endpoints require a valid JWT Bearer token.
+                        """,
                 contact = @Contact(
-                        name = "Ahmad",
+                        name = "Ahmad Buba",
                         email = "ahmadbubacherryfield@gmail.com"
-                ),
-                description = "OpenApi documentation for Letsellify logistics",
-                title = "OpenApi specification - Letsellify Logistics",
-                version = "1.0"
+                )
         ),
         servers = {
                 @Server(
-                        url = "/"
+                        url = "/",
+                        description = "Default Server"
                 )
         },
         security = {
-                @SecurityRequirement(
-                        name = "bearerAuth"
-                )
+                @SecurityRequirement(name = "bearerAuth")
         }
 )
 @SecurityScheme(
         name = "bearerAuth",
-        description = "JWT auth description",
+        description = """
+                Use JWT Bearer authentication for all protected endpoints.
+                Example: Authorization: Bearer <your_token>
+                """,
         scheme = "bearer",
         type = SecuritySchemeType.HTTP,
         bearerFormat = "JWT",
         in = SecuritySchemeIn.HEADER
 )
-
 public class DocumentationConfiguration {
-
 }
