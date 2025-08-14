@@ -3,6 +3,7 @@ package com.letsellify.logistics.components.logistics.core.paystackPaymentGatewa
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.letsellify.logistics.common.data.LogisticAppRole;
 import com.letsellify.logistics.components.logistics.core.financeAccountManagement.FinanceAccountManager;
+import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.data.Payment;
 import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.database.entity.PaystackChargeSuccessWebhookEntity;
 import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.database.entity.PaystackPaymentEntity;
 import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.database.repository.PaystackPaymentRepository;
@@ -18,6 +19,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
@@ -37,20 +39,20 @@ import java.util.UUID;
 @Slf4j
 public class PaystackManager {
     private final PaystackPaymentRepository paystackPaymentRepository;
-    private final FinanceAccountManager accountManager;   // this will go soon. another bounded context
+    private final ApplicationEventPublisher applicationEventPublisher;   // this will go soon. another bounded context
     private final RestClient restClient;
     private final String paystackSecret;
     private final List<String> paystackAllowedIps;
 
     public PaystackManager(
             final PaystackPaymentRepository paystackPaymentRepository,
-            final FinanceAccountManager accountManager,
+            final ApplicationEventPublisher applicationEventPublisher,
             @Qualifier("PaystackRestClient") final RestClient restClient,
             @Value("${paystack.secret-key}") final String paystackSecret,
             @Value("${paystack.allowed-ips}") final List<String> paystackAllowedIps
     ) {
         this.paystackPaymentRepository = paystackPaymentRepository;
-        this.accountManager = accountManager;
+        this.applicationEventPublisher = applicationEventPublisher;
         this.restClient = restClient;
         this.paystackSecret = paystackSecret;
         this.paystackAllowedIps = paystackAllowedIps;
@@ -108,7 +110,7 @@ public class PaystackManager {
         log.info("Payment status is {}, with the following data {}", paymentEntity.isSuccess(), paymentEntity.getChargeSuccessWebhookData().toString());
         try {
             // put it on a kafka, accountManager listens
-            this.accountManager.topUpAccount(paymentEntity.getUserId(), paymentEntity.getUserRole(), paymentEntity.getAmount());
+            this.applicationEventPublisher.publishEvent(new Payment(paymentEntity));
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }

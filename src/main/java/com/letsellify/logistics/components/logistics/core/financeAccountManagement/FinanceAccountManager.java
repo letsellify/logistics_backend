@@ -17,13 +17,21 @@ import com.letsellify.logistics.components.logistics.core.financeAccountManageme
 import com.letsellify.logistics.components.logistics.core.financeAccountManagement.exception.FinanceAccountNotFoundException;
 import com.letsellify.logistics.components.logistics.core.financeAccountManagement.exception.InsufficientFundsException;
 import com.letsellify.logistics.components.logistics.core.financeAccountManagement.exception.UnableToDetermineAccountException;
+import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.PaystackManager;
+import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.event.ChargeSuccessEvent;
+import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.rest.resource.PaystackInitiateTransactionResponse;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.VendorManager;
+import com.letsellify.logistics.components.logistics.core.vendorManagement.data.Vendor;
+import com.letsellify.logistics.components.logistics.core.vendorManagement.exception.InCompleteVendorProfileException;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.exception.VendorNotFoundException;
+import com.letsellify.logistics.components.user.core.userManagement.exception.UserNotFoundException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +55,7 @@ public class FinanceAccountManager {
     private final ObjectProvider<VendorManager> vendorManagerProvider;
     private final DispatcherManager dispatcherManager;
     private final AgentManager agentManager;
+    private final PaystackManager paystackManager;
 
 
     @Transactional
@@ -90,6 +99,34 @@ public class FinanceAccountManager {
                 break;
         }
 //        return new LogisticsAccountTransaction(transactionEntity);
+    }
+
+    @EventListener
+    @Async
+    @Transactional
+    public void acceptPayment(final ChargeSuccessEvent event) {
+        LogisticsAccountEntity entity;
+        try {
+            entity = this.accountRepository.findByUserId(event.getUserId())
+                    .orElseThrow(() -> new FinanceAccountNotFoundException("Account for user with id: " + event.getUserId() + " not found"));
+        } catch (FinanceAccountNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        BigDecimal amountToTopUp = event.getAmount();
+        BigDecimal currentBalance = entity.getBalance();
+        entity.setBalance(currentBalance.add(amountToTopUp));
+        this.accountRepository.save(entity);
+    }
+
+    /* Only vendor can top up for now. Later we might add switchCase if other actors can top up */
+    PaystackInitiateTransactionResponse initializeTopUp(final @NonNull String userName, final LogisticAppRole userRole,  final @NonNull BigDecimal amount) throws VendorNotFoundException, InCompleteVendorProfileException, UserNotFoundException, FinanceAccountNotFoundException {
+        if (userRole != LogisticAppRole.VENDOR) {
+            throw new FinanceAccountNotFoundException("Only vendors can top up thier account");
+        }
+        Vendor vendor  = Objects.requireNonNull(this.vendorManagerProvider
+                        .getIfAvailable())
+                .findAndValidateVendor(userName);
+        return this.paystackManager.initializePayment(vendor.getId(), vendor.getEmail(), LogisticAppRole.VENDOR, amount);
     }
 
     @Transactional

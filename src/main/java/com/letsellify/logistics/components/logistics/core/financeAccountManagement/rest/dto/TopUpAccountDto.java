@@ -1,8 +1,10 @@
 package com.letsellify.logistics.components.logistics.core.financeAccountManagement.rest.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.*;
 import lombok.Data;
+
+import java.math.BigDecimal;
 
 /**
  * @author AHMAD BUBA
@@ -10,11 +12,11 @@ import lombok.Data;
  * Time:10:44
  */
 
-@Data
-public class TopUpAccountDto {
-
-    @NotBlank(message = "Amount cannot be blank")
-    @Pattern(regexp = "\\d+(\\.\\d{1,2})?", message = "Amount must be a positive number with up to two decimal places")
-    private String amount;
-
+public record TopUpAccountDto(
+        @NotNull(message = "Amount is required")
+        @DecimalMin(value = "5.00", message = "Amount must be at least ₦5.00")
+        @Digits(integer = 10, fraction = 2, message = "Amount must have at most 10 digits and 2 decimal places")
+        @JsonProperty("amount")
+        BigDecimal amount
+) {
 }

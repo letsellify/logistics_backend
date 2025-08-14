@@ -63,13 +63,13 @@ public class VendorController {
 //        return this.vendorDataService.getVendorInformation(authentication);
 //    }
 
-    @PostMapping("/account/initialize-topUp")
-    public PaystackInitiateTransactionResponse initializeTopUp(
-            final Authentication authentication,
-            @Valid @RequestBody final VendorTopUpDto topUpDto
-    ) {
-        return this.vendorDataService.initializeTopUp(authentication, topUpDto);
-    }
+//    @PostMapping("/account/initialize-topUp")
+//    public PaystackInitiateTransactionResponse initializeTopUp(
+//            final Authentication authentication,
+//            @Valid @RequestBody final VendorTopUpDto topUpDto
+//    ) {
+//        return this.vendorDataService.initializeTopUp(authentication, topUpDto);
+//    }
 
 //    @PostMapping(value = "logistics/image-upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 //    public LogisticItemImageResource uploadLogisticsItemImage(final Authentication authentication, @RequestParam final MultipartFile file) {

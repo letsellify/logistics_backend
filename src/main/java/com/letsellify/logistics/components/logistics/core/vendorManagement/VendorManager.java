@@ -131,19 +131,20 @@ public class VendorManager {
         entity.setPersonalInformation(personalInformationEmbeddable);
         entity.setContactInformation(contactInformationEmbeddable);
         entity.setBusinessInformation(businessInformationEmbeddable);
-        this.vendorRepository.save(entity);
         String profilePicturePresignedUrl = null;
         if (entity.getProfilePicture() != null) {
             profilePicturePresignedUrl = this.fileStorageManager.generatePresignedUrl(entity.getProfilePicture());
             entity.setProfileComplete(true);
         }
+        this.vendorRepository.save(entity);
         return new VendorInfo(profilePicturePresignedUrl, entity);
     }
 
     public VendorInfo getProfile(final @NonNull String vendorUsername) throws VendorNotFoundException {
         final VendorEntity entity = this.vendorRepository.findByEmail(vendorUsername)
                 .orElseThrow(() -> new VendorNotFoundException("Vendor with username " + vendorUsername + " not found."));
-        return new VendorInfo(this.fileStorageManager.generatePresignedUrl(entity.getProfilePicture()), entity);
+        final String profilePicture = entity.getProfilePicture();
+        return new VendorInfo(profilePicture == null ? this.fileStorageManager.generatePresignedUrl(profilePicture): null, entity);
     }
 
     public VendorPersonalInformation uploadPersonalInformation(final @NonNull String vendorEmail, final @NonNull String name, final @NonNull String homeAddress, final @NonNull String state, final @NonNull String lg) throws VendorNotFoundException, NoSuchStateException, IllegalLGAException {
@@ -334,5 +335,19 @@ public class VendorManager {
                 .orElseThrow(() -> new VendorNotFoundException("Vendor with username " + userName + " not found."));
         this.validateVendor(entity);
         return new Vendor(entity);
+    }
+
+    public Vendor findAndValidateVendor(@NonNull UUID vendorId) throws VendorNotFoundException, InCompleteVendorProfileException {
+        VendorEntity entity = this.vendorRepository.findById(vendorId)
+                .orElseThrow(() -> new VendorNotFoundException("Vendor with Id " + vendorId+ " not found."));
+        this.validateVendor(entity);
+        return new Vendor(entity);
+    }
+
+    public void topUpAccount(final @NonNull UUID vendorId, final @NonNull BigDecimal amount) throws VendorNotFoundException, InCompleteVendorProfileException {
+        VendorEntity entity = this.vendorRepository.findById(vendorId)
+                .orElseThrow(() -> new VendorNotFoundException("Vendor with Id " + vendorId+ " not found."));
+        this.validateVendor(entity);
+
     }
 }

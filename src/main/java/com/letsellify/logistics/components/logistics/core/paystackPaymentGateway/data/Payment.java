@@ -21,6 +21,8 @@ public class Payment {
 
     private UUID id;
 
+    private UUID userId;
+
     private BigDecimal amount;
 
     private boolean initializationStatus;
@@ -33,11 +35,22 @@ public class Payment {
 
     private String reference;
 
-    // user email instead, consider adding role too
-    private String userEmail;
-
     private LogisticAppRole userRole;
 
+
+    public Payment(PaystackPaymentEntity entity) {
+        this.entity = entity;
+        this.id = entity.getId();
+        this.userId = entity.getUserId();
+        this.amount = entity.getAmount();
+        this.userRole = entity.getUserRole();
+        this.authorizationUrl = entity.getAuthorizationUrl();
+        this.accessCode = entity.getAccessCode();
+        this.reference = entity.getReference();
+        this.initializationMessage = entity.getInitializationMessage();
+        this.initializationStatus = entity.isInitializationStatus();
+
+    }
 
     public PaystackPaymentInitializationResource getResource() {
         return PaystackDataMapper.INSTANCE.dataToResource(this);
