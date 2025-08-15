@@ -79,9 +79,9 @@ public class AdminUserManager implements CommandLineRunner {
           .sendToAdminAwaitApprovalMail(event.getAgentEmail(),event.getAgentName(), event.getRole());
     }
 
-    LogisticDispatcherInfo viewDispatcherPersonalInfo(final @NonNull String dispatcherEmail) throws NoKycRecordFoundException, NoSuchDispatcherException {
-        return this.dispatcherManager.viewDispatcherPersonalInfo(dispatcherEmail);
-    }
+//    LogisticDispatcherInfo viewDispatcherPersonalInfo(final @NonNull String dispatcherEmail) throws NoKycRecordFoundException, NoSuchDispatcherException {
+//        return this.dispatcherManager.viewDispatcherPersonalInfo(dispatcherEmail);
+//    }
 
 //    Dispatcher approveDispatcher(final @NonNull String dispatcherEmail) throws NoSuchDispatcherException, DispatcherApprovedException, NoKycRecordFoundException {
 //        return this.dispatcherManager.approveDispatcher(dispatcherEmail);

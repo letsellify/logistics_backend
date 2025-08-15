@@ -1,6 +1,6 @@
 package com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.resource;
 
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.KycType;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.*;
 
 /**
  * @author AHMAD BUBA
@@ -11,26 +11,11 @@ import com.letsellify.logistics.components.logistics.core.dispatcherManagement.d
 
 public record DispatcherProfileInfoResource(
         String email,
-        String name,
-        String whatsAppPhone,
-        String phone,
-        String state,
-        String lga,
-        String address,
-        String businessName,
-        String businessOfficeAddress,
-        String businessState,
-        String businessLga,
-        String guarantorName,
-        String guarantorState,
-        String guarantorLga,
-        String guarantorAddress,
-        String guarantorRelationship,
-        String guarantorPhoneNumber,
-        String guarantorWhatsAppNumber,
-        String guarantorEmail,
-        String guarantorCareer,
-        KycType kycType,
-        String kycNumber
+        String profilePicture,
+        DispatcherPersonalInformationResource personalInformation,
+        DispatcherContactInformationResource contactInformation,
+        DispatcherBusinessInformationResource businessInformation,
+        DispatcherGuarantorResource guarantor,
+        DispatcherKycResource kyc
 ) {
 }

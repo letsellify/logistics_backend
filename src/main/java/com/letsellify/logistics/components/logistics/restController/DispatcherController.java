@@ -2,7 +2,9 @@ package com.letsellify.logistics.components.logistics.restController;
 
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.DispatcherDataService;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto.DispatcherProfileDto;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto.DispatcherProfilePictureDto;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.resource.DispatcherProfileInfoResource;
+import com.letsellify.logistics.components.logistics.core.vendorManagement.rest.dto.VendorProfilePictureDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -12,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,10 +30,10 @@ import org.springframework.web.bind.annotation.*;
 @Tag(
         name = "Dispatchers API",
         description = """
-        API endpoints for managing dispatcher profiles.
-        You must be authenticated to use these endpoints.
-        Once you have posted content as a dispatcher, your profile and profile picture cannot be updated without notifying an administrator.
-        """
+                API endpoints for managing dispatcher profiles.
+                You must be authenticated to use these endpoints.
+                Once you have posted content as a dispatcher, your profile and profile picture cannot be updated without notifying an administrator.
+                """
 )
 public class DispatcherController {
 
@@ -39,9 +42,9 @@ public class DispatcherController {
     @Operation(
             summary = "Set dispatcher profile",
             description = """
-            Creates or updates the dispatcher profile for the authenticated user.
-            Once you have posted content, profile updates (including profile picture changes) must be approved by an administrator.
-            """,
+                    Creates or updates the dispatcher profile for the authenticated user.
+                    Once you have posted content, profile updates (including profile picture changes) must be approved by an administrator.
+                    """,
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -98,5 +101,43 @@ public class DispatcherController {
             final @NonNull Authentication authentication
     ) {
         return this.dispatcherDataService.getProfile(authentication);
+    }
+
+
+    @Operation(
+            summary = "Upload Dispatcher profile picture",
+            description = """
+                        Uploads a profile picture for the authenticated dispatcher.
+                        Can only be done before beginning to accept logistic requests.
+                        To change the profile picture after posting, contact the administrator.
+                    """,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Profile picture file to upload",
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                            schema = @Schema(implementation = DispatcherProfilePictureDto.class)
+                    )
+            ),
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Profile picture uploaded successfully",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(
+                                            type = "string",
+                                            example = "https://cdn.example.com/dispatcher/profile-picture.jpg"
+                                    )
+                            )
+                    ),
+                    @ApiResponse(responseCode = "400", description = "Invalid file format or size"),
+                    @ApiResponse(responseCode = "403", description = "Profile picture cannot be updated after posting"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated")
+            }
+    )
+    @PostMapping(value = "/profile-picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String uploadProfilePhoto(final Authentication authentication, final @ModelAttribute DispatcherProfilePictureDto profilePictureDto) {
+        return this.dispatcherDataService.uploadProfilePhoto(authentication, profilePictureDto.file());
     }
 }

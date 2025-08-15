@@ -6,7 +6,6 @@ import com.letsellify.logistics.components.logistics.core.dispatcherManagement.r
 import com.letsellify.logistics.components.logistics.core.kycManagement.data.KycDocumentType;
 
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * @author AHMAD BUBA
@@ -27,12 +26,12 @@ public record LogisticDispatcherInfo(
     public LogisticDispatcherInfo(final DispatcherEntity entity, final Map<KycDocumentType, String> kycs) {
         this(
                 entity.getEmail(),
-                entity.getPersonalInfo().getName(),
-                entity.getContactInfo().getWhatsAppPhone(),
-                entity.getContactInfo().getPhone(),
-                entity.getPersonalInfo().getState(),
-                entity.getPersonalInfo().getLga(),
-                entity.getPersonalInfo().getAddress()
+                entity.getPersonalInformation().getName(),
+                entity.getContactInformation().getWhatsAppPhone(),
+                entity.getContactInformation().getPhone(),
+                entity.getPersonalInformation().getState(),
+                entity.getPersonalInformation().getLga(),
+                entity.getPersonalInformation().getAddress()
         );
     }
 

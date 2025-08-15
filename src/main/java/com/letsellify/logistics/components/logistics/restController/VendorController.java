@@ -124,7 +124,7 @@ public class VendorController {
     @PostMapping(value = "/profile-picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String uploadProfilePicture(
             final Authentication authentication,
-            @ModelAttribute VendorProfilePictureDto dto
+            final @ModelAttribute VendorProfilePictureDto dto
     ) {
         return this.vendorDataService.uploadProfilePicture(authentication, dto.file());
     }

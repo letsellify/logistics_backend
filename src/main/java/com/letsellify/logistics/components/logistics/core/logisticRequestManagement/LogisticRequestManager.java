@@ -524,7 +524,7 @@ public class LogisticRequestManager {
                 return new LogisticRequests(agentRequests, page);
 
             case DISPATCHER:
-                Dispatcher dispatcher = this.dispatcherManager.findAndValidateDispatcher(userName);
+                Dispatcher dispatcher = this.dispatcherManager.findDispatcher(userName);
                 page = this.logisticsRequestRepository.findAllByDispatcherId(dispatcher.id(), pageable);
                 List<LogisticRequest> dispatcherRequests = page.getContent()
                         .stream()

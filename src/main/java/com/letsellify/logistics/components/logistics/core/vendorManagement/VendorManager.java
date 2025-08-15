@@ -12,12 +12,14 @@ import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway
 import com.letsellify.logistics.components.logistics.core.vendorManagement.data.*;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.database.entity.VendorEntity;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.database.repository.VendorRepository;
+import com.letsellify.logistics.components.logistics.core.vendorManagement.event.VendorNameUpdateEvent;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.exception.*;
 import com.letsellify.logistics.components.user.core.userManagement.event.UserOfRoleVendorCreated;
 import com.letsellify.logistics.components.user.core.userManagement.exception.UserNotFoundException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,6 +41,7 @@ public class VendorManager {
     private final VendorRepository vendorRepository;
     private final PaystackManager paystackManager;
     private final FileStorageManager fileStorageManager;
+    private final ApplicationEventPublisher eventPublisher;
     private final NigeriaStatesManager nigeriaStatesManager;
     private final static LogisticAppRole VENDOR_APP_ROLE = LogisticAppRole.VENDOR;
 
@@ -125,10 +128,26 @@ public class VendorManager {
         if (entity.isProfileComplete()) {
             throw new CompleteVendorProfileException("Vendor profile is all ready filled");
         }
-        final VendorEntity.PersonalInformationEmbeddable personalInformationEmbeddable = new VendorEntity.PersonalInformationEmbeddable(vendorName, homeAddress, homeState, homeLg);
+        if (entity.getPersonalInformation() == null) {
+            final VendorEntity.PersonalInformationEmbeddable personalInformationEmbeddable = new VendorEntity.PersonalInformationEmbeddable(vendorName, homeAddress, homeState, homeLg);
+            entity.setPersonalInformation(personalInformationEmbeddable);
+        }
+        else {
+            final String vendorNameBeforeUpdate = entity.getPersonalInformation().getName();
+            final VendorEntity.PersonalInformationEmbeddable personalInformationEmbeddable = VendorEntity.PersonalInformationEmbeddable.builder()
+                    .name(vendorName)
+                    .homeAddress(homeAddress)
+                    .state(homeState)
+                    .lg(lg)
+                    .build();
+            entity.setPersonalInformation(personalInformationEmbeddable);
+            final String vendorNameAfterUpdate = entity.getPersonalInformation().getName();
+            if (vendorName != null && !vendorNameBeforeUpdate.equals(vendorNameAfterUpdate)) {
+                this.eventPublisher.publishEvent(new VendorNameUpdateEvent(entity.getEmail(), vendorNameBeforeUpdate, vendorNameAfterUpdate));
+            }
+        }
         final VendorEntity.ContactInformationEmbeddable contactInformationEmbeddable = new VendorEntity.ContactInformationEmbeddable(phoneNumber, whatsAppPhoneNumber);
         final VendorEntity.BusinessInformationEmbeddable businessInformationEmbeddable = new VendorEntity.BusinessInformationEmbeddable(businessName, businessOfficeAddress, state, lg);
-        entity.setPersonalInformation(personalInformationEmbeddable);
         entity.setContactInformation(contactInformationEmbeddable);
         entity.setBusinessInformation(businessInformationEmbeddable);
         String profilePicturePresignedUrl = null;
@@ -310,6 +329,7 @@ public class VendorManager {
 
     private VendorInfo buildVendorInformation(VendorEntity entity) {
         return new VendorInfo(
+                entity.getEmail(),
                 fileStorageManager.generatePresignedUrl(entity.getProfilePicture()),
                 wrapPersonalInfo(entity),
                 wrapContactInfo(entity),

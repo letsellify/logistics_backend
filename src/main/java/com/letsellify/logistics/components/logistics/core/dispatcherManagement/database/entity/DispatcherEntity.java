@@ -26,9 +26,13 @@ public class DispatcherEntity extends Auditable {
     @Column(unique = true)
     private String email;
     @Setter
-    private PersonalInfoEmbeddable personalInfo;
+    private PersonalInfoEmbeddable personalInformation;
+
     @Setter
-    private ContactInfoEmbeddable contactInfo;
+    private String profileImage;
+
+    @Setter
+    private ContactInfoEmbeddable contactInformation;
     @Setter
     private DispatchDetailEmbeddable dispatchDetail;
 
@@ -55,7 +59,7 @@ public class DispatcherEntity extends Auditable {
         final DispatcherEntity dispatcherEntity = new DispatcherEntity();
         dispatcherEntity.id = UUID.randomUUID();
         dispatcherEntity.email = email;
-        dispatcherEntity.personalInfo = new PersonalInfoEmbeddable(name);
+        dispatcherEntity.personalInformation = new PersonalInfoEmbeddable(name);
         dispatcherEntity.approve = false;
         dispatcherEntity.currentlyAcceptingDelivery = false;
         return dispatcherEntity;

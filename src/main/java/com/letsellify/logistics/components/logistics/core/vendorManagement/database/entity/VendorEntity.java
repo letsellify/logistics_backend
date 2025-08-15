@@ -2,9 +2,7 @@ package com.letsellify.logistics.components.logistics.core.vendorManagement.data
 
 import com.letsellify.logistics.common.entityAudit.entity.Auditable;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.*;
 import org.springframework.lang.NonNull;
 
 import java.math.BigDecimal;
@@ -53,6 +51,7 @@ public class VendorEntity extends Auditable {
     }
 
     @Embeddable
+    @Builder
     @Getter
     public static class PersonalInformationEmbeddable {
         private String name;
@@ -78,6 +77,7 @@ public class VendorEntity extends Auditable {
     }
 
     @Embeddable
+    @Builder
     @Getter
     public static class ContactInformationEmbeddable {
         private String phoneNumber;
@@ -93,6 +93,7 @@ public class VendorEntity extends Auditable {
     }
 
     @Embeddable
+    @Builder
     @Getter
     public static class BusinessInformationEmbeddable {
         private String businessName;

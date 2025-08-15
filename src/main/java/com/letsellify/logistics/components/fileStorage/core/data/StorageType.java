@@ -10,4 +10,5 @@ public enum StorageType {
     KYC,
     LOGISTICS,
     VENDOR_PROFILE_PICTURE,
+    DISPATCHER_PROFILE_PICTURE
 }

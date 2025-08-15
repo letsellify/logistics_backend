@@ -1,12 +1,7 @@
 package com.letsellify.logistics.components.logistics.core.dispatcherManagement.dataMapper;
 
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.Dispatcher;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.DispatcherInfo;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.DispatchersInfo;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.LogisticDispatcherInfo;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.resource.DispatcherProfileInfoResource;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.resource.DispatcherResource;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.resource.LogisticDispatcherInfoResource;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.*;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.resource.*;
 import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.rest.resource.DispatcherProfileInfoResources;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
@@ -28,5 +23,15 @@ public interface DispatcherMapper {
     DispatcherResource getResource(Dispatcher data);
 
     DispatcherProfileInfoResources getResources(DispatchersInfo data);
+
+    DispatcherGuarantorResource getResource(DispatcherGuarantor data);
+
+    DispatcherBusinessInformationResource getResource(DispatcherBusinessInformation data);
+
+    DispatcherContactInformationResource getResource(DispatcherContactInformation data);
+
+    DispatcherPersonalInformationResource getResource(DispatcherPersonalInformation data);
+
+    DispatcherKycResource getResource(DispatcherKyc data);
 
 }

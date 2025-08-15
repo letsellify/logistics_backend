@@ -32,14 +32,14 @@ import org.springframework.stereotype.Service;
 public class AdminUserDataService {
     private final AdminUserManager adminUserManager;
 
-    public LogisticDispatcherInfoResource viewDispatcherPersonalInfo(final @NonNull String dispatcherEmail) {
-        try {
-            return this.adminUserManager.viewDispatcherPersonalInfo(dispatcherEmail)
-                    .getResource();
-        } catch (final NoKycRecordFoundException | NoSuchDispatcherException e) {
-            throw new LogisticsResourceNotFoundException(e.getMessage());
-        }
-    }
+//    public LogisticDispatcherInfoResource viewDispatcherPersonalInfo(final @NonNull String dispatcherEmail) {
+//        try {
+//            return this.adminUserManager.viewDispatcherPersonalInfo(dispatcherEmail)
+//                    .getResource();
+//        } catch (final NoKycRecordFoundException | NoSuchDispatcherException e) {
+//            throw new LogisticsResourceNotFoundException(e.getMessage());
+//        }
+//    }
 
     public DispatcherResource approveDispatcher(final @NonNull String dispatcherEmail) {
         try {
@@ -55,29 +55,29 @@ public class AdminUserDataService {
     }
 
 
-    public AgentInfoResource viewAgentPersonalInfo(final @NonNull String dispatcherEmail) {
-        try {
-            return this.adminUserManager.viewAgentPersonalInfo(dispatcherEmail)
-                    .getResource();
-        } catch (final NoKycRecordFoundException | NoSuchAgentException e) {
-            throw new LogisticsResourceNotFoundException(e.getMessage());
-        }
-    }
+//    public AgentInfoResource viewAgentPersonalInfo(final @NonNull String dispatcherEmail) {
+//        try {
+//            return this.adminUserManager.viewAgentPersonalInfo(dispatcherEmail)
+//                    .getResource();
+//        } catch (final NoKycRecordFoundException | NoSuchAgentException e) {
+//            throw new LogisticsResourceNotFoundException(e.getMessage());
+//        }
+//    }
 
     public DispatcherProfileInfoResources getAllDispatcherAwaitingApproval(final @NonNull Pageable pageable) {
         return this.adminUserManager.getAllDispatchersAwaitingApproval(pageable).getResource();
     }
 
-    public AgentResource approveAgent(final @NonNull String dispatcherEmail) {
-        try {
-            return this.adminUserManager.approveAgent(dispatcherEmail)
-                    .getResource();
-        } catch (final NoSuchAgentException | NoKycRecordFoundException e) {
-            throw new LogisticsResourceNotFoundException(e.getMessage());
-        } catch (final AgentApprovedException e) {
-            throw new LogisticsBadRequestException(e.getMessage());
-        }
-    }
+//    public AgentResource approveAgent(final @NonNull String dispatcherEmail) {
+//        try {
+//            return this.adminUserManager.approveAgent(dispatcherEmail)
+//                    .getResource();
+//        } catch (final NoSuchAgentException | NoKycRecordFoundException e) {
+//            throw new LogisticsResourceNotFoundException(e.getMessage());
+//        } catch (final AgentApprovedException e) {
+//            throw new LogisticsBadRequestException(e.getMessage());
+//        }
+//    }
 
 
     public UserResource getUser(final @NonNull String userEmail) {
