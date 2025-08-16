@@ -105,13 +105,8 @@ public class FinanceAccountManager {
     @Async
     @Transactional
     public void acceptPayment(final ChargeSuccessEvent event) {
-        LogisticsAccountEntity entity;
-        try {
-            entity = this.accountRepository.findByUserId(event.getUserId())
-                    .orElseThrow(() -> new FinanceAccountNotFoundException("Account for user with id: " + event.getUserId() + " not found"));
-        } catch (FinanceAccountNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        LogisticsAccountEntity entity = this.accountRepository.findByUserIdAndAppRole(event.getUserId(),event.getUserRole())
+                .orElseGet(() -> LogisticsAccountEntity.getInstance(event.getUserId(), event.getUserRole()));
         final BigDecimal amountToTopUp = event.getAmount();
         final BigDecimal currentBalance = entity.getBalance();
         entity.setBalance(currentBalance.add(amountToTopUp));

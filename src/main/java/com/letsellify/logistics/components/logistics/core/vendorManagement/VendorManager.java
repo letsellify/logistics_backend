@@ -163,7 +163,10 @@ public class VendorManager {
         final VendorEntity entity = this.vendorRepository.findByEmail(vendorUsername)
                 .orElseThrow(() -> new VendorNotFoundException("Vendor with username " + vendorUsername + " not found."));
         final String profilePicture = entity.getProfilePicture();
-        return new VendorInfo(profilePicture == null ? this.fileStorageManager.generatePresignedUrl(profilePicture): null, entity);
+        log.info("Profile picture: " + profilePicture);
+        final String profilePicturePresignedUrl = profilePicture == null ? null : this.fileStorageManager.generatePresignedUrl(profilePicture);
+        log.info("Profile picture presigned: " + profilePicturePresignedUrl);
+        return new VendorInfo(profilePicturePresignedUrl, entity);
     }
 
     public VendorPersonalInformation uploadPersonalInformation(final @NonNull String vendorEmail, final @NonNull String name, final @NonNull String homeAddress, final @NonNull String state, final @NonNull String lg) throws VendorNotFoundException, NoSuchStateException, IllegalLGAException {

@@ -14,8 +14,6 @@ public record OtherDetail(
         BigDecimal dispatcherPay,
         LocalDate dispatcherPickUpDate,
         LocalDate dispatcherDeliveryDate,
-//  LocalDate agentReceivingDate,
-//  LocalDate agentDeliveryDate,
         String pickUpState,
         String pickUpLga,
         String pickUpAddress

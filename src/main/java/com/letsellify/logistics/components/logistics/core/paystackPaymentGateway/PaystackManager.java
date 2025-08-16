@@ -7,6 +7,7 @@ import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway
 import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.database.entity.PaystackChargeSuccessWebhookEntity;
 import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.database.entity.PaystackPaymentEntity;
 import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.database.repository.PaystackPaymentRepository;
+import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.event.ChargeSuccessEvent;
 import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.exception.PaystackWebhookException;
 import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.rest.dto.ChargeSuccessPayload;
 import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.rest.dto.PaystackInitiateTransactionRequest;
@@ -110,7 +111,8 @@ public class PaystackManager {
         log.info("Payment status is {}, with the following data {}", paymentEntity.isSuccess(), paymentEntity.getChargeSuccessWebhookData().toString());
         try {
             // put it on a kafka, accountManager listens
-            this.applicationEventPublisher.publishEvent(new Payment(paymentEntity));
+            final Payment payment = new Payment(paymentEntity);
+            this.applicationEventPublisher.publishEvent(new ChargeSuccessEvent(payment));
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
