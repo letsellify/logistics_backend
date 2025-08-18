@@ -1,6 +1,9 @@
 package com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.resource;
 
 
+import com.letsellify.logistics.components.logistics.core.guarantorManagement.data.GuarantorCareer;
+import com.letsellify.logistics.components.logistics.core.guarantorManagement.data.GuarantorRelationship;
+
 /**
  * Author: Ahmad Buba
  * Date:8/14/25
@@ -12,10 +15,10 @@ public record DispatcherGuarantorResource(
         String state,
         String lga,
         String address,
-        String relationship,
+        GuarantorRelationship relationship,
         String phoneNumber,
         String whatsAppNumber,
         String email,
-        String career
+        GuarantorCareer career
 ) {
 }
