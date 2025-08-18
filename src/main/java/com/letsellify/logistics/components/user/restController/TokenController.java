@@ -162,7 +162,7 @@ public class TokenController {
     )
     @PostMapping("/token")
     public ResponseEntity<?> getNewTokens(
-            @RequestHeader(value = "Origin", required = false) final String origin,
+            final HttpServletRequest httpServletRequest,
             @RequestHeader("X-Client-Type") final String clientType,
             @CookieValue(value = "refresh_token", required = false) final String refreshTokenCookie,
             @RequestBody(required = false) final Map<String, String> requestBody,
@@ -191,13 +191,13 @@ public class TokenController {
         final TokenResource tokenResource = this.tokenDataService.getToken(authentication);
 
         if ("web".equalsIgnoreCase(clientType)) {
-            String domain = null;
-            if (origin != null && origin.contains("localhost")) {
+            final String serverName = httpServletRequest.getServerName();
+            final String domain;
+            if (serverName.contains("localhost")) {
                 domain = "localhost";
-            } else if (origin != null && origin.contains(".letsellify")) {
-                domain = ".letsellify";
-            }
-            if (domain == null) {
+            } else if (serverName.contains(".letsellify")) {
+                domain = "logistics.letsellify.com";
+            } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Origin header not detected");
             }
             CookieHandler.addCookie(httpServletResponse, domain, "access_token", tokenResource.getAccessToken(), 15 * 60);
@@ -210,6 +210,44 @@ public class TokenController {
                 "access_token", tokenResource.getAccessToken(),
                 "refresh_token", tokenResource.getRefreshToken()
         ));
+    }
+
+
+    @Operation(
+            summary = "Logout a user",
+            description = """
+                        Logs out the authenticated user by clearing issued cookies.
+
+                        **Behavior:**
+                        - For **web clients**:  
+                          Clears `access_token` and `refresh_token` cookies on the domain.  
+                          Effectively invalidates the session on the browser side.
+                        - For **mobile clients**:  
+                          Since tokens are returned in the response body and stored locally, the client
+                          must manually delete any stored tokens.
+                          
+                        **Important:**  
+                        This endpoint does not revoke tokens server-side (if token revocation is required,
+                        implement it at the token store or database level). It only clears cookies on the client.
+                    """,
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Logout successful. Cookies cleared."),
+                    @ApiResponse(responseCode = "400", description = "Bad request"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized or invalid client")
+            }
+    )
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) {
+        String domain = httpServletRequest.getServerName();
+        if ("localhost".equals(domain)) {
+            domain = "localhost";
+        }
+        else
+            domain = "logistics.letsellify.com";
+        CookieHandler.clearCookie(httpServletResponse, domain, "access_token");
+        CookieHandler.clearCookie(httpServletResponse, domain, "refresh_token");
+
+        return ResponseEntity.ok(Map.of("message", "Logout successful"));
     }
 
 

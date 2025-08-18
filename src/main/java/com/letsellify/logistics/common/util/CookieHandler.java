@@ -3,7 +3,9 @@ package com.letsellify.logistics.common.util;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author AHMAD BUBA
@@ -33,6 +35,18 @@ public class CookieHandler {
         cookieBuilder.append(" HttpOnly;");
 
         response.addHeader("Set-Cookie", cookieBuilder.toString());
+    }
+
+    public static void clearCookie(final HttpServletResponse httpServletResponse, final String domain, final String name) {
+        Cookie cookie = new Cookie(name, StringUtils.EMPTY);
+        cookie.setHttpOnly(true);
+        cookie.setSecure("localhost".equalsIgnoreCase(domain));
+        cookie.setPath("/");
+        if (!"localhost".equalsIgnoreCase(domain)) {
+            cookie.setDomain(domain);
+        }
+        cookie.setMaxAge(0);
+        httpServletResponse.addCookie(cookie);
     }
 //    public static void addCookie(final HttpServletResponse response, final String domain, final String name, final String value, final int maxAge) {
 //        final Cookie cookie = new Cookie(name, value);
