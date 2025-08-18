@@ -14,7 +14,6 @@ public record VendorProfileInfoDto(
         VendorPersonalInfoDto personalInformation,
         @NotNull(message = "Vendor contact information must be provided")
         VendorContactInfoDto contactInformation,
-        @NotNull(message = "Vendor Business information must be provided")
         VendorBusinessInfoDto businessInformation
 ) {
 }

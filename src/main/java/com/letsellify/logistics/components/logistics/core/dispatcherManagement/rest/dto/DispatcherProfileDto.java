@@ -15,7 +15,6 @@ public record DispatcherProfileDto(
         DispatcherPersonalInfoDto personalInfo,
         @NotNull
         DispatcherContactInfoDto contactInfo,
-        @NotNull
         DispatchDetailDto dispatchDetail,
         @NotNull
         DispatcherGuarantorDto guarantorInfo,
