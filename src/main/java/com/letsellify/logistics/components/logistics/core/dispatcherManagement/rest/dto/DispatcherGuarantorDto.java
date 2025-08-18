@@ -1,6 +1,8 @@
 package com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto;
 
 
+import com.letsellify.logistics.components.logistics.core.guarantorManagement.data.GuarantorCareer;
+import com.letsellify.logistics.components.logistics.core.guarantorManagement.data.GuarantorRelationship;
 import jakarta.validation.constraints.*;
 
 /**
@@ -18,8 +20,8 @@ public record DispatcherGuarantorDto(
         String lga,
         @NotBlank(message = "Address of guarantor must be provided")
         String address,
-        @NotBlank(message = "Relationship with guarantor must be specified")
-        String relationship,
+        @NotNull(message = "Relationship must be provided")
+        GuarantorRelationship relationship,
         @NotBlank(message = "Phone number of guarantor must be provided")
         @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Invalid phone number format.")
         @Size(min = 10, max = 15, message = "Phone number must be between 10 and 15 digits.")
@@ -31,7 +33,7 @@ public record DispatcherGuarantorDto(
         @NotBlank(message = "Guarantor email must be provided")
         @Email
         String email,
-        @NotBlank
-        String career
+        @NotNull(message = "Career must be provided")
+        GuarantorCareer career
 ) {
 }

@@ -133,5 +133,6 @@ public class DispatcherEntity extends Auditable {
         private String email;
         @Column(name = "guarantor_career")
         private String career;
+
     }
 }

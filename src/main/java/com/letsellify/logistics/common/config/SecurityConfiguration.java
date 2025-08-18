@@ -80,6 +80,7 @@ public class SecurityConfiguration {
             "/oauth2/**",
             "/login/oauth2/code/**",
             "/api/v1/authorize/**",
+            "/api/v1/guarantor/**",
             "/api/v1/user/register",
             "/api/v1/verification/**",
             "/api/v1/social-signup/**",
