@@ -164,7 +164,10 @@ public class VendorManager {
                 .orElseThrow(() -> new VendorNotFoundException("Vendor with username " + vendorUsername + " not found."));
         final String profilePicture = entity.getProfilePicture();
         log.info("Profile picture: " + profilePicture);
-        final String profilePicturePresignedUrl = profilePicture == null ? null : this.fileStorageManager.generatePresignedUrl(profilePicture);
+        final String profilePicturePresignedUrl =
+                (profilePicture == null || profilePicture.isBlank())
+                        ? null
+                        : this.fileStorageManager.generatePresignedUrl(profilePicture);
         log.info("Profile picture presigned: " + profilePicturePresignedUrl);
         return new VendorInfo(profilePicturePresignedUrl, entity);
     }

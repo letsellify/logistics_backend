@@ -15,6 +15,11 @@ import com.letsellify.logistics.components.logistics.core.logisticRequestManagem
 import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.NigeriaStatesManager;
 import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.exception.IllegalLGAException;
 import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.exception.NoSuchStateException;
+import com.letsellify.logistics.components.logistics.core.vendorManagement.data.VendorBusinessInformation;
+import com.letsellify.logistics.components.logistics.core.vendorManagement.data.VendorContactInformation;
+import com.letsellify.logistics.components.logistics.core.vendorManagement.data.VendorInfo;
+import com.letsellify.logistics.components.logistics.core.vendorManagement.data.VendorPersonalInformation;
+import com.letsellify.logistics.components.logistics.core.vendorManagement.database.entity.VendorEntity;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.exception.DispatcherProfilePhotoExistsException;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.exception.VendorExistsException;
 import com.letsellify.logistics.components.user.core.userManagement.event.UserOfRoleDispatcherCreated;
@@ -239,9 +244,9 @@ public class DispatcherManager {
     DispatcherInfo getProfile(final @NonNull String dispatcherUsername) throws NoSuchDispatcherException, InCompleteDispatcherProfileException {
         final DispatcherEntity entity = this.dispatcherRepository.findByEmail(dispatcherUsername)
                 .orElseThrow(() -> new NoSuchDispatcherException("Dispatcher with username " + dispatcherUsername + " does not exist"));
-        if (!entity.isProfileComplete()) {
-            throw new InCompleteDispatcherProfileException("Dispatcher profile not complete");
-        }
+//        if (!entity.isProfileComplete()) {
+//            throw new InCompleteDispatcherProfileException("Dispatcher profile not complete");
+//        }
         final String profilePicturePresignedUrl = entity.getProfileImage() == null ? null : this.fileStorageManager.generatePresignedUrl(entity.getProfileImage());
         return new DispatcherInfo(profilePicturePresignedUrl, entity);
     }
@@ -274,6 +279,7 @@ public class DispatcherManager {
             throw new InCompleteDispatcherProfileException("Dispatcher profile not approved");
         }
     }
+
 
 
 }
