@@ -46,7 +46,7 @@ public class DispatcherDataService {
 
     public DispatcherProfileInfoResource setProfile(final @NonNull Authentication authentication, final @NonNull DispatcherProfileDto profileDto) {
         try {
-            return this.dispatcherManager.setProfile(authentication.getName(), profileDto.personalInfo(), profileDto.contactInfo(), profileDto.dispatchDetail(), profileDto.guarantorInfo(), profileDto.kyc())
+            return this.dispatcherManager.setProfile(authentication.getName(), profileDto.personalInformation(), profileDto.contactInformation(), profileDto.businessInformation(), profileDto.guarantorInformation(), profileDto.kyc())
                     .getResource();
         } catch (final NoSuchDispatcherException e) {
             throw new LogisticsResourceNotFoundException(e.getMessage());

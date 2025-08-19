@@ -12,12 +12,12 @@ import jakarta.validation.constraints.NotNull;
 @ValidKyc
 public record DispatcherProfileDto(
         @NotNull
-        DispatcherPersonalInfoDto personalInfo,
+        DispatcherPersonalInfoDto personalInformation,
         @NotNull
-        DispatcherContactInfoDto contactInfo,
-        DispatchDetailDto dispatchDetail,
+        DispatcherContactInfoDto contactInformation,
+        DispatchDetailDto businessInformation,
         @NotNull
-        DispatcherGuarantorDto guarantorInfo,
+        DispatcherGuarantorDto guarantorInformation,
         @NotNull
         KycDto kyc
 ) {
