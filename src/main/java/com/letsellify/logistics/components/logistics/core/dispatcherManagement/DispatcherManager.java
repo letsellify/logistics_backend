@@ -186,10 +186,17 @@ public class DispatcherManager {
         if (!this.nigeriaStatesManager.validateStateLga(personalInfoDto.state(), personalInfoDto.lga())) {
             throw new IllegalLGAException("LGA " + personalInfoDto.lga() +  " does not belong to state " + personalInfoDto.state());
         }
+        DispatcherEntity.DispatchDetailEmbeddable dispatchDetailEmbeddable = null;
         if (dispatchDetailDto != null) {
             if (!this.nigeriaStatesManager.validateStateLga(dispatchDetailDto.state(), dispatchDetailDto.lga())) {
                 throw new IllegalLGAException("LGA " + dispatchDetailDto.lga() +  " does not belong to state " + dispatchDetailDto.state());
             }
+            dispatchDetailEmbeddable = DispatcherEntity.DispatchDetailEmbeddable.builder()
+                    .businessLga(dispatchDetailDto.lga())
+                    .businessName(dispatchDetailDto.name())
+                    .businessOfficeAddress(dispatchDetailDto.address())
+                    .businessState(dispatchDetailDto.state())
+                    .build();
         }
         final DispatcherEntity entity = this.dispatcherRepository.findByEmail(dispatcherUsername)
                 .orElseThrow(() -> new NoSuchDispatcherException("No such dispatcher with email " + dispatcherUsername + " found"));
@@ -223,12 +230,7 @@ public class DispatcherManager {
                 .phone(contactInfoDto.phone())
                 .whatsAppPhone(contactInfoDto.whatsAppPhone())
                 .build();
-        final DispatcherEntity.DispatchDetailEmbeddable dispatchDetailEmbeddable = DispatcherEntity.DispatchDetailEmbeddable.builder()
-                .businessLga(dispatchDetailDto.lga())
-                .businessName(dispatchDetailDto.name())
-                .businessOfficeAddress(dispatchDetailDto.address())
-                .businessState(dispatchDetailDto.state())
-                .build();
+       
         final DispatcherEntity.DispatcherGuarantorEmbeddable guarantorEmbeddable = DispatcherEntity.DispatcherGuarantorEmbeddable.builder()
                 .fullName(dispatcherGuarantorDto.fullName())
                 .address(dispatcherGuarantorDto.address())
