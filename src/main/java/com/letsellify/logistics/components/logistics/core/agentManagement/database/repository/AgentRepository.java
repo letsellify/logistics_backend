@@ -1,6 +1,8 @@
 package com.letsellify.logistics.components.logistics.core.agentManagement.database.repository;
 
 import com.letsellify.logistics.components.logistics.core.agentManagement.database.entity.AgentEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -21,5 +23,7 @@ public interface AgentRepository extends JpaRepository<AgentEntity, UUID> {
     List<AgentEntity> findByApprovedAndAcceptingStorage(boolean approved, boolean acceptingStorage);
 
     boolean existsByEmail(String agentEmail);
+
+    Page<AgentEntity> findByApprovedFalseAndProfileCompleteTrue(Pageable pageable);
 
 }

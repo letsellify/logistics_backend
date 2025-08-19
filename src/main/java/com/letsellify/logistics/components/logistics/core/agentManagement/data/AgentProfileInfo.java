@@ -26,15 +26,15 @@ public record AgentProfileInfo(
     public AgentProfileInfo(final AgentEntity agentEntity) {
         this(
                 agentEntity.getEmail(),
-                agentEntity.getPersonalInfo().getName(),
-                agentEntity.getPersonalInfo().getHomeState(),
-                agentEntity.getPersonalInfo().getHomeLga(),
-                agentEntity.getPersonalInfo().getHomeAddress(),
-                agentEntity.getContactInfo().getWhatsAppPhone(),
-                agentEntity.getContactInfo().getPhone(),
-                agentEntity.getStoreDetail().getStoreState(),
-                agentEntity.getStoreDetail().getStoreLga(),
-                agentEntity.getStoreDetail().getStoreAddress()
+                agentEntity.getPersonalInformation().getName(),
+                agentEntity.getPersonalInformation().getState(),
+                agentEntity.getPersonalInformation().getLga(),
+                agentEntity.getPersonalInformation().getAddress(),
+                agentEntity.getContactInformation().getWhatsAppPhone(),
+                agentEntity.getContactInformation().getPhone(),
+                agentEntity.getBusinessInformation().getBusinessState(),
+                agentEntity.getBusinessInformation().getBusinessLga(),
+                agentEntity.getBusinessInformation().getBusinessOfficeAddress()
         );
     }
 

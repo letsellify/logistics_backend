@@ -10,12 +10,17 @@ import lombok.Data;
  * Time:17:32
  */
 
-@Data
-public class UserResources {
-    // takes a page of user entity
-    private List<UserResource> users;
-    private int size;
-    private int number;
-    private long totalElements;
-    private int totalPages;
+
+public record UserResources(
+        // takes a page of user entity
+        List<UserResource> users,
+        int currentPage,
+        int totalPages,
+        long totalElements,
+        boolean isPageFirst,
+        boolean isPageLast,
+        boolean isPageEmpty,
+        boolean hasNext
+) {
+
 }

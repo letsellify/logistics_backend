@@ -1,9 +1,8 @@
-package com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.validator;
+package com.letsellify.logistics.common.validator;
 
 
+import com.letsellify.logistics.common.validator.annotation.ValidKyc;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.KycType;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto.DispatcherProfileDto;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.validator.annotation.ValidKyc;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -13,42 +12,38 @@ import jakarta.validation.ConstraintValidatorContext;
  */
 
 
-public class KycValidator implements ConstraintValidator<ValidKyc, DispatcherProfileDto> {
+public class KycValidator implements ConstraintValidator<ValidKyc, HasKyc> {
 
     @Override
-    public boolean isValid(DispatcherProfileDto profileDto, ConstraintValidatorContext context) {
-        if (profileDto.kyc() == null) {
+    public boolean isValid(HasKyc dto, ConstraintValidatorContext context) {
+        if (dto == null || dto.getKyc() == null) {
             return false;
         }
-        KycType type = profileDto.kyc().type();
-        String number = profileDto.kyc().number();
+
+        KycType type = dto.getKyc().type();
+        String number = dto.getKyc().number();
 
         if (type == null || number == null) {
-            return true; // Let @NonNull/NotBlank handle these
+            return true; // let @NotNull / @NotBlank handle this
         }
 
         boolean valid = true;
-
         switch (type) {
-            case NIN ->
-            {
+            case NIN -> {
                 if (!number.matches("\\d{11}")) {
                     addViolation(context, "NIN must be exactly 11 digits", "kyc.number");
                     valid = false;
                 }
-                break;
             }
-            case BVN ->
-            {
+            case BVN -> {
                 if (!number.matches("\\d{11}")) {
                     addViolation(context, "BVN must be exactly 11 digits", "kyc.number");
                     valid = false;
                 }
-                break;
             }
-            default ->
-                addViolation(context, "KYC type must be either 'NIN' or 'BVN'", "kyc.type");
+            default -> addViolation(context, "KYC type must be either 'NIN' or 'BVN'", "kyc.type");
         }
+
         return valid;
     }
 

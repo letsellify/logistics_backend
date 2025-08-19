@@ -1,5 +1,6 @@
 package com.letsellify.logistics.components.user.restController;
 
+import com.letsellify.logistics.components.logistics.core.agentManagement.rest.resource.AgentProfileInfoResources;
 import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.rest.resource.DispatcherProfileInfoResources;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -132,4 +133,55 @@ public class AdminUserController {
     public DispatcherResource approveDispatcher(@PathVariable String email) {
         return this.dataService.approveDispatcher(email);
     }
+
+    // ==============================
+    // AGENTS
+    // ==============================
+
+    @Operation(
+            summary = "Get unapproved agents",
+            description = "Retrieves a paginated list of all agents awaiting approval.",
+            parameters = {
+                    @Parameter(name = "page", description = "Page number (0-based index)", example = "0"),
+                    @Parameter(name = "size", description = "Number of items per page", example = "5"),
+                    @Parameter(name = "sortBy", description = "Field to sort by", example = "creationDate"),
+                    @Parameter(name = "descending", description = "Sort descending if true, ascending if false", example = "true")
+            }
+    )
+    @GetMapping("/agentss/unapproved")
+    public AgentProfileInfoResources getAllAgentAwaitingApproval(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "creationDate") String sortBy,
+            @RequestParam(defaultValue = "true") boolean descending
+    ) {
+        Sort sort = descending ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        return this.dataService.getAllAgentAwaitingApproval
+                (pageable);
+    }
+
+    @Operation(
+            summary = "Approve agent",
+            description = "Approves an agent account by their email address.",
+            parameters = {
+                    @Parameter(name = "email", description = "Email address of the dispatcher to approve", example = "agent@example.com")
+            },
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Agent approved successfully",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = AgentResource.class)
+                            )
+                    ),
+                    @ApiResponse(responseCode = "404", description = "Agent not found")
+            }
+    )
+    @PatchMapping("/agents/{email}/approve")
+    public AgentResource approveAgent(@PathVariable String email) {
+        return this.dataService.approveAgent(email);
+    }
+
 }

@@ -3,6 +3,8 @@ package com.letsellify.logistics.components.logistics.core.agentManagement.data;
 import com.letsellify.logistics.components.logistics.core.agentManagement.dataMapper.AgentDataMapper;
 import com.letsellify.logistics.components.logistics.core.agentManagement.database.entity.AgentEntity;
 import com.letsellify.logistics.components.logistics.core.agentManagement.rest.resource.AgentInfoResource;
+import com.letsellify.logistics.components.logistics.core.agentManagement.rest.resource.AgentProfileInfoResource;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.*;
 import com.letsellify.logistics.components.logistics.core.kycManagement.data.KycDocumentType;
 
 import java.util.Map;
@@ -16,36 +18,26 @@ import java.util.UUID;
 
 public record AgentInfo(
         String email,
-        String name,
-        String homeState,
-        String homeLga,
-        String homeAddress,
-        String whatsAppPhone,
-        String phone,
-        String storeState,
-        String storeLga,
-        String storeAddress,
-        UUID kycId,
-        Map<KycDocumentType, String> kycs
+        String profilePicture,
+        AgentPersonalInformation personalInformation,
+        AgentContactInformation contactInformation,
+        AgentBusinessInformation businessInformation,
+        AgentGuarantor guarantor,
+        AgentKyc kyc
 ) {
-    public AgentInfo(final AgentEntity entity, final Map<KycDocumentType, String> kycs) {
+    public AgentInfo(final String profilePicture, final AgentEntity agentEntity) {
         this(
-                entity.getEmail(),
-                entity.getPersonalInfo().getName(),
-                entity.getPersonalInfo().getHomeState(),
-                entity.getPersonalInfo().getHomeLga(),
-                entity.getPersonalInfo().getHomeAddress(),
-                entity.getContactInfo().getWhatsAppPhone(),
-                entity.getContactInfo().getPhone(),
-                entity.getStoreDetail().getStoreState(),
-                entity.getStoreDetail().getStoreLga(),
-                entity.getStoreDetail().getStoreAddress(),
-                entity.getKycId(),
-                kycs
+                agentEntity.getEmail(),
+                profilePicture,
+                agentEntity.getPersonalInformation() != null ? new AgentPersonalInformation(agentEntity.getPersonalInformation()) : null,
+                agentEntity.getContactInformation() != null ? new AgentContactInformation(agentEntity.getContactInformation()) : null,
+                agentEntity.getBusinessInformation() != null ? new AgentBusinessInformation(agentEntity.getBusinessInformation()) : null,
+                agentEntity.getGuarantor() != null ? new AgentGuarantor(agentEntity.getGuarantor()) : null,
+                agentEntity.getKycType() != null && agentEntity.getKycNumber() != null ? new AgentKyc(agentEntity.getKycType(), agentEntity.getKycNumber()) : null
         );
     }
 
-    public AgentInfoResource getResource() {
-        return AgentDataMapper.INSTANCE.toResource(this);
+    public AgentProfileInfoResource getResource() {
+        return AgentDataMapper.INSTANCE.toProfileResource(this);
     }
 }

@@ -33,12 +33,10 @@ public class DispatcherDataService {
     public String uploadProfilePhoto(final @NonNull Authentication authentication, final @NonNull MultipartFile file) {
         try {
             return this.dispatcherManager.uploadProfilePhoto(authentication.getName(), file);
-        } catch (DispatcherProfilePhotoExistsException e) {
+        } catch (DispatcherProfilePhotoExistsException | DispatcherProfileCompleteException e) {
             throw new LogisticsRestException(HttpStatus.CONFLICT, e.getMessage(), e);
         } catch (IOException e) {
             throw new LogisticsInternalServerErrorException(e.getMessage());
-        } catch (DispatcherProfileCompleteException e) {
-            throw new LogisticsBadRequestException(e.getMessage());
         } catch (NoSuchDispatcherException e) {
             throw new LogisticsRestException(HttpStatus.UNAUTHORIZED, e.getMessage(), e);
         }
@@ -60,8 +58,8 @@ public class DispatcherDataService {
         try {
             return this.dispatcherManager.getProfile(authentication.getName())
                     .getResource();
-        } catch (InCompleteDispatcherProfileException | NoSuchDispatcherException e) {
-            throw new LogisticsBadRequestException(e.getMessage());
+        } catch (NoSuchDispatcherException e) {
+            throw new LogisticsRestException(HttpStatus.UNAUTHORIZED, e.getMessage(), e);
         }
     }
 

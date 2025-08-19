@@ -1,5 +1,7 @@
 package com.letsellify.logistics.components.logistics.core.agentManagement.rest.resource;
 
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.resource.*;
+
 /**
  * @author AHMAD BUBA
  * Date:2/26/25
@@ -8,14 +10,11 @@ package com.letsellify.logistics.components.logistics.core.agentManagement.rest.
 
 public record AgentProfileInfoResource(
         String email,
-        String name,
-        String homeState,
-        String homeLga,
-        String homeAddress,
-        String whatsAppPhone,
-        String phone,
-        String storeState,
-        String storeLga,
-        String storeAddress
+        String profilePicture,
+        AgentPersonalInformationResource personalInformation,
+        AgentContactInformationResource contactInformation,
+        AgentBusinessInformationResource businessInformation,
+        AgentGuarantorResource guarantor,
+        AgentKycResource kyc
 ) {
 }

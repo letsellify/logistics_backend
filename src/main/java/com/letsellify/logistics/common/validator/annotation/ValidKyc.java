@@ -1,7 +1,7 @@
-package com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.validator.annotation;
+package com.letsellify.logistics.common.validator.annotation;
 
 
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.validator.KycValidator;
+import com.letsellify.logistics.common.validator.KycValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 

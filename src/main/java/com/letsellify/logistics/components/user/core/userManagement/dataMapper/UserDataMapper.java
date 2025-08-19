@@ -31,13 +31,7 @@ public interface UserDataMapper {
             resources.add(userResource);
         }
 
-        final UserResources resourcePage = new UserResources();
-        resourcePage.setUsers(resources);
-        resourcePage.setSize(entityListPage.getSize());
-        resourcePage.setNumber(entityListPage.getNumber());
-        resourcePage.setTotalElements(entityListPage.getTotalElements());
-        resourcePage.setTotalPages(entityListPage.getTotalPages());
-        return resourcePage;
+        return new UserResources(resources,entityListPage.getNumber(), entityListPage.getTotalPages(), entityListPage.getTotalElements(), entityListPage.isFirst(),entityListPage.isLast(),entityListPage.isEmpty(),entityListPage.hasNext());
     }
 
 }

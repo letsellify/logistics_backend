@@ -1,6 +1,8 @@
 package com.letsellify.logistics.components.user.core.userManagement;
 
 import com.letsellify.logistics.components.logistics.core.agentManagement.data.AgentInfo;
+import com.letsellify.logistics.components.logistics.core.agentManagement.data.AgentsInfo;
+import com.letsellify.logistics.components.logistics.core.agentManagement.exception.InCompleteAgentProfileException;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.DispatchersInfo;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.exception.InCompleteDispatcherProfileException;
 import org.springframework.boot.CommandLineRunner;
@@ -95,13 +97,21 @@ public class AdminUserManager implements CommandLineRunner {
         return this.dispatcherManager.getAllAwaitingApproval(pageable);
     }
 
-    AgentInfo viewAgentPersonalInfo(final @NonNull String agentEmail) throws NoSuchAgentException, NoKycRecordFoundException {
-        return this.agentManager.viewAgentPersonalInfo(agentEmail);
-    }
-
-    Agent approveAgent(final @NonNull String agentEmail) throws NoKycRecordFoundException, NoSuchAgentException, AgentApprovedException {
+    Agent approveAgent(final @NonNull String agentEmail) throws NoSuchAgentException, InCompleteAgentProfileException, AgentApprovedException {
         return this.agentManager.approveAgent(agentEmail);
     }
+
+    AgentsInfo getAllAgentsAwaitingApproval(final @NonNull Pageable pageable)  {
+        return this.agentManager.getAllAwaitingApproval(pageable);
+    }
+
+//    AgentInfo viewAgentPersonalInfo(final @NonNull String agentEmail) throws NoSuchAgentException, NoKycRecordFoundException {
+//        return this.agentManager.viewAgentPersonalInfo(agentEmail);
+//    }
+//
+//    Agent approveAgent(final @NonNull String agentEmail) throws NoKycRecordFoundException, NoSuchAgentException, AgentApprovedException {
+//        return this.agentManager.approveAgent(agentEmail);
+//    }
 
 
     LogisticsAppUser getUser(final @NonNull String userEmail) throws UserNotFoundException {

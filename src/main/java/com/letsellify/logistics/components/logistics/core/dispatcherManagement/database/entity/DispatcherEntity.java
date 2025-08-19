@@ -2,6 +2,8 @@ package com.letsellify.logistics.components.logistics.core.dispatcherManagement.
 
 import com.letsellify.logistics.common.entityAudit.entity.Auditable;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.KycType;
+import com.letsellify.logistics.components.logistics.core.guarantorManagement.data.GuarantorCareer;
+import com.letsellify.logistics.components.logistics.core.guarantorManagement.data.GuarantorRelationship;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.NaturalId;
@@ -124,7 +126,8 @@ public class DispatcherEntity extends Auditable {
         private String lga;
         @Column(name = "guarantor_address")
         private String address;
-        private String relationship;
+        @Enumerated(EnumType.STRING)
+        private GuarantorRelationship relationship;
         @Column(name = "guarantor_phoneNumber")
         private String phoneNumber;
         @Column(name = "guarantor_whatsAppNumber")
@@ -132,7 +135,8 @@ public class DispatcherEntity extends Auditable {
         @Column(name = "guarantor_email")
         private String email;
         @Column(name = "guarantor_career")
-        private String career;
+        @Enumerated(EnumType.STRING)
+        private GuarantorCareer career;
 
     }
 }

@@ -26,8 +26,8 @@ public record Agent(
         String storeAddress
 ) {
     public Agent(final AgentEntity agentEntity) {
-        this(agentEntity.getId(), agentEntity.getPersonalInfo()
-                .getName(), agentEntity.getEmail(), agentEntity.getContactInfo().getWhatsAppPhone(), agentEntity.getContactInfo().getPhone(), agentEntity.getPersonalInfo().getHomeState(), agentEntity.getPersonalInfo().getHomeLga(), agentEntity.getPersonalInfo().getHomeAddress(), agentEntity.getStoreDetail().getStoreState(), agentEntity.getStoreDetail().getStoreLga(), agentEntity.getStoreDetail().getStoreAddress());
+        this(agentEntity.getId(), agentEntity.getPersonalInformation()
+                .getName(), agentEntity.getEmail(), agentEntity.getContactInformation().getWhatsAppPhone(), agentEntity.getContactInformation().getPhone(), agentEntity.getPersonalInformation().getState(), agentEntity.getPersonalInformation().getLga(), agentEntity.getPersonalInformation().getAddress(), agentEntity.getBusinessInformation().getBusinessState(), agentEntity.getBusinessInformation().getBusinessLga(), agentEntity.getBusinessInformation().getBusinessOfficeAddress());
     }
 
     public AgentResource getResource() {

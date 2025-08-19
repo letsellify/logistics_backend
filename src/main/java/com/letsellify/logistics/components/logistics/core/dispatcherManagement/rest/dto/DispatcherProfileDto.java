@@ -1,6 +1,7 @@
 package com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto;
 
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.validator.annotation.ValidKyc;
+import com.letsellify.logistics.common.validator.HasKyc;
+import com.letsellify.logistics.common.validator.annotation.ValidKyc;
 import jakarta.validation.constraints.NotNull;
 
 /**
@@ -20,5 +21,9 @@ public record DispatcherProfileDto(
         DispatcherGuarantorDto guarantorInformation,
         @NotNull
         KycDto kyc
-) {
+) implements HasKyc {
+    @Override
+    public KycDto getKyc() {
+        return this.kyc;
+    }
 }

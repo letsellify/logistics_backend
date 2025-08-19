@@ -119,7 +119,7 @@ public class DispatcherManager {
     }
 
 
-    public DispatchersInfo getAllAwaitingApproval(Pageable pageable) {
+    public DispatchersInfo getAllAwaitingApproval(final @NonNull Pageable pageable) {
         final Page<DispatcherEntity> entityPage = this.dispatcherRepository.findByProfileCompleteTrueAndApproveFalse(pageable);
         final List<DispatcherEntity> entities = entityPage.getContent();
         final List<DispatcherInfo> dispatcherInfos = new ArrayList<>();
@@ -167,7 +167,7 @@ public class DispatcherManager {
 
         final String fileKey = this.fileStorageManager.storeFile(StorageType.DISPATCHER_PROFILE_PICTURE, dispatcherUsername, file);
         entity.setProfileImage(fileKey);
-        if (entity.getPersonalInformation() != null && entity.getContactInformation() != null && entity.getGuarantor() != null && entity.getDispatchDetail() != null && entity.getKycType() != null && entity.getKycNumber() != null) {
+        if (entity.getPersonalInformation() != null && entity.getContactInformation() != null && entity.getGuarantor() != null && entity.getKycType() != null && entity.getKycNumber() != null) {
             entity.setProfileComplete(true);
         }
         this.dispatcherRepository.save(entity);
@@ -185,6 +185,9 @@ public class DispatcherManager {
     ) throws NoSuchDispatcherException, NoSuchStateException, IllegalLGAException, DispatcherProfileCompleteException {
         if (!this.nigeriaStatesManager.validateStateLga(personalInfoDto.state(), personalInfoDto.lga())) {
             throw new IllegalLGAException("LGA " + personalInfoDto.lga() +  " does not belong to state " + personalInfoDto.state());
+        }
+        if (!this.nigeriaStatesManager.validateStateLga(dispatcherGuarantorDto.state(), dispatcherGuarantorDto.lga())) {
+            throw new IllegalLGAException("LGA " + dispatchDetailDto.lga() + " does not belong to state " + dispatcherGuarantorDto.state());
         }
         DispatcherEntity.DispatchDetailEmbeddable dispatchDetailEmbeddable = null;
         if (dispatchDetailDto != null) {
@@ -234,10 +237,10 @@ public class DispatcherManager {
         final DispatcherEntity.DispatcherGuarantorEmbeddable guarantorEmbeddable = DispatcherEntity.DispatcherGuarantorEmbeddable.builder()
                 .fullName(dispatcherGuarantorDto.fullName())
                 .address(dispatcherGuarantorDto.address())
-                .career(dispatcherGuarantorDto.career().toString())
+                .career(dispatcherGuarantorDto.career())
                 .phoneNumber(dispatcherGuarantorDto.phoneNumber())
                 .whatsAppNumber(dispatcherGuarantorDto.whatsAppNumber())
-                .relationship(dispatcherGuarantorDto.relationship().toString())
+                .relationship(dispatcherGuarantorDto.relationship())
                 .state(dispatcherGuarantorDto.state())
                 .lga(dispatcherGuarantorDto.lga())
                 .email(dispatcherGuarantorDto.email())
@@ -257,7 +260,7 @@ public class DispatcherManager {
     }
 
 
-    DispatcherInfo getProfile(final @NonNull String dispatcherUsername) throws NoSuchDispatcherException, InCompleteDispatcherProfileException {
+    DispatcherInfo getProfile(final @NonNull String dispatcherUsername) throws NoSuchDispatcherException {
         final DispatcherEntity entity = this.dispatcherRepository.findByEmail(dispatcherUsername)
                 .orElseThrow(() -> new NoSuchDispatcherException("Dispatcher with username " + dispatcherUsername + " does not exist"));
 //        if (!entity.isProfileComplete()) {

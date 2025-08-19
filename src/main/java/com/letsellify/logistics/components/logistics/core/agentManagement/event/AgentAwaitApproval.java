@@ -20,7 +20,7 @@ public class AgentAwaitApproval extends ApplicationEvent {
 
     public AgentAwaitApproval(final AgentInfo agentInfo) {
         super(agentInfo);
-        this.agentName = agentInfo.name();
+        this.agentName = agentInfo.personalInformation().name();
         this.agentEmail = agentInfo.email();
         this.role = LogisticAppRole.AGENT;
     }

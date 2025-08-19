@@ -1,11 +1,7 @@
 package com.letsellify.logistics.components.logistics.core.agentManagement.dataMapper;
 
-import com.letsellify.logistics.components.logistics.core.agentManagement.data.Agent;
-import com.letsellify.logistics.components.logistics.core.agentManagement.data.AgentInfo;
-import com.letsellify.logistics.components.logistics.core.agentManagement.data.AgentProfileInfo;
-import com.letsellify.logistics.components.logistics.core.agentManagement.rest.resource.AgentInfoResource;
-import com.letsellify.logistics.components.logistics.core.agentManagement.rest.resource.AgentProfileInfoResource;
-import com.letsellify.logistics.components.logistics.core.agentManagement.rest.resource.AgentResource;
+import com.letsellify.logistics.components.logistics.core.agentManagement.data.*;
+import com.letsellify.logistics.components.logistics.core.agentManagement.rest.resource.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -23,6 +19,19 @@ public interface AgentDataMapper {
 
     AgentInfoResource toResource(AgentInfo data);
 
+    AgentProfileInfoResource toProfileResource(AgentInfo data);
+
     AgentProfileInfoResource toResource(AgentProfileInfo data);
 
+    AgentPersonalInformationResource getResource(AgentPersonalInformation data);
+
+    AgentKycResource getResource(AgentKyc data);
+
+    AgentContactInformationResource toResource(AgentContactInformation data);
+
+    AgentBusinessInformationResource toResource(AgentBusinessInformation data);
+
+    AgentGuarantorResource toResource(AgentGuarantor data);
+
+    AgentProfileInfoResources toProfileResources(AgentsInfo data);
 }

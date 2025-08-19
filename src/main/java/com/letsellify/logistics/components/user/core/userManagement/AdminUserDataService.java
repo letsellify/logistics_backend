@@ -2,9 +2,12 @@ package com.letsellify.logistics.components.user.core.userManagement;
 
 import com.letsellify.logistics.common.restException.LogisticsBadRequestException;
 import com.letsellify.logistics.common.restException.LogisticsResourceNotFoundException;
+import com.letsellify.logistics.common.restException.LogisticsRestException;
 import com.letsellify.logistics.components.logistics.core.agentManagement.exception.AgentApprovedException;
+import com.letsellify.logistics.components.logistics.core.agentManagement.exception.InCompleteAgentProfileException;
 import com.letsellify.logistics.components.logistics.core.agentManagement.exception.NoSuchAgentException;
 import com.letsellify.logistics.components.logistics.core.agentManagement.rest.resource.AgentInfoResource;
+import com.letsellify.logistics.components.logistics.core.agentManagement.rest.resource.AgentProfileInfoResources;
 import com.letsellify.logistics.components.logistics.core.agentManagement.rest.resource.AgentResource;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.exception.DispatcherApprovedException;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.exception.InCompleteDispatcherProfileException;
@@ -19,6 +22,7 @@ import com.letsellify.logistics.components.user.core.userManagement.rest.resourc
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 /**
@@ -94,4 +98,20 @@ public class AdminUserDataService {
                 .getResource();
     }
 
+    public AgentProfileInfoResources getAllAgentAwaitingApproval(final @NonNull Pageable pageable) {
+        return this.adminUserManager.getAllAgentsAwaitingApproval(pageable).getResource();
+    }
+
+    public AgentResource approveAgent(final @NonNull String agentEmail) {
+       try {
+           return this.adminUserManager.approveAgent(agentEmail)
+                   .getResource();
+       } catch (NoSuchAgentException e) {
+           throw new LogisticsRestException(HttpStatus.NOT_FOUND, e.getMessage());
+       } catch (InCompleteAgentProfileException e) {
+           throw new LogisticsRestException(HttpStatus.UNAUTHORIZED, e.getMessage());
+       } catch (AgentApprovedException e) {
+           throw new LogisticsBadRequestException(e.getMessage());
+       }
+    }
 }
