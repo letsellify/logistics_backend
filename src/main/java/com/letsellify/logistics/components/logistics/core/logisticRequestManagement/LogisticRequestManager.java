@@ -1,5 +1,28 @@
 package com.letsellify.logistics.components.logistics.core.logisticRequestManagement;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+
+import org.axonframework.commandhandling.gateway.CommandGateway;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.letsellify.logistics.common.data.LogisticAppRole;
 import com.letsellify.logistics.components.fileStorage.core.FileStorageManager;
 import com.letsellify.logistics.components.fileStorage.core.data.StorageType;
@@ -13,10 +36,14 @@ import com.letsellify.logistics.components.logistics.core.dispatcherManagement.e
 import com.letsellify.logistics.components.logistics.core.financeAccountManagement.FinanceAccountManager;
 import com.letsellify.logistics.components.logistics.core.financeAccountManagement.exception.FinanceAccountNotFoundException;
 import com.letsellify.logistics.components.logistics.core.financeAccountManagement.exception.InsufficientFundsException;
-import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.NigeriaStatesManager;
-import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.exception.IllegalLGAException;
-import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.exception.NoSuchStateException;
-import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.data.*;
+import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.data.LogisticAgent;
+import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.data.LogisticDispatcher;
+import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.data.LogisticRequest;
+import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.data.LogisticRequests;
+import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.data.LogisticsItemImage;
+import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.data.LogisticsStatus;
+import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.data.Receiver;
+import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.data.Sender;
 import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.database.entity.ConditionEntity;
 import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.database.entity.ItemEntity;
 import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.database.entity.LogisticItemImageEntity;
@@ -29,35 +56,22 @@ import com.letsellify.logistics.components.logistics.core.logisticRequestManagem
 import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.eventStore.command.LogisticRequestCommand;
 import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.eventStore.event.InDispatcherPossessionEvent;
 import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.eventStore.event.LogisticRequestedEvent;
-import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.exception.*;
+import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.exception.ImageConflictException;
+import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.exception.InvalidLogisticItemImageException;
+import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.exception.InvalidRoleException;
+import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.exception.LogisticFraudException;
+import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.exception.LogisticRequestAccessDeniedException;
+import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.exception.NoSuchLogisticRequestException;
+import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.NigeriaStatesManager;
+import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.exception.IllegalLGAException;
+import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.exception.NoSuchStateException;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.VendorManager;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.data.Vendor;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.exception.InCompleteVendorProfileException;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.exception.VendorNotFoundException;
+
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.axonframework.commandhandling.gateway.CommandGateway;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 /**
  * @author AHMAD BUBA
@@ -159,8 +173,7 @@ public class LogisticRequestManager {
             throw new InvalidRoleException("User with " + userRole + " cannot request logistic");
         }
         final Vendor vendor = this.vendorManager.findAndValidateVendor(vendorEmail);
-        return
-                order(
+        return this.order(
                         vendor,
                         itemName,
                         quantity,
@@ -213,14 +226,22 @@ public class LogisticRequestManager {
             final @NonNull String pickUpLga,
             final @NonNull String pickUpAddress
     ) throws NoSuchStateException, IllegalLGAException, InsufficientFundsException, InvalidLogisticItemImageException, ImageConflictException {
+        /* Validate state and lga */
 
-        if (!this.nigeriaStatesManager.validateStateAndLgaForLogistics(pickUpState, pickUpLga, state, lga)) {
-            throw new IllegalLGAException("LGA does not belong to state");
+        if (!this.nigeriaStatesManager.validateStateLga(pickUpState,pickUpLga)) {
+            throw new IllegalLGAException("LGA " + pickUpLga +  " does not belong to state " + pickUpState);
         }
 
-        final Set<String> images = Set.of(imageUrl1, imageUrl2);
-        final List<LogisticsItemImage> itemImages = new ArrayList<>();
+        if (!this.nigeriaStatesManager.validateStateLga(state, lga)) {
+            throw new IllegalLGAException("LGA " + lga +  " does not belong to state " +state);
+        }
 
+
+        final Set<String> images = new HashSet<>();
+        images.add(imageUrl1);
+        images.add(imageUrl2);
+
+        final List<LogisticsItemImage> itemImages = new ArrayList<>();
         for (final String image : images) {
             if (image != null && !image.isBlank()) {
                 final LogisticItemImageEntity imageEntity = this.logisticsItemImageRepository.findByIdAndSenderId(image, vendor.getId())

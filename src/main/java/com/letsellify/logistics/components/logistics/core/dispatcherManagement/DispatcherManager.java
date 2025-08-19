@@ -1,31 +1,12 @@
 package com.letsellify.logistics.components.logistics.core.dispatcherManagement;
 
-import com.letsellify.logistics.components.communication.core.emailManagement.EmailService;
-import com.letsellify.logistics.components.fileStorage.core.FileStorageManager;
-import com.letsellify.logistics.components.fileStorage.core.data.StorageType;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.Dispatcher;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.DispatcherInfo;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.DispatchersInfo;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.database.entity.DispatcherEntity;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.database.repository.DispatcherRepository;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.event.DispatcherNameUpdateEvent;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.exception.*;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto.*;
-import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.event.LogisticRequestBroadcast;
-import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.NigeriaStatesManager;
-import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.exception.IllegalLGAException;
-import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.exception.NoSuchStateException;
-import com.letsellify.logistics.components.logistics.core.vendorManagement.data.VendorBusinessInformation;
-import com.letsellify.logistics.components.logistics.core.vendorManagement.data.VendorContactInformation;
-import com.letsellify.logistics.components.logistics.core.vendorManagement.data.VendorInfo;
-import com.letsellify.logistics.components.logistics.core.vendorManagement.data.VendorPersonalInformation;
-import com.letsellify.logistics.components.logistics.core.vendorManagement.database.entity.VendorEntity;
-import com.letsellify.logistics.components.logistics.core.vendorManagement.exception.DispatcherProfilePhotoExistsException;
-import com.letsellify.logistics.components.logistics.core.vendorManagement.exception.VendorExistsException;
-import com.letsellify.logistics.components.user.core.userManagement.event.UserOfRoleDispatcherCreated;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
@@ -35,8 +16,36 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.*;
+import com.letsellify.logistics.components.communication.core.emailManagement.EmailService;
+import com.letsellify.logistics.components.fileStorage.core.FileStorageManager;
+import com.letsellify.logistics.components.fileStorage.core.data.StorageType;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.Dispatcher;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.DispatcherInfo;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.DispatchersInfo;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.database.entity.DispatcherEntity;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.database.repository.DispatcherRepository;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.event.DispatcherNameUpdateEvent;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.exception.DispatcherApprovedException;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.exception.DispatcherExistsException;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.exception.DispatcherProfileCompleteException;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.exception.InCompleteDispatcherProfileException;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.exception.NoSuchDispatcherException;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto.DispatchDetailDto;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto.DispatcherContactInfoDto;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto.DispatcherGuarantorDto;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto.DispatcherPersonalInfoDto;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto.KycDto;
+import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.event.LogisticRequestBroadcast;
+import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.NigeriaStatesManager;
+import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.exception.IllegalLGAException;
+import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.exception.NoSuchStateException;
+import com.letsellify.logistics.components.logistics.core.vendorManagement.exception.DispatcherProfilePhotoExistsException;
+import com.letsellify.logistics.components.logistics.core.vendorManagement.exception.VendorExistsException;
+import com.letsellify.logistics.components.user.core.userManagement.event.UserOfRoleDispatcherCreated;
+
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author AHMAD BUBA
@@ -111,11 +120,11 @@ public class DispatcherManager {
 
 
     public DispatchersInfo getAllAwaitingApproval(Pageable pageable) {
-        Page<DispatcherEntity> entityPage = this.dispatcherRepository.findByProfileCompleteTrueAndApproveFalse(pageable);
-        List<DispatcherEntity> entities = entityPage.getContent();
-        List<DispatcherInfo> dispatcherInfos = new ArrayList<>();
-        for (DispatcherEntity entity : entities) {
-            String profilePicturePresignedUrl = entity.getProfileImage() == null ? null : this.fileStorageManager.generatePresignedUrl(entity.getProfileImage());
+        final Page<DispatcherEntity> entityPage = this.dispatcherRepository.findByProfileCompleteTrueAndApproveFalse(pageable);
+        final List<DispatcherEntity> entities = entityPage.getContent();
+        final List<DispatcherInfo> dispatcherInfos = new ArrayList<>();
+        for (final DispatcherEntity entity : entities) {
+            final String profilePicturePresignedUrl = entity.getProfileImage() == null ? null : this.fileStorageManager.generatePresignedUrl(entity.getProfileImage());
             dispatcherInfos.add(new DispatcherInfo(profilePicturePresignedUrl, entity));
         }
         return new DispatchersInfo(dispatcherInfos, entityPage);
@@ -138,8 +147,8 @@ public class DispatcherManager {
     }
 
     public UUID getDispatcherId(final @NonNull String dispatcherUsername) throws NoSuchDispatcherException {
-        DispatcherEntity entity = this.dispatcherRepository.findByEmail(dispatcherUsername)
-                .orElseThrow(() -> new NoSuchDispatcherException("No dispatcher with email " + dispatcherUsername + " found"));
+        final DispatcherEntity entity = this.dispatcherRepository.findByEmail(dispatcherUsername)
+                                                                 .orElseThrow(() -> new NoSuchDispatcherException("No dispatcher with email " + dispatcherUsername + " found"));
         return entity.getId();
     }
 
@@ -147,8 +156,8 @@ public class DispatcherManager {
     @Transactional
     String uploadProfilePhoto(final @NonNull String dispatcherUsername, final @NonNull MultipartFile file) throws NoSuchDispatcherException, DispatcherProfileCompleteException, DispatcherProfilePhotoExistsException, IOException {
         this.fileStorageManager.validateImageFile(file);
-        DispatcherEntity entity = this.dispatcherRepository.findByEmail(dispatcherUsername)
-                .orElseThrow(() -> new NoSuchDispatcherException("No dispatcher with email " + dispatcherUsername + " found"));
+        final DispatcherEntity entity = this.dispatcherRepository.findByEmail(dispatcherUsername)
+                                                                 .orElseThrow(() -> new NoSuchDispatcherException("No dispatcher with email " + dispatcherUsername + " found"));
         if (entity.isProfileComplete()) {
             throw new DispatcherProfileCompleteException("You have all ready filled your profile, You cannot edit anything. Contact admin");
         }
@@ -170,12 +179,17 @@ public class DispatcherManager {
             final @NonNull String dispatcherUsername,
             final @NonNull DispatcherPersonalInfoDto personalInfoDto,
             final @NonNull DispatcherContactInfoDto contactInfoDto,
-            final @NonNull DispatchDetailDto dispatchDetailDto,
+            final DispatchDetailDto dispatchDetailDto,
             final @NonNull DispatcherGuarantorDto dispatcherGuarantorDto,
             final @NonNull KycDto kycDto
     ) throws NoSuchDispatcherException, NoSuchStateException, IllegalLGAException, DispatcherProfileCompleteException {
-        if (!this.nigeriaStatesManager.validateStateLga(personalInfoDto.state(), personalInfoDto.lga()) || !this.nigeriaStatesManager.validateStateLga(dispatchDetailDto.state(), dispatchDetailDto.lga())) {
-            throw new IllegalLGAException("LGA state validation failed");
+        if (!this.nigeriaStatesManager.validateStateLga(personalInfoDto.state(), personalInfoDto.lga())) {
+            throw new IllegalLGAException("LGA " + personalInfoDto.lga() +  " does not belong to state " + personalInfoDto.state());
+        }
+        if (dispatchDetailDto != null) {
+            if (!this.nigeriaStatesManager.validateStateLga(dispatchDetailDto.state(), dispatchDetailDto.lga())) {
+                throw new IllegalLGAException("LGA " + dispatchDetailDto.lga() +  " does not belong to state " + dispatchDetailDto.state());
+            }
         }
         final DispatcherEntity entity = this.dispatcherRepository.findByEmail(dispatcherUsername)
                 .orElseThrow(() -> new NoSuchDispatcherException("No such dispatcher with email " + dispatcherUsername + " found"));
@@ -183,7 +197,7 @@ public class DispatcherManager {
             throw new DispatcherProfileCompleteException("Dispatcher profile has all ready been filled");
         }
         if (entity.getPersonalInformation() == null) {
-            DispatcherEntity.PersonalInfoEmbeddable personalInfoEmbeddable = new DispatcherEntity.PersonalInfoEmbeddable();
+            final DispatcherEntity.PersonalInfoEmbeddable personalInfoEmbeddable = new DispatcherEntity.PersonalInfoEmbeddable();
             personalInfoEmbeddable.setName(personalInfoDto.name());
             personalInfoEmbeddable.setState(personalInfoDto.state());
             personalInfoEmbeddable.setAddress(personalInfoDto.address());
