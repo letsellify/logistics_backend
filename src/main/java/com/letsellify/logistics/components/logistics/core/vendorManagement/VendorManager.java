@@ -120,9 +120,14 @@ public class VendorManager {
         if (!this.nigeriaStatesManager.validateStateLga(homeState, homeLg)) {
             throw new IllegalLGAException(homeLg + "does not belong to " + homeState);
         }
-        if (!this.nigeriaStatesManager.validateStateLga(state,lg)) {
-            throw new IllegalLGAException(lg + "does not belong to " + state);
+        VendorEntity.BusinessInformationEmbeddable businessInformationEmbeddable = null;
+        if (state != null && !state.isEmpty() && lg != null && !lg.isEmpty()) {
+            if (!this.nigeriaStatesManager.validateStateLga(state,lg)) {
+                throw new IllegalLGAException(lg + "does not belong to " + state);
+            }
+            businessInformationEmbeddable = new VendorEntity.BusinessInformationEmbeddable(businessName, businessOfficeAddress, state, lg);
         }
+
         final VendorEntity entity = this.vendorRepository.findByEmail(vendorEmail)
                 .orElseThrow(() -> new VendorNotFoundException("Vendor with username " + vendorEmail + " not found."));
         if (entity.isProfileComplete()) {
@@ -147,7 +152,6 @@ public class VendorManager {
             }
         }
         final VendorEntity.ContactInformationEmbeddable contactInformationEmbeddable = new VendorEntity.ContactInformationEmbeddable(phoneNumber, whatsAppPhoneNumber);
-        final VendorEntity.BusinessInformationEmbeddable businessInformationEmbeddable = new VendorEntity.BusinessInformationEmbeddable(businessName, businessOfficeAddress, state, lg);
         entity.setContactInformation(contactInformationEmbeddable);
         entity.setBusinessInformation(businessInformationEmbeddable);
         String profilePicturePresignedUrl = null;

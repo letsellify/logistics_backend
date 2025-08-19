@@ -18,7 +18,8 @@ public record VendorInfo(
         VendorContactInformation contactInformation,
         VendorBusinessInformation businessInformation
 ) {
-    public VendorInfo(String profilePicture, VendorEntity entity) {
+    public
+    VendorInfo(String profilePicture, VendorEntity entity) {
         this(
                 entity.getEmail(),
                 profilePicture,
