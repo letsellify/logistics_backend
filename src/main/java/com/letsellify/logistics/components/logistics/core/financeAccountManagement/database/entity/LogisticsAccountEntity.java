@@ -82,19 +82,19 @@ public class LogisticsAccountEntity extends Auditable {
         escrowedPayment.setAccount(this);
     }
 
-    public LogisticsAccountTransactionEntity topUpAccount(final BigDecimal amount) {
-        final LogisticsAccountTransactionEntity transaction = LogisticsAccountTransactionEntity.getInstance(this, LogisticsAccountTransactionType.CREDIT, this.balance, null);
-        this.transactions.add(transaction);
-        this.balance = this.balance.add(amount);
-        return transaction;
-    }
+//    public LogisticsAccountTransactionEntity topUpAccount(final BigDecimal amount) {
+//        final LogisticsAccountTransactionEntity transaction = LogisticsAccountTransactionEntity.getInstance(this, LogisticsAccountTransactionType.CREDIT, this.balance, null);
+//        this.transactions.add(transaction);
+//        this.balance = this.balance.add(amount);
+//        return transaction;
+//    }
 
-    public LogisticsAccountTransactionEntity logisticsTopUpAccount(final BigDecimal amount, final String shippingRequestId) {
-        final LogisticsAccountTransactionEntity transaction = LogisticsAccountTransactionEntity.getInstance(this, LogisticsAccountTransactionType.CREDIT, this.balance, shippingRequestId);
-        this.transactions.add(transaction);
-        this.balance = this.balance.add(amount);
-        return transaction;
-    }
+//    public LogisticsAccountTransactionEntity logisticsTopUpAccount(final BigDecimal amount, final String shippingRequestId) {
+//        final LogisticsAccountTransactionEntity transaction = LogisticsAccountTransactionEntity.getInstance(this, LogisticsAccountTransactionType.CREDIT, this.balance, shippingRequestId);
+//        this.transactions.add(transaction);
+//        this.balance = this.balance.add(amount);
+//        return transaction;
+//    }
 
     public void logisticsEscrow(final String shippingRequestId, final BigDecimal amount) throws InsufficientFundsException {
         if (this.balance.compareTo(amount) < 0) {
@@ -108,16 +108,16 @@ public class LogisticsAccountEntity extends Auditable {
     // tricky, manager first gets escrowedPayment using repository by shippingId, from escrowedPayment gets the account
     // then tells the account settle
     // we could possibly make it get by id then us normal stream method to find it based on id since all transactions have allready been fetched
-    public LogisticsAccountTransactionEntity settle(final EscrowedPaymentEntity escrowedPaymentEntity, final UUID userId, final LogisticAppRole userRole, final BigDecimal amount) {
-        try {
-            escrowedPaymentEntity.settle(userId, userRole, amount);
-        } catch (IllegalStateException e) {
-            throw new RuntimeException(e);
-        }
-        return LogisticsAccountTransactionEntity
-                .getInstance(this, LogisticsAccountTransactionType.DEBIT, amount, escrowedPaymentEntity.getShippingId());
-        // create transaction
-        // check if esc
-    }
+//    public LogisticsAccountTransactionEntity settle(final EscrowedPaymentEntity escrowedPaymentEntity, final UUID userId, final LogisticAppRole userRole, final BigDecimal amount) {
+//        try {
+//            escrowedPaymentEntity.settle(userId, userRole, amount);
+//        } catch (IllegalStateException e) {
+//            throw new RuntimeException(e);
+//        }
+//        return LogisticsAccountTransactionEntity
+//                .getInstance(this, LogisticsAccountTransactionType.DEBIT, amount, escrowedPaymentEntity.getShippingId());
+//        // create transaction
+//        // check if esc
+//    }
 
 }

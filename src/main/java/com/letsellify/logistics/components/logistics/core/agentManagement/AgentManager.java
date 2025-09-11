@@ -82,7 +82,7 @@ public class AgentManager {
     @EventListener
     public void on(final LogisticRequestBroadcast broadcast) {
         log.info("we have got a shipping request order from: {}", broadcast.getSenderId());
-        final List<AgentEntity> agentEntityList = this.agentRepository.findByApprovedAndAcceptingStorage(true, true);
+        final List<AgentEntity> agentEntityList = this.agentRepository.findByProfileCompleteTrueAndApprovedTrueAndAcceptingStorageTrueAndPersonalInformation_Lga(broadcast.getReceiverLga());
         final Set<Agent> agents = new HashSet<>();
         for (final AgentEntity entity : agentEntityList) {
             agents.add(new Agent(entity));

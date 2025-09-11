@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.*;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.database.entity.LgaPreferenceEntity;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.exception.*;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
@@ -19,17 +22,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.letsellify.logistics.components.communication.core.emailManagement.EmailService;
 import com.letsellify.logistics.components.fileStorage.core.FileStorageManager;
 import com.letsellify.logistics.components.fileStorage.core.data.StorageType;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.Dispatcher;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.DispatcherInfo;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.DispatchersInfo;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.database.entity.DispatcherEntity;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.database.repository.DispatcherRepository;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.event.DispatcherNameUpdateEvent;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.exception.DispatcherApprovedException;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.exception.DispatcherExistsException;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.exception.DispatcherProfileCompleteException;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.exception.InCompleteDispatcherProfileException;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.exception.NoSuchDispatcherException;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto.DispatchDetailDto;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto.DispatcherContactInfoDto;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto.DispatcherGuarantorDto;
@@ -94,7 +89,7 @@ public class DispatcherManager {
     @EventListener
     public void on(final LogisticRequestBroadcast broadcast) {
         log.info("we have got a shipping request order from: {}", broadcast.getSenderId());
-        final List<DispatcherEntity> dispatcherEntityList = this.dispatcherRepository.findByCurrentlyAcceptingDeliveryAndApprove(true, true);
+        final List<DispatcherEntity> dispatcherEntityList = this.dispatcherRepository.findMatchingDispatchers(broadcast.getPickUpLga(),broadcast.getReceiverLga());
         final Set<Dispatcher> dispatchers = new HashSet<>();
         for (final DispatcherEntity entity : dispatcherEntityList) {
             dispatchers.add(new Dispatcher(entity));
@@ -300,5 +295,86 @@ public class DispatcherManager {
     }
 
 
+    @Transactional
+    public DispatcherLgaPreference addLgaPreference(final String dispatcherUsername, final String pickUpLga, final String dropOffLga) throws IllegalLGAException, InCompleteDispatcherProfileException, UnableToAddLgaPreferenceException, NoSuchDispatcherException, NoSuchStateException {
+        if (!this.nigeriaStatesManager.isLgaValid(pickUpLga)) {
+            throw new IllegalLGAException("Pick up lga " + pickUpLga + " is not valid");
+        }
+        if (!this.nigeriaStatesManager.isLgaValid(dropOffLga)) {
+            throw new IllegalLGAException("Drop off lga " + dropOffLga + " is not valid");
+        }
+        final DispatcherEntity entity = this.dispatcherRepository.findByEmail(dispatcherUsername)
+                .orElseThrow(() -> new NoSuchDispatcherException("Dispatcher with username " + dispatcherUsername + " does not exist"));
 
+        validateDispatcher(entity);
+        if (entity.isReceiveAllNotifications()) {
+            throw new UnableToAddLgaPreferenceException("Dispatcher with username " + dispatcherUsername + " is currently recieving all notifications. Turn it off before adding preferences");
+        }
+        final LgaPreferenceEntity lgaPreferenceEntity = new LgaPreferenceEntity(pickUpLga, dropOffLga);
+        entity.addPreference(lgaPreferenceEntity);
+        this.dispatcherRepository.save(entity);
+        return new DispatcherLgaPreference(lgaPreferenceEntity);
+    }
+
+    public DispatcherLgaPreferences getLgaPreferences(final @NonNull String dispatcherUsername) throws NoSuchDispatcherException, InCompleteDispatcherProfileException {
+        final DispatcherEntity entity = this.dispatcherRepository.findByEmail(dispatcherUsername)
+                .orElseThrow(() -> new NoSuchDispatcherException("Dispatcher with username " + dispatcherUsername + " does not exist"));
+        validateDispatcher(entity);
+        return new DispatcherLgaPreferences(entity.getPreferences());
+    }
+
+    @Transactional
+    public void updateNotificationPreference(final @NonNull String dispatcherUsername, final boolean notification ) throws DispatcherReceiveAllNotificationException, InCompleteDispatcherProfileException, NoSuchDispatcherException {
+        if (notification) {
+            this.receiveAllNotifications(dispatcherUsername);
+        }
+        else {
+            this.unReceiveAllNotifications(dispatcherUsername);
+        }
+    }
+
+    @Transactional
+    public void deletePreference(final @NonNull String dispatcherUsername, final @NonNull UUID preferenceId) throws NoSuchDispatcherException, NoSuchDispatcherPreferenceException, InCompleteDispatcherProfileException, DispatcherReceiveAllNotificationException {
+        DispatcherEntity entity = this.dispatcherRepository.findByEmail(dispatcherUsername)
+                .orElseThrow(() -> new NoSuchDispatcherException("No such dispatcher with "+ dispatcherUsername + " found"));
+
+        validateDispatcher(entity);
+        if (entity.isReceiveAllNotifications()) {
+            throw new DispatcherReceiveAllNotificationException("You cannot delete preference. You are currently receiving all notifications");
+        }
+        int before = entity.getPreferences().size();
+        entity.removePreference(preferenceId);
+        int after = entity.getPreferences().size();
+
+        if (before == after) {
+            throw new NoSuchDispatcherPreferenceException("Preference not found for this dispatcher");
+        }
+        this.dispatcherRepository.save(entity);
+    }
+
+
+
+    public void receiveAllNotifications(final @NonNull String dispatcherUsername) throws NoSuchDispatcherException, InCompleteDispatcherProfileException, DispatcherReceiveAllNotificationException {
+        final DispatcherEntity entity = this.dispatcherRepository.findByEmail(dispatcherUsername)
+                .orElseThrow(() -> new NoSuchDispatcherException("Dispatcher with username " + dispatcherUsername + " does not exist"));
+        validateDispatcher(entity);
+        if (entity.isReceiveAllNotifications()) {
+            throw new DispatcherReceiveAllNotificationException("Dispatcher is all ready set to receive all notifications");
+        }
+        entity.clearPreferences();
+        entity.setReceiveAllNotifications(true);
+        this.dispatcherRepository.save(entity);
+    }
+
+
+    public void unReceiveAllNotifications(final @NonNull String dispatcherUsername) throws NoSuchDispatcherException, InCompleteDispatcherProfileException, DispatcherReceiveAllNotificationException {
+        final DispatcherEntity entity = this.dispatcherRepository.findByEmail(dispatcherUsername)
+                .orElseThrow(() -> new NoSuchDispatcherException("Dispatcher with username " + dispatcherUsername + " does not exist"));
+        validateDispatcher(entity);
+        if (!entity.isReceiveAllNotifications()) {
+            throw new DispatcherReceiveAllNotificationException("Dispatcher is all ready set to not receiving all notifications");
+        }
+        entity.setReceiveAllNotifications(false);
+        this.dispatcherRepository.save(entity);
+    }
 }

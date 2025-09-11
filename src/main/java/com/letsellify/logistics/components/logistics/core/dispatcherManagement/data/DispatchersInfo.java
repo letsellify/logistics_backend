@@ -3,7 +3,6 @@ package com.letsellify.logistics.components.logistics.core.dispatcherManagement.
 
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.dataMapper.DispatcherMapper;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.database.entity.DispatcherEntity;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.resource.DispatcherProfileInfoResource;
 import com.letsellify.logistics.components.logistics.core.logisticRequestManagement.rest.resource.DispatcherProfileInfoResources;
 import org.springframework.data.domain.Page;
 

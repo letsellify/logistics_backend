@@ -3,6 +3,7 @@ package com.letsellify.logistics.components.logistics.core.nigeriaStatesManageme
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.config.StateLGAProps;
+import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.data.NigerianLga;
 import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.data.NigerianStateLGA;
 import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.data.NigerianStates;
 import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.database.entity.LGAEntity;
@@ -40,6 +41,7 @@ public class NigeriaStatesManager implements CommandLineRunner {
     private final LGARepository lgaRepository;
     private final StateLGAProps stateLGAProps;
     private final Map<String, Set<String>> stateLgaCache = new HashMap<>();
+    private final Set<NigerianLga> lgaCache = new HashSet<>();
 
 
     @Override
@@ -80,6 +82,10 @@ public class NigeriaStatesManager implements CommandLineRunner {
         return this.validateStateAndLgaFromCache(state, lga);
     }
 
+    public boolean isLgaValid(final @NonNull String lga) throws NoSuchStateException {
+        return lgaCache.stream()
+                .anyMatch(nigerianLga -> nigerianLga.lga().equalsIgnoreCase(lga));
+    }
 
     private boolean validateStateAndLgaFromCache(final @NonNull String state, final @NonNull String lga) throws NoSuchStateException {
         // Check if the homeState exists in cache (case-insensitive)
@@ -89,7 +95,7 @@ public class NigeriaStatesManager implements CommandLineRunner {
         if (lgas.isEmpty()) {
             throw new NoSuchStateException("No such homeState exists: " + state);
         }
-        // Check if the LGA belongs to the homeState
+        /* Check if the LGA belongs to the homeState */
         return lgas.contains(lga);
     }
 
@@ -141,10 +147,13 @@ public class NigeriaStatesManager implements CommandLineRunner {
             final Set<String> lgaSet = this.lgaRepository.findByState(state).stream()
                     .map(lga -> {
                         log.info("the homeLga: {}", lga.getName());
+                        NigerianLga nigerianLga = new NigerianLga(lga);
+                        lgaCache.add(nigerianLga);
                         return lga.getName();
                     })
                     .collect(Collectors.toSet());
             this.stateLgaCache.put(state.getName(), lgaSet);
         });
+        log.info("Total lgas: {}", lgaCache.size());
     }
 }

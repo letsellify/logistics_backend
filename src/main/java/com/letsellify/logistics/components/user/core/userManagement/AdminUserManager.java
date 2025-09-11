@@ -68,6 +68,12 @@ public class AdminUserManager implements CommandLineRunner {
         }
     }
 
+    public LogisticsAppUser getAdminUser() throws UserNotFoundException {
+        UserEntity entity = this.userRepository.findByEmail(adminUserProperties.email())
+                .orElseThrow(() -> new UserNotFoundException("Admin user with username " + adminUserProperties.email() + " not found"));
+        return new LogisticsAppUser(entity);
+    }
+
 
     @EventListener
     public void on(final DispatcherAwaitApproval event) {

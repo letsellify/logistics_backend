@@ -128,6 +128,8 @@ public class VerificationCodeManager {
         final VerificationCodeEntity entity = new VerificationCodeEntity(userEmail, roleToUse);
         this.verificationCodeRepository.save(entity);
 
+        log.info("Here is the verification code for user {}: {}", userEmail, entity.getCode());
+
         // Send the verification email
         this.emailService
           .sendVerificationEmail(userEmail, entity.getCode());

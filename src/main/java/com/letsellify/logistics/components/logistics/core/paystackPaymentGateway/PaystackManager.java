@@ -2,8 +2,7 @@ package com.letsellify.logistics.components.logistics.core.paystackPaymentGatewa
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.letsellify.logistics.common.data.LogisticAppRole;
-import com.letsellify.logistics.components.logistics.core.financeAccountManagement.FinanceAccountManager;
-import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.data.Payment;
+import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.data.PaystackPayment;
 import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.database.entity.PaystackChargeSuccessWebhookEntity;
 import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.database.entity.PaystackPaymentEntity;
 import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.database.repository.PaystackPaymentRepository;
@@ -111,7 +110,7 @@ public class PaystackManager {
         log.info("Payment status is {}, with the following data {}", paymentEntity.isSuccess(), paymentEntity.getChargeSuccessWebhookData().toString());
         try {
             // put it on a kafka, accountManager listens
-            final Payment payment = new Payment(paymentEntity);
+            final PaystackPayment payment = new PaystackPayment(paymentEntity);
             this.applicationEventPublisher.publishEvent(new ChargeSuccessEvent(payment));
         } catch (final Exception e) {
             throw new RuntimeException(e);

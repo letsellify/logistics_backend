@@ -1,8 +1,10 @@
 package com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.dataMapper;
 
+import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.data.NigerianLga;
 import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.data.NigerianState;
 import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.data.NigerianStateLGA;
 import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.data.NigerianStates;
+import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.rest.resource.LgaResource;
 import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.rest.resource.StateLGAResource;
 import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.rest.resource.StateResource;
 import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.rest.resource.StatesResource;
@@ -24,6 +26,8 @@ public interface StateLGADataMapper {
     StateLGAResource dataToResource(NigerianStateLGA data);
 
     StatesResource dateToResource(NigerianStates data);
+
+    LgaResource dataToResource(NigerianLga data);
 
 
 }

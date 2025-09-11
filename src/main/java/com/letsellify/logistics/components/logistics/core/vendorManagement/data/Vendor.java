@@ -26,10 +26,10 @@ public class Vendor {
     public Vendor(final VendorEntity entity) {
         this.entity = entity;
         this.id = entity.getId();
-        this.name = entity.getPersonalInformation().getName();
+        this.name = entity.getPersonalInformation() == null ? null : entity.getPersonalInformation().getName();
         this.email = entity.getEmail();
-        this.phoneNumber = entity.getContactInformation().getPhoneNumber();
-        this.whatsAppPhoneNumber = entity.getContactInformation().getWhatsAppPhoneNumber();
+        this.phoneNumber = entity.getContactInformation() == null ? null : entity.getContactInformation().getPhoneNumber();
+        this.whatsAppPhoneNumber = entity.getContactInformation() == null ? null : entity.getContactInformation().getWhatsAppPhoneNumber();
         this.balance = entity.getCurrentAccountBalance();
     }
 }

@@ -34,4 +34,8 @@ public interface DispatcherMapper {
 
     DispatcherKycResource getResource(DispatcherKyc data);
 
+    DispatcherLgaPreferenceResource dataToResource(DispatcherLgaPreference data);
+
+    DispatcherLgaPreferenceResources dataToResources(DispatcherLgaPreferences data);
+
 }

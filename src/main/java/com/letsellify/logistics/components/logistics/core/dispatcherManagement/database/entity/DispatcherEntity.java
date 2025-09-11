@@ -8,6 +8,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.NaturalId;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -47,6 +49,13 @@ public class DispatcherEntity extends Auditable {
 
     @Setter
     private String kycNumber;
+
+    @Setter
+    private boolean receiveAllNotifications;
+
+    @OneToMany(mappedBy = "dispatcher", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<LgaPreferenceEntity> preferences;
+
 //    private UUID kycId;
     private boolean currentlyAcceptingDelivery;
     private boolean approve;
@@ -64,11 +73,32 @@ public class DispatcherEntity extends Auditable {
         dispatcherEntity.personalInformation = new PersonalInfoEmbeddable(name);
         dispatcherEntity.approve = false;
         dispatcherEntity.currentlyAcceptingDelivery = false;
+        dispatcherEntity.preferences = new HashSet<>();
+        dispatcherEntity.receiveAllNotifications = true;
         return dispatcherEntity;
     }
 
     public void approve() {
         this.approve = true;
+    }
+
+    public void addPreference(final LgaPreferenceEntity lgaPreferenceEntity) {
+        this.preferences.add(lgaPreferenceEntity);
+        lgaPreferenceEntity.setDispatcher(this);
+    }
+
+    public void removePreference(final UUID preferenceId) {
+        if (preferences == null) {
+            return;
+        }
+        preferences.removeIf(pref -> pref.getPreferenceId().equals(preferenceId));
+    }
+
+
+    public void clearPreferences() {
+        if (preferences != null) {
+            preferences.clear();
+        }
     }
 
 

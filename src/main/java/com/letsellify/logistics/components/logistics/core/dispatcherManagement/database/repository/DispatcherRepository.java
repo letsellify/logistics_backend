@@ -4,6 +4,8 @@ import com.letsellify.logistics.components.logistics.core.dispatcherManagement.d
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -25,5 +27,22 @@ public interface DispatcherRepository extends JpaRepository<DispatcherEntity, UU
     boolean existsByEmail(String dispatcherEmail);
 
     Page<DispatcherEntity> findByProfileCompleteTrueAndApproveFalse(Pageable pageable);
+
+    @Query("""
+        SELECT d FROM DispatcherEntity d
+            WHERE d.profileComplete = true
+                AND d.approve = true
+                    AND d.currentlyAcceptingDelivery = true
+                AND (
+                        d.receiveAllNotifications = true
+                            OR EXISTS (
+                                    SELECT p FROM LgaPreferenceEntity p
+                                        WHERE p.dispatcher = d
+                                            AND p.pickUpLga = :pickup
+                                                AND p.dropOffLga = :dropOff
+                                )
+                    )
+    """)
+    List<DispatcherEntity> findMatchingDispatchers(@Param("pickup") String pickUpLga, @Param("dropOff") String dropOffLga);
 
 }

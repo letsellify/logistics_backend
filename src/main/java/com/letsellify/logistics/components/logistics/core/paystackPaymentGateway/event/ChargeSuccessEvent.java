@@ -2,7 +2,7 @@ package com.letsellify.logistics.components.logistics.core.paystackPaymentGatewa
 
 
 import com.letsellify.logistics.common.data.LogisticAppRole;
-import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.data.Payment;
+import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.data.PaystackPayment;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
@@ -16,12 +16,14 @@ import java.util.UUID;
 
 @Getter
 public class ChargeSuccessEvent extends ApplicationEvent {
+    private final PaystackPayment paystackPayment;
     private final UUID userId;
     private final LogisticAppRole userRole;
     private final BigDecimal amount;
 
-    public ChargeSuccessEvent(final Payment payment) {
+    public ChargeSuccessEvent(final PaystackPayment payment) {
         super(payment);
+        paystackPayment = payment;
         this.userId = payment.getUserId();
         this.userRole = payment.getUserRole();
         this.amount = payment.getAmount();

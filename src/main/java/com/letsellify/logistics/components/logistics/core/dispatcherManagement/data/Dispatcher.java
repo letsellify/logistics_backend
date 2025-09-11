@@ -27,14 +27,13 @@ public record Dispatcher(
     public Dispatcher(final DispatcherEntity dispatcherEntity) {
         this(
                 dispatcherEntity.getId(),
-                dispatcherEntity.getPersonalInformation()
-                        .getName(),
+                dispatcherEntity.getPersonalInformation() == null ? null : dispatcherEntity.getPersonalInformation().getName(),
                 dispatcherEntity.getEmail(),
-                dispatcherEntity.getContactInformation().getWhatsAppPhone(),
-                dispatcherEntity.getContactInformation().getPhone(),
-                dispatcherEntity.getPersonalInformation().getState(),
-                dispatcherEntity.getPersonalInformation().getLga(),
-                dispatcherEntity.getPersonalInformation().getAddress()
+                dispatcherEntity.getContactInformation() == null ? null : dispatcherEntity.getContactInformation().getWhatsAppPhone(),
+                dispatcherEntity.getContactInformation() == null ? null : dispatcherEntity.getContactInformation().getPhone(),
+                dispatcherEntity.getPersonalInformation() == null ? null : dispatcherEntity.getPersonalInformation().getState(),
+                dispatcherEntity.getPersonalInformation() == null ? null : dispatcherEntity.getPersonalInformation().getLga(),
+                dispatcherEntity.getPersonalInformation() == null ? null : dispatcherEntity.getPersonalInformation().getAddress()
         );
     }
 

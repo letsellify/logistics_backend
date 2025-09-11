@@ -8,6 +8,7 @@ import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagemen
 import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.exception.IllegalLGAException;
 import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.exception.NoSuchStateException;
 import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.PaystackManager;
+import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.event.ChargeSuccessEvent;
 import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.rest.resource.PaystackInitiateTransactionResponse;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.data.*;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.database.entity.VendorEntity;
@@ -77,6 +78,17 @@ public class VendorManager {
         final VendorEntity entity = this.vendorRepository.findById(event.getVendorId())
                 .orElseThrow(() -> new VendorNotFoundException("Vendor with id " + event.getVendorId() + " not found"));
         entity.setCurrentAccountBalance(event.getCurrentBalance());
+        this.vendorRepository.save(entity);
+    }
+
+    @EventListener
+    public void paystackTopUp(final ChargeSuccessEvent event) throws VendorNotFoundException {
+        log.info("Handling ChargeSuccessEvent for user: {}", event.getUserId());
+        final VendorEntity entity = this.vendorRepository.findById(event.getUserId())
+                .orElseThrow(() -> new VendorNotFoundException("Vendor with id " + event.getUserId() + " not found"));
+        final BigDecimal currentBalance = entity.getCurrentAccountBalance();
+        final BigDecimal amountToTopUp = event.getAmount();
+        entity.setCurrentAccountBalance(currentBalance.add(amountToTopUp));
         this.vendorRepository.save(entity);
     }
 

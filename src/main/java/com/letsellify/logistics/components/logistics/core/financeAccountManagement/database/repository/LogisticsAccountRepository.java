@@ -17,4 +17,6 @@ public interface LogisticsAccountRepository extends JpaRepository<LogisticsAccou
     Optional<LogisticsAccountEntity> findByUserId(UUID userId);
 
     Optional<LogisticsAccountEntity> findByUserIdAndAppRole(UUID userId, LogisticAppRole appRole);
+
+    Optional<LogisticsAccountEntity> findByAppRole(LogisticAppRole appRole);
 }

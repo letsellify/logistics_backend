@@ -263,6 +263,7 @@ public class LogisticRequestManager {
         log.info("Total order amount " + totalOrderAmount);
         log.info("tax " + totalSpendingAfterTax);
         log.info("total spending after tax " + totalSpending);
+        log.info("Vendor balance is {}", vendor.getBalance());
 
         if (vendor.getBalance().compareTo(totalSpending) < 0) {
             throw new InsufficientFundsException("Insufficient balance to perform the transaction.");
@@ -441,6 +442,7 @@ public class LogisticRequestManager {
     }
 
 
+    @Transactional(readOnly = true)
     public LogisticRequest getLogisticRequest(
             final @NonNull String userName,
             final @NonNull LogisticAppRole userRole,
@@ -448,56 +450,63 @@ public class LogisticRequestManager {
     ) throws NoSuchLogisticRequestException, VendorNotFoundException, NoSuchAgentException,
             NoSuchDispatcherException, LogisticRequestAccessDeniedException, InvalidRoleException {
 
-        LogisticRequestEntity entity = this.logisticsRequestRepository
+        LogisticRequestEntity entity = logisticsRequestRepository
                 .findByShippingRequestId(shippingRequestId)
-                .orElseThrow(() -> new NoSuchLogisticRequestException("No logistic request found with id: " + shippingRequestId));
+                .orElseThrow(() -> new NoSuchLogisticRequestException(
+                        "No logistic request found with id: " + shippingRequestId));
 
-        // Optional role-based access control
-        switch (userRole) {
-            case VENDOR -> {
-                Vendor vendor = this.vendorManager.findVendor(userName);
-                UUID vendorId = vendor.getId();
-                if (entity.getSenderId() != null && !entity.getSenderId().equals(vendorId)) {
-                    throw new LogisticRequestAccessDeniedException("This request does not belong to the vendor.");
-                }
-            }
-            case AGENT -> {
-                Agent agent = this.agentManager.findAgent(userName);
-                UUID agentId = agent.id();
-                if (entity.getAgentId() != null && !entity.getAgentId().equals(agentId)) {
-                    throw new LogisticRequestAccessDeniedException("This request does not belong to the agent.");
-                }
-            }
-            case DISPATCHER -> {
-                Dispatcher dispatcher = this.dispatcherManager.findDispatcher(userName);
-                UUID dispatcherId = dispatcher.id();
-                if (entity.getDispatcherId() != null && !entity.getDispatcherId().equals(dispatcherId)) {
-                    throw new LogisticRequestAccessDeniedException("This request does not belong to the dispatcher.");
-                }
-            }
-            case ADMIN -> {
-                // No access restriction for admin
-            }
-            default -> throw new InvalidRoleException("Unsupported role: " + userRole);
-        }
-
-        // Build related role info if available
         Sender sender = null;
         LogisticAgent agent = null;
         LogisticDispatcher dispatcher = null;
 
-        if (entity.getSenderId() != null) {
-            sender = new Sender(this.vendorManager.findVendor(entity.getSenderId()));
-        }
-        if (entity.getAgentId() != null) {
-            agent = new LogisticAgent(this.agentManager.findAgent(entity.getAgentId()));
-        }
-        if (entity.getDispatcherId() != null) {
-            dispatcher = new LogisticDispatcher(this.dispatcherManager.findDispatcher(entity.getDispatcherId()));
+        switch (userRole) {
+            case VENDOR -> {
+                Vendor vendor = vendorManager.findVendor(userName);
+                UUID vendorId = vendor.getId();
+                log.info("it is a vendor");
+                if (entity.getSenderId() != null && !entity.getSenderId().equals(vendorId)) {
+                    throw new LogisticRequestAccessDeniedException("This request does not belong to the vendor.");
+                }
+                // reuse fetched vendor for DTO
+                sender = new Sender(vendor);
+            }
+            case AGENT -> {
+                Agent ag = agentManager.findAgent(userName);
+                UUID agentId = ag.id();
+                log.info("it is an agent");
+                if (entity.getAgentId() == null || !entity.getAgentId().equals(agentId)) {
+                    throw new LogisticRequestAccessDeniedException("This request does not belong to the agent or has already been accepted by another agent.");
+                }
+                agent = new LogisticAgent(ag);
+            }
+            case DISPATCHER -> {
+                Dispatcher disp = dispatcherManager.findDispatcher(userName);
+                UUID dispatcherId = disp.id();
+                log.info("it is a dispatcher");
+                if (entity.getDispatcherId() == null || !entity.getDispatcherId().equals(dispatcherId)) {
+                    throw new LogisticRequestAccessDeniedException("This request does not belong to the dispatcher or has been accepted by another dispatcher.");
+                }
+                dispatcher = new LogisticDispatcher(disp);
+            }
+            case ADMIN -> {
+                log.info("it is an admin");
+                // no restriction — but still build DTOs if IDs exist
+                if (entity.getSenderId() != null) {
+                    sender = new Sender(vendorManager.findVendor(entity.getSenderId()));
+                }
+                if (entity.getAgentId() != null) {
+                    agent = new LogisticAgent(agentManager.findAgent(entity.getAgentId()));
+                }
+                if (entity.getDispatcherId() != null) {
+                    dispatcher = new LogisticDispatcher(dispatcherManager.findDispatcher(entity.getDispatcherId()));
+                }
+            }
+            default -> throw new InvalidRoleException("Unsupported role: " + userRole);
         }
 
         return new LogisticRequest(entity, getPresignedImageUrls(entity), sender, dispatcher, agent);
     }
+
 
 
     public LogisticRequests getLogisticRequests(

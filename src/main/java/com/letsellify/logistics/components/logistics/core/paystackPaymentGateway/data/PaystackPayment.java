@@ -16,7 +16,7 @@ import java.util.UUID;
  */
 
 @Data
-public class Payment {
+public class PaystackPayment {
     private final PaystackPaymentEntity entity;
 
     private UUID id;
@@ -38,7 +38,7 @@ public class Payment {
     private LogisticAppRole userRole;
 
 
-    public Payment(PaystackPaymentEntity entity) {
+    public PaystackPayment(PaystackPaymentEntity entity) {
         this.entity = entity;
         this.id = entity.getId();
         this.userId = entity.getUserId();

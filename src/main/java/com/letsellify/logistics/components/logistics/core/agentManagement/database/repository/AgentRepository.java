@@ -26,4 +26,6 @@ public interface AgentRepository extends JpaRepository<AgentEntity, UUID> {
 
     Page<AgentEntity> findByApprovedFalseAndProfileCompleteTrue(Pageable pageable);
 
+   List<AgentEntity> findByProfileCompleteTrueAndApprovedTrueAndAcceptingStorageTrueAndPersonalInformation_Lga(String dropOffLga);
+
 }

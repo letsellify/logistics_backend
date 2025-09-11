@@ -28,6 +28,7 @@ public class LogisticsAccountTransactionEntity extends Auditable {
     private BigDecimal amount;
     private LogisticsAccountTransactionType transactionType;
     private String shippingId;
+    private String paystackPaymentId;
     @ManyToOne
     @JoinColumn(name = "logistics_account_id", nullable = false)
     private LogisticsAccountEntity logisticsAccount;
@@ -36,7 +37,10 @@ public class LogisticsAccountTransactionEntity extends Auditable {
         super();
     }
 
-    protected static LogisticsAccountTransactionEntity getInstance(final LogisticsAccountEntity account, final LogisticsAccountTransactionType transactionType, final BigDecimal amount, final String shippingId) {
+    protected static LogisticsAccountTransactionEntity getInstance(final LogisticsAccountEntity account, final LogisticsAccountTransactionType transactionType, final BigDecimal amount, final String shippingId, final String paystackPaymentId) {
+        if (shippingId == null && paystackPaymentId == null) {
+            throw new IllegalArgumentException("shippingId and paystackPaymentId cannot be null");
+        }
         if (transactionType == LogisticsAccountTransactionType.DEBIT
                 && account.getAppRole() == LogisticAppRole.VENDOR
                 && shippingId == null) {
@@ -48,6 +52,7 @@ public class LogisticsAccountTransactionEntity extends Auditable {
         entity.transactionType = transactionType;
         entity.amount = amount;
         entity.shippingId = shippingId;
+        entity.paystackPaymentId = paystackPaymentId;
         return entity;
     }
 }

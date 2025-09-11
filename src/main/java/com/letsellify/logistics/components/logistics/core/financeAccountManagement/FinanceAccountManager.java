@@ -6,9 +6,8 @@ import com.letsellify.logistics.components.logistics.core.agentManagement.except
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.DispatcherManager;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.exception.NoSuchDispatcherException;
 import com.letsellify.logistics.components.logistics.core.financeAccountManagement.data.LogisticsAccount;
-import com.letsellify.logistics.components.logistics.core.financeAccountManagement.database.entity.EscrowedPaymentEntity;
-import com.letsellify.logistics.components.logistics.core.financeAccountManagement.database.entity.LogisticsAccountEntity;
-import com.letsellify.logistics.components.logistics.core.financeAccountManagement.database.entity.LogisticsAccountTransactionEntity;
+import com.letsellify.logistics.components.logistics.core.financeAccountManagement.data.LogisticsAccountTransactionType;
+import com.letsellify.logistics.components.logistics.core.financeAccountManagement.database.entity.*;
 import com.letsellify.logistics.components.logistics.core.financeAccountManagement.database.repository.EscrowedPaymentRepository;
 import com.letsellify.logistics.components.logistics.core.financeAccountManagement.database.repository.LogisticsAccountRepository;
 import com.letsellify.logistics.components.logistics.core.financeAccountManagement.event.AgentTopUpAccountEvent;
@@ -56,67 +55,71 @@ public class FinanceAccountManager {
     private final DispatcherManager dispatcherManager;
     private final AgentManager agentManager;
     private final PaystackManager paystackManager;
+    private final SystemFinanceAccountManager systemFinanceAccountManager;
 
 
-    @Transactional
-    public void topUpAccount(final UUID userId, final LogisticAppRole userRole, final BigDecimal amount) {
-        log.info("will try to topUp {}", userId);
-        final LogisticsAccountEntity userAccountEntity = this.accountRepository.findByUserId(userId)
-                .orElseGet(() -> LogisticsAccountEntity.getInstance(userId, userRole));
-        log.info("top initiated for account of user {}", userAccountEntity.getUserId());
-        final LogisticsAccountTransactionEntity transactionEntity = userAccountEntity.topUpAccount(amount);
-        this.accountRepository.save(userAccountEntity);
-        // Publish relevant events based on the user's role
-        switch (userAccountEntity.getAppRole()) {
-            case VENDOR:
-                // Currently, VendorTopUpAccountEvent is the only practical use case
-                // as only vendors are the source of money.
-                this.eventPublisher.publishEvent(
-                        new VendorTopUpAccountEvent(
-                                userAccountEntity.getUserId(),
-                                userAccountEntity.getBalance()
-                        )
-                );
-                break;
-            case AGENT:
-                this.eventPublisher.publishEvent(
-                        new AgentTopUpAccountEvent(
-                                userAccountEntity.getUserId(),
-                                userAccountEntity.getBalance()
-                        )
-                );
-                break;
-            case DISPATCHER:
-                this.eventPublisher.publishEvent(
-                        new DispatcherTopUpAccountEvent(
-                                userAccountEntity.getUserId(),
-                                userAccountEntity.getBalance()
-                        )
-                );
-                break;
-            default:
-                // Add log here. this is sensitive
-                break;
-        }
-//        return new LogisticsAccountTransaction(transactionEntity);
-    }
+
+//    @Transactional
+//    public void topUpAccount(final UUID userId, final LogisticAppRole userRole, final BigDecimal amount) {
+//        log.info("will try to topUp {}", userId);
+//        final LogisticsAccountEntity userAccountEntity = this.accountRepository.findByUserId(userId)
+//                .orElseGet(() -> LogisticsAccountEntity.getInstance(userId, userRole));
+//        log.info("top initiated for account of user {}", userAccountEntity.getUserId());
+//        final LogisticsAccountTransactionEntity transactionEntity = userAccountEntity.topUpAccount(amount);
+//        this.accountRepository.save(userAccountEntity);
+//        // Publish relevant events based on the user's role
+//        switch (userAccountEntity.getAppRole()) {
+//            case VENDOR:
+//                // Currently, VendorTopUpAccountEvent is the only practical use case
+//                // as only vendors are the source of money.
+//                this.eventPublisher.publishEvent(
+//                        new VendorTopUpAccountEvent(
+//                                userAccountEntity.getUserId(),
+//                                userAccountEntity.getBalance()
+//                        )
+//                );
+//                break;
+//            case AGENT:
+//                this.eventPublisher.publishEvent(
+//                        new AgentTopUpAccountEvent(
+//                                userAccountEntity.getUserId(),
+//                                userAccountEntity.getBalance()
+//                        )
+//                );
+//                break;
+//            case DISPATCHER:
+//                this.eventPublisher.publishEvent(
+//                        new DispatcherTopUpAccountEvent(
+//                                userAccountEntity.getUserId(),
+//                                userAccountEntity.getBalance()
+//                        )
+//                );
+//                break;
+//            default:
+//                // Add log here. this is sensitive
+//                break;
+//        }
+////        return new LogisticsAccountTransaction(transactionEntity);
+//    }
 
     @EventListener
     @Async
     @Transactional
-    public void acceptPayment(final ChargeSuccessEvent event) {
+    public void acceptPayment(final ChargeSuccessEvent event) throws FinanceAccountNotFoundException {
+        log.info("Charge successful, Webhook recieved from paystack with payment of {}", event.getAmount());
         LogisticsAccountEntity entity = this.accountRepository.findByUserIdAndAppRole(event.getUserId(),event.getUserRole())
                 .orElseGet(() -> LogisticsAccountEntity.getInstance(event.getUserId(), event.getUserRole()));
         final BigDecimal amountToTopUp = event.getAmount();
         final BigDecimal currentBalance = entity.getBalance();
         entity.setBalance(currentBalance.add(amountToTopUp));
+        this.systemFinanceAccountManager.addPaystackTransaction(event.getAmount(), event.getPaystackPayment(), LogisticsAccountTransactionType.CREDIT);
         this.accountRepository.save(entity);
     }
 
     /* Only vendor can top up for now. Later we might add switchCase if other actors can top up */
     PaystackInitiateTransactionResponse initializeTopUp(final @NonNull String userName, final LogisticAppRole userRole,  final @NonNull BigDecimal amount) throws VendorNotFoundException, InCompleteVendorProfileException, UserNotFoundException, FinanceAccountNotFoundException {
         if (userRole != LogisticAppRole.VENDOR) {
-            throw new FinanceAccountNotFoundException("Only vendors can top up thier account");
+            throw new FinanceAccountNotFoundException("Only vendors can top up their account");
         }
         final Vendor vendor  = Objects.requireNonNull(this.vendorManagerProvider
                         .getIfAvailable())
@@ -245,5 +248,6 @@ public class FinanceAccountManager {
         this.accountRepository.save(entity);
         return entity;
     }
+
 
 }

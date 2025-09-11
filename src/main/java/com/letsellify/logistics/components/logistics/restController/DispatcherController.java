@@ -1,9 +1,14 @@
 package com.letsellify.logistics.components.logistics.restController;
 
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.DispatcherDataService;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto.DispatcherNotificationDto;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto.DispatcherProfileDto;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto.DispatcherProfilePictureDto;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto.LgaPreferenceDto;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.resource.DispatcherLgaPreferenceResource;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.resource.DispatcherLgaPreferenceResources;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.resource.DispatcherProfileInfoResource;
+import com.letsellify.logistics.components.logistics.core.nigeriaStatesManagement.rest.resource.LgaResource;
 import com.letsellify.logistics.components.logistics.core.vendorManagement.rest.dto.VendorProfilePictureDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,6 +22,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 /**
  * @author AHMAD BUBA
@@ -139,5 +146,110 @@ public class DispatcherController {
     @PostMapping(value = "/profile-picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String uploadProfilePhoto(final Authentication authentication, final @ModelAttribute DispatcherProfilePictureDto profilePictureDto) {
         return this.dispatcherDataService.uploadProfilePhoto(authentication, profilePictureDto.file());
+    }
+
+
+    @Operation(
+            summary = "Add dispatcher notification preference",
+            description = """
+                    Adds a new LGA pair preference for the authenticated dispatcher. 
+                    Each preference specifies a pick-up LGA and a drop-off LGA. 
+                    When preferences exist, the dispatcher will only receive notifications for those specific LGA pairs. 
+                    By default, if no preferences are set, the dispatcher receives all notifications.
+                    """,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "The LGA pair to add as a preference",
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = LgaPreferenceDto.class)
+                    )
+            ),
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Preference added successfully",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = DispatcherLgaPreferenceResource.class)
+                            )
+                    ),
+                    @ApiResponse(responseCode = "400", description = "Invalid request body"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated")
+            },
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @PostMapping("/notification-preferences")
+    public DispatcherLgaPreferenceResource addLgaPreference(final Authentication authentication, @RequestBody final @Valid LgaPreferenceDto lgaPreferenceDto) {
+        return this.dispatcherDataService.addLgaPreference(authentication,lgaPreferenceDto);
+    }
+
+    @Operation(
+            summary = "Get dispatcher notification preferences",
+            description = """
+                    Retrieves the list of notification preferences (LGA pairs) for the authenticated dispatcher.
+                    If no preferences are set, the dispatcher receives all notifications by default.
+                    """,
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Preferences retrieved successfully",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = DispatcherLgaPreferenceResources.class)
+                            )
+                    ),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated")
+            },
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @GetMapping("/notification-preferences")
+    public DispatcherLgaPreferenceResources getLgaPreferences(final Authentication authentication) {
+        return this.dispatcherDataService.getLgaPreferences(authentication);
+    }
+
+    @Operation(
+            summary = "Update dispatcher notification mode",
+            description = """
+                    Updates the notification mode for the dispatcher.
+                    - If `all = true`, clears all preferences and the dispatcher will receive all notifications.
+                    - If `all = false`, dispatcher will only receive notifications for the LGA pairs they have set.
+                    """,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Notification mode (all or preferences)",
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = DispatcherNotificationDto.class)
+                    )
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "Notification mode updated successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid request body"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated")
+            },
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @PatchMapping("/notification-preferences")
+    public void updateNotificationPreference(final Authentication authentication, @RequestBody final @Valid DispatcherNotificationDto dispatcherNotificationDto) {
+        this.dispatcherDataService.updateNotificationPreference(authentication, dispatcherNotificationDto);
+    }
+
+    @Operation(
+            summary = "Delete dispatcher notification preference",
+            description = """
+                    Deletes a specific notification preference by its ID.
+                    If the dispatcher has no preferences left, they will receive all notifications by default.
+                    """,
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "Preference deleted successfully"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated"),
+                    @ApiResponse(responseCode = "404", description = "Preference not found")
+            },
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @DeleteMapping("/notification-preferences/{id}")
+    public void deleteNotificationPreference(final Authentication authentication, @PathVariable("id") final UUID preferenceId) {
+        this.dispatcherDataService.deleteNotificationPreference(authentication, preferenceId);
     }
 }

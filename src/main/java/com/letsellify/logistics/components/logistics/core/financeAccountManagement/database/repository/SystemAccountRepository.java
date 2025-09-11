@@ -13,5 +13,5 @@ import java.util.UUID;
  */
 
 @Repository
-public interface SystemAccountRepository extends JpaRepository<SystemAccountEntity, UUID> {
+public interface SystemAccountRepository extends JpaRepository<SystemAccountEntity, String> {
 }

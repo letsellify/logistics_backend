@@ -26,8 +26,19 @@ public record Agent(
         String storeAddress
 ) {
     public Agent(final AgentEntity agentEntity) {
-        this(agentEntity.getId(), agentEntity.getPersonalInformation()
-                .getName(), agentEntity.getEmail(), agentEntity.getContactInformation().getWhatsAppPhone(), agentEntity.getContactInformation().getPhone(), agentEntity.getPersonalInformation().getState(), agentEntity.getPersonalInformation().getLga(), agentEntity.getPersonalInformation().getAddress(), agentEntity.getBusinessInformation().getBusinessState(), agentEntity.getBusinessInformation().getBusinessLga(), agentEntity.getBusinessInformation().getBusinessOfficeAddress());
+        this(
+                agentEntity.getId(),
+                agentEntity.getPersonalInformation() == null ? null : agentEntity.getPersonalInformation().getName(),
+                agentEntity.getEmail(),
+                agentEntity.getContactInformation() == null ? null : agentEntity.getContactInformation().getWhatsAppPhone(),
+                agentEntity.getContactInformation() == null ? null : agentEntity.getContactInformation().getPhone(),
+                agentEntity.getPersonalInformation() == null ? null :  agentEntity.getPersonalInformation().getState(),
+                agentEntity.getPersonalInformation() == null ? null : agentEntity.getPersonalInformation().getLga(),
+                agentEntity.getPersonalInformation() == null ? null : agentEntity.getPersonalInformation().getAddress(),
+                agentEntity.getBusinessInformation() == null ? null :  agentEntity.getBusinessInformation().getBusinessState(),
+                agentEntity.getBusinessInformation() == null ? null : agentEntity.getBusinessInformation().getBusinessLga(),
+                agentEntity.getBusinessInformation() == null ? null : agentEntity.getBusinessInformation().getBusinessOfficeAddress()
+        );
     }
 
     public AgentResource getResource() {
