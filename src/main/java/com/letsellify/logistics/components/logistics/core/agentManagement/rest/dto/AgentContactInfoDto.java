@@ -1,5 +1,7 @@
 package com.letsellify.logistics.components.logistics.core.agentManagement.rest.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -11,11 +13,13 @@ import jakarta.validation.constraints.Size;
  */
 
 public record AgentContactInfoDto(
+        @JsonProperty("phoneNumber")
         @NotBlank(message = "Phone number cannot be empty.")
         @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Invalid phone number format.")
         @Size(min = 10, max = 15, message = "Phone number must be between 10 and 15 digits.")
         String phone,
 
+        @JsonProperty("whatsAppPhoneNumber")
         @NotBlank(message = "WhatsApp phone number cannot be empty.")
         @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Invalid WhatsApp phone number format.")
         @Size(min = 10, max = 15, message = "WhatsApp phone number must be between 10 and 15 digits.")
