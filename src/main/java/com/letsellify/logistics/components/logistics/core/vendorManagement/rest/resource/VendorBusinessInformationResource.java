@@ -1,5 +1,6 @@
 package com.letsellify.logistics.components.logistics.core.vendorManagement.rest.resource;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Author: Ahmad Buba
@@ -8,9 +9,13 @@ package com.letsellify.logistics.components.logistics.core.vendorManagement.rest
 
 
 public record VendorBusinessInformationResource(
+        @JsonProperty(value = "name")
         String businessName,
+        @JsonProperty(value = "address")
         String businessOfficeAddress,
+        @JsonProperty(value = "state")
         String state,
+        @JsonProperty(value = "lga")
         String lg
 ) {
 }
