@@ -38,4 +38,5 @@ public interface DispatcherMapper {
 
     DispatcherLgaPreferenceResources dataToResources(DispatcherLgaPreferences data);
 
+    DispatcherCurrentlyAcceptingDeliveryResource toResource(DispatcherCurrentlyAcceptingDelivery dispatcherCurrentlyAcceptingDelivery);
 }

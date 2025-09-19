@@ -1,6 +1,6 @@
 package com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.resource;
 
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.data.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
@@ -17,6 +17,7 @@ public record DispatcherProfileInfoResource(
         DispatcherPersonalInformationResource personalInformation,
         DispatcherContactInformationResource contactInformation,
         DispatcherBusinessInformationResource businessInformation,
+        @JsonProperty("guarantorInformation")
         DispatcherGuarantorResource guarantor,
         DispatcherKycResource kyc,
         boolean receiveAllNotifications,

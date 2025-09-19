@@ -1,10 +1,8 @@
 package com.letsellify.logistics.components.logistics.restController;
 
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.DispatcherDataService;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto.DispatcherNotificationDto;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto.DispatcherProfileDto;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto.DispatcherProfilePictureDto;
-import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto.LgaPreferenceDto;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.dto.*;
+import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.resource.DispatcherCurrentlyAcceptingDeliveryResource;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.resource.DispatcherLgaPreferenceResource;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.resource.DispatcherLgaPreferenceResources;
 import com.letsellify.logistics.components.logistics.core.dispatcherManagement.rest.resource.DispatcherProfileInfoResource;
@@ -252,4 +250,51 @@ public class DispatcherController {
     public void deleteNotificationPreference(final Authentication authentication, @PathVariable("id") final UUID preferenceId) {
         this.dispatcherDataService.deleteNotificationPreference(authentication, preferenceId);
     }
+
+    @Operation(
+            summary = "Set currently accepting delivery status",
+            description = """
+                Updates whether the authenticated dispatcher is currently accepting deliveries.
+                Only dispatchers with a complete profile can set this status.
+                """,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Dispatcher currently accepting delivery status",
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = DispatcherCurrentlyAcceptingDeliveryDto.class)
+                    )
+            ),
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Dispatcher delivery status updated successfully",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = DispatcherCurrentlyAcceptingDeliveryResource.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "Forbidden - Dispatcher profile incomplete"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Dispatcher not found"
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Unauthorized - User not authenticated"
+                    )
+            },
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @PatchMapping("/currently-accepting-delivery")
+    public DispatcherCurrentlyAcceptingDeliveryResource setCurrentlyAcceptingDelivery(
+            final @NonNull Authentication authentication,
+            @RequestBody final @Valid DispatcherCurrentlyAcceptingDeliveryDto dispatcherCurrentlyAcceptingDeliveryDto
+    ) {
+        return this.dispatcherDataService.setCurrentlyAcceptingDelivery(authentication, dispatcherCurrentlyAcceptingDeliveryDto);
+    }
+
 }

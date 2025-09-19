@@ -141,9 +141,20 @@ public class DispatcherManager {
         return new Dispatcher(entity);
     }
 
+    public DispatcherCurrentlyAcceptingDelivery setCurrentlyAcceptingDelivery(final @NonNull String dispatcherUsername, final boolean acceptingDelivery) throws NoSuchDispatcherException, InCompleteDispatcherProfileException {
+        final DispatcherEntity entity = this.dispatcherRepository.findByEmail(dispatcherUsername)
+                .orElseThrow(() -> new NoSuchDispatcherException("No dispatcher with email " + dispatcherUsername + " not found"));
+        validateDispatcher(entity);
+        entity.setCurrentlyAcceptingDelivery(acceptingDelivery);
+        this.dispatcherRepository.save(entity);
+
+        return new DispatcherCurrentlyAcceptingDelivery(entity.isCurrentlyAcceptingDelivery());
+
+    }
+
     public UUID getDispatcherId(final @NonNull String dispatcherUsername) throws NoSuchDispatcherException {
         final DispatcherEntity entity = this.dispatcherRepository.findByEmail(dispatcherUsername)
-                                                                 .orElseThrow(() -> new NoSuchDispatcherException("No dispatcher with email " + dispatcherUsername + " found"));
+                                                                 .orElseThrow(() -> new NoSuchDispatcherException("No dispatcher with email " + dispatcherUsername + " not found"));
         return entity.getId();
     }
 
