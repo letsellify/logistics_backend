@@ -139,8 +139,8 @@ public class LogisticRequestManager {
         if (!userRole.equals(LogisticAppRole.VENDOR)) {
             throw new InvalidRoleException("Only Vendors can upload logistics images and make logistic requests");
         }
-        Vendor sender = this.vendorManager.findAndValidateVendor(userName);
-        return uploadLogisticsItemImage(sender.getId(), sender.getEmail(), image);
+        final Vendor sender = this.vendorManager.findAndValidateVendor(userName);
+        return this.uploadLogisticsItemImage(sender.getId(), sender.getEmail(), image);
     }
 
     public CompletableFuture<String> order(
@@ -260,9 +260,9 @@ public class LogisticRequestManager {
                 .divide(HUNDRED, 2, RoundingMode.HALF_UP);
         final BigDecimal totalSpending = totalOrderAmount.add(totalSpendingAfterTax);
 
-        log.info("Total order amount " + totalOrderAmount);
-        log.info("tax " + totalSpendingAfterTax);
-        log.info("total spending after tax " + totalSpending);
+        log.info("Total order amount {}", totalOrderAmount);
+        log.info("tax {}", totalSpendingAfterTax);
+        log.info("total spending after tax {}", totalSpending);
         log.info("Vendor balance is {}", vendor.getBalance());
 
         if (vendor.getBalance().compareTo(totalSpending) < 0) {
@@ -364,23 +364,22 @@ public class LogisticRequestManager {
 
         // this entity should accept a list of iamgees above. it sets the each image to have a reference to this: within the class
         final LogisticRequestEntity entity = LogisticRequestEntity.create(
-                event.getRequestId(),
-                event.getSender().getSenderId(),
-                createItemFromRequest(event),
-                event.getImages(),
-                event.getPickUpState(),
-                event.getPickUpLga(),
-                event.getPickUpAddress(),
-                new Receiver(event.getReceiverFullName(), event.getReceiverLocation(), event.getReceiverState(), event.getReceiverLga(), event.getReceiverEmail(), event.getReceiverCallNumber(), event.getReceiverWhatsAppNumber()),
-                event.getAgentPay(),
-                event.getDispatcherPay(),
-                event.getTotalSpendingAfterTax(),
-                event.getDispatcherPickUpDate(),
-                event.getDispatcherDeliveryDate(),
-                event.getAgentReceivingDate(),
-                event.getAgentDeliveringDate(),
-                event.getRequestDate(),
-                LogisticsStatus.REQUESTED
+          event.getRequestId(),
+          event.getSender().getSenderId(), this.createItemFromRequest(event),
+          event.getImages(),
+          event.getPickUpState(),
+          event.getPickUpLga(),
+          event.getPickUpAddress(),
+          new Receiver(event.getReceiverFullName(), event.getReceiverLocation(), event.getReceiverState(), event.getReceiverLga(), event.getReceiverEmail(), event.getReceiverCallNumber(), event.getReceiverWhatsAppNumber()),
+          event.getAgentPay(),
+          event.getDispatcherPay(),
+          event.getTotalSpendingAfterTax(),
+          event.getDispatcherPickUpDate(),
+          event.getDispatcherDeliveryDate(),
+          event.getAgentReceivingDate(),
+          event.getAgentDeliveringDate(),
+          event.getRequestDate(),
+          LogisticsStatus.REQUESTED
         );
 
         this.logisticsRequestRepository.save(entity);
@@ -427,18 +426,18 @@ public class LogisticRequestManager {
 //    }
 
 
-    public ItemEntity createItemFromRequest(LogisticRequestedEvent request) {
-        Set<ConditionEntity> conditionEntities = request.getCondition().stream()
-                .map(this::getOrCreateCondition)
-                .collect(Collectors.toSet());
+    public ItemEntity createItemFromRequest(final LogisticRequestedEvent request) {
+        final Set<ConditionEntity> conditionEntities = request.getCondition().stream()
+                                                              .map(this::getOrCreateCondition)
+                                                              .collect(Collectors.toSet());
 
         return new ItemEntity(request.getItemName(), request.getQuantity(), request.getDescription(), request.getFragility(), request.getWeight(), conditionEntities);
 
     }
 
-    private ConditionEntity getOrCreateCondition(String name) {
-        return conditionRepository.findByName(name)
-                .orElseGet(() -> conditionRepository.save(new ConditionEntity(name)));
+    private ConditionEntity getOrCreateCondition(final String name) {
+        return this.conditionRepository.findByName(name)
+                                       .orElseGet(() -> this.conditionRepository.save(new ConditionEntity(name)));
     }
 
 
@@ -450,7 +449,7 @@ public class LogisticRequestManager {
     ) throws NoSuchLogisticRequestException, VendorNotFoundException, NoSuchAgentException,
             NoSuchDispatcherException, LogisticRequestAccessDeniedException, InvalidRoleException {
 
-        LogisticRequestEntity entity = logisticsRequestRepository
+        final LogisticRequestEntity entity = this.logisticsRequestRepository
                 .findByShippingRequestId(shippingRequestId)
                 .orElseThrow(() -> new NoSuchLogisticRequestException(
                         "No logistic request found with id: " + shippingRequestId));
@@ -461,8 +460,8 @@ public class LogisticRequestManager {
 
         switch (userRole) {
             case VENDOR -> {
-                Vendor vendor = vendorManager.findVendor(userName);
-                UUID vendorId = vendor.getId();
+                final Vendor vendor = vendorManager.findVendor(userName);
+                final UUID vendorId = vendor.getId();
                 log.info("it is a vendor");
                 if (entity.getSenderId() != null && !entity.getSenderId().equals(vendorId)) {
                     throw new LogisticRequestAccessDeniedException("This request does not belong to the vendor.");
@@ -471,8 +470,8 @@ public class LogisticRequestManager {
                 sender = new Sender(vendor);
             }
             case AGENT -> {
-                Agent ag = agentManager.findAgent(userName);
-                UUID agentId = ag.id();
+                final Agent ag = this.agentManager.findAgent(userName);
+                final UUID agentId = ag.id();
                 log.info("it is an agent");
                 if (entity.getAgentId() == null || !entity.getAgentId().equals(agentId)) {
                     throw new LogisticRequestAccessDeniedException("This request does not belong to the agent or has already been accepted by another agent.");
@@ -480,8 +479,8 @@ public class LogisticRequestManager {
                 agent = new LogisticAgent(ag);
             }
             case DISPATCHER -> {
-                Dispatcher disp = dispatcherManager.findDispatcher(userName);
-                UUID dispatcherId = disp.id();
+                final Dispatcher disp = this.dispatcherManager.findDispatcher(userName);
+                final UUID dispatcherId = disp.id();
                 log.info("it is a dispatcher");
                 if (entity.getDispatcherId() == null || !entity.getDispatcherId().equals(dispatcherId)) {
                     throw new LogisticRequestAccessDeniedException("This request does not belong to the dispatcher or has been accepted by another dispatcher.");
@@ -492,19 +491,19 @@ public class LogisticRequestManager {
                 log.info("it is an admin");
                 // no restriction — but still build DTOs if IDs exist
                 if (entity.getSenderId() != null) {
-                    sender = new Sender(vendorManager.findVendor(entity.getSenderId()));
+                    sender = new Sender(this.vendorManager.findVendor(entity.getSenderId()));
                 }
                 if (entity.getAgentId() != null) {
-                    agent = new LogisticAgent(agentManager.findAgent(entity.getAgentId()));
+                    agent = new LogisticAgent(this.agentManager.findAgent(entity.getAgentId()));
                 }
                 if (entity.getDispatcherId() != null) {
-                    dispatcher = new LogisticDispatcher(dispatcherManager.findDispatcher(entity.getDispatcherId()));
+                    dispatcher = new LogisticDispatcher(this.dispatcherManager.findDispatcher(entity.getDispatcherId()));
                 }
             }
             default -> throw new InvalidRoleException("Unsupported role: " + userRole);
         }
 
-        return new LogisticRequest(entity, getPresignedImageUrls(entity), sender, dispatcher, agent);
+        return new LogisticRequest(entity, this.getPresignedImageUrls(entity), sender, dispatcher, agent);
     }
 
 
@@ -514,15 +513,15 @@ public class LogisticRequestManager {
             final @NonNull LogisticAppRole userRole,
             final @NonNull Pageable pageable
     ) throws VendorNotFoundException, InCompleteVendorProfileException, InvalidRoleException, NoSuchAgentException, NoSuchDispatcherException, InCompleteDispatcherProfileException {
-        Page<LogisticRequestEntity> page;
+        final Page<LogisticRequestEntity> page;
 
         switch (userRole) {
             case VENDOR:
-                Vendor vendor = this.vendorManager.findAndValidateVendor(userName);
+                final Vendor vendor = this.vendorManager.findAndValidateVendor(userName);
                 page = this.logisticsRequestRepository.findAllBySenderId(vendor.getId(), pageable);
-                List<LogisticRequest> vendorRequests = page.getContent()
-                        .stream()
-                        .map(entity -> new LogisticRequest(
+                final List<LogisticRequest> vendorRequests = page.getContent()
+                                                                 .stream()
+                                                                 .map(entity -> new LogisticRequest(
                                 entity,
                                 entity.getItemImages()
                                         .stream()
@@ -532,15 +531,15 @@ public class LogisticRequestManager {
                                 null,
                                 null
                         ))
-                        .toList();
+                                                                 .toList();
                 return new LogisticRequests(vendorRequests, page);
 
             case AGENT:
-                Agent agent = this.agentManager.findAndValidateAgent(userName);
+                final Agent agent = this.agentManager.findAndValidateAgent(userName);
                 page = this.logisticsRequestRepository.findAllByAgentId(agent.id(), pageable);
-                List<LogisticRequest> agentRequests = page.getContent()
-                        .stream()
-                        .map(entity -> new LogisticRequest(
+                final List<LogisticRequest> agentRequests = page.getContent()
+                                                                .stream()
+                                                                .map(entity -> new LogisticRequest(
                                 entity,
                                 entity.getItemImages()
                                         .stream()
@@ -550,15 +549,15 @@ public class LogisticRequestManager {
                                 null,
                                 new LogisticAgent(agent)
                         ))
-                        .toList();
+                                                                .toList();
                 return new LogisticRequests(agentRequests, page);
 
             case DISPATCHER:
-                Dispatcher dispatcher = this.dispatcherManager.findDispatcher(userName);
+                final Dispatcher dispatcher = this.dispatcherManager.findDispatcher(userName);
                 page = this.logisticsRequestRepository.findAllByDispatcherId(dispatcher.id(), pageable);
-                List<LogisticRequest> dispatcherRequests = page.getContent()
-                        .stream()
-                        .map(entity -> new LogisticRequest(
+                final List<LogisticRequest> dispatcherRequests = page.getContent()
+                                                                     .stream()
+                                                                     .map(entity -> new LogisticRequest(
                                 entity,
                                 entity.getItemImages()
                                         .stream()
@@ -568,7 +567,7 @@ public class LogisticRequestManager {
                                 new LogisticDispatcher(dispatcher),
                                 null
                         ))
-                        .toList();
+                                                                     .toList();
                 return new LogisticRequests(dispatcherRequests, page);
 
             default:
@@ -599,7 +598,7 @@ public class LogisticRequestManager {
         return null;
     }
 
-    private List<String> getPresignedImageUrls(LogisticRequestEntity entity) {
+    private List<String> getPresignedImageUrls(final LogisticRequestEntity entity) {
         return entity.getItemImages()
                 .stream()
                 .map(itemImage -> this.fileStorageManager.generatePresignedUrl(itemImage.getImageFilePath()))
