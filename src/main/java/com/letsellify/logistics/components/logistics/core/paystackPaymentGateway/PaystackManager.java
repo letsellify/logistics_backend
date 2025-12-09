@@ -1,5 +1,17 @@
 package com.letsellify.logistics.components.logistics.core.paystackPaymentGateway;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.letsellify.logistics.common.data.LogisticAppRole;
 import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.data.PaystackPayment;
@@ -14,20 +26,10 @@ import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway
 import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.rest.resource.PaystackListBanksResponse;
 import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.rest.resource.PaystackResolveBankAccountResponse;
 import com.letsellify.logistics.components.user.core.userManagement.exception.UserNotFoundException;
+
 import jakarta.annotation.PostConstruct;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.UUID;
 
 /**
  * @author AHMAD BUBA

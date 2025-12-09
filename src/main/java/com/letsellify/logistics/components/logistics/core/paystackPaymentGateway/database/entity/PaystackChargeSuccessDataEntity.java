@@ -1,12 +1,18 @@
 package com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.database.entity;
 
-import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.rest.dto.ChargeSuccessPayload;
-import jakarta.persistence.*;
-import lombok.Data;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.rest.dto.ChargeSuccessPayload;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import lombok.Data;
 
 /**
  * @author AHMAD BUBA
@@ -31,8 +37,8 @@ public class PaystackChargeSuccessDataEntity {
     private String channel;
     private String currency;
     private String ipAddress;
-    @Column(insertable = false, updatable = false)
-    private int metadata;
+    @Column(columnDefinition = "jsonb", insertable = false, updatable = false)
+    private String metadata;
 
     @Embedded
     private Log log;
@@ -66,13 +72,14 @@ public class PaystackChargeSuccessDataEntity {
         this.channel = payload.getChannel();
         this.currency = payload.getCurrency();
         this.ipAddress = payload.getIpAddress();
-        this.metadata = payload.getMetadata();
+        this.metadata = payload.getMetadata().toString();
         this.fees = payload.getFees();
         this.log = new Log(payload.getLog()); // Deep copy of Log
         this.customer = new Customer(payload.getCustomer()); // Deep copy of Customer
         this.authorization = new Authorization(payload.getAuthorization()); // Deep copy of Authorization
         this.plan = new Plan(payload.getPlan());
     }
+
 
     @Embeddable
     @Data
@@ -182,7 +189,7 @@ public class PaystackChargeSuccessDataEntity {
         private String email;
         private String customerCode;
         private String phone;
-        @Column(insertable = false, updatable = false)
+        @Column(columnDefinition = "jsonb", insertable = false, updatable = false)
         private String metadata;
         private String riskAction;
 
@@ -198,7 +205,7 @@ public class PaystackChargeSuccessDataEntity {
             this.email = customer.getEmail();
             this.customerCode = customer.getCustomerCode();
             this.phone = customer.getPhone();
-            this.metadata = customer.getMetadata();
+            this.metadata = customer.getMetadata().toString();
             this.riskAction = customer.getRiskAction();
         }
     }

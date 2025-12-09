@@ -1,11 +1,10 @@
 package com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.dataMapper;
 
-import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.data.PaystackPayment;
-import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.database.entity.PaystackChargeSuccessWebhookEntity;
-import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.rest.dto.ChargeSuccessPayload;
-import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.rest.resource.PaystackPaymentInitializationResource;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
+
+import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.data.PaystackPayment;
+import com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.rest.resource.PaystackPaymentInitializationResource;
 
 /**
  * @author AHMAD BUBA
@@ -19,6 +18,6 @@ public interface PaystackDataMapper {
 
     PaystackPaymentInitializationResource dataToResource(PaystackPayment payment);
 
-    PaystackChargeSuccessWebhookEntity resourceToEntity(ChargeSuccessPayload payload);
+//    PaystackChargeSuccessWebhookEntity resourceToEntity(ChargeSuccessPayload payload);
 
 }

@@ -1,10 +1,12 @@
 package com.letsellify.logistics.components.logistics.core.paystackPaymentGateway.rest.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import lombok.Data;
 
 /**
  * @author AHMAD BUBA
@@ -35,7 +37,7 @@ public class ChargeSuccessPayload {
         private String currency;
         @JsonProperty("ip_address")
         private String ipAddress;
-        private int metadata;
+        private JsonNode metadata;
         private Log log;
         private String fees;
         private Customer customer;
@@ -90,7 +92,7 @@ public class ChargeSuccessPayload {
             @JsonProperty("customer_code")
             private String customerCode;
             private String phone;
-            private String metadata;
+            private JsonNode metadata;
             @JsonProperty("risk_action")
             private String riskAction;
         }
